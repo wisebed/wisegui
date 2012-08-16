@@ -555,7 +555,8 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 	
 	tabs.find('#WisebedTestbedMakeReservationList').append(p_nodes);
 	
-
+	
+	
 	
 	var showTable = function (wiseML) {
 		that.table = new WiseGuiNodeTable(wiseML, p_nodes, true, true);
@@ -567,7 +568,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 			}
 	);
 
-	 //Show google map
+	 //Show specialized google map for reservation 
 	var showMap = function(wiseML){ 
 		var wiseMlParser = new WiseMLParser(wiseML, tabs.find('#WisebedTestbedMakeReservationMap'));
 		wiseMlParser.map.enableKeyDragZoom();
@@ -635,7 +636,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 			})
 		}
 		
-		//TODO FMA: 
+
 		//Filter out all markers but the ones with the urns given
 		wiseMlParser.map.filter = function(urns){
 			//loop over markers and set new image
@@ -702,6 +703,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 	);
 
 
+	tabs.find('#WisebedTestbedMakeReservationMap').append("<h4>Click on single nodes or Shift+Click for bounding box</h4>");
 	
 	// Add the picker
     input_date_start.datepicker({dateFormat: 'dd.mm.yy'});
