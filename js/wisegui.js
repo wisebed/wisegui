@@ -573,6 +573,29 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 		wiseMlParser.map.enableKeyDragZoom();
 		wiseMlParser.map.selectedURNs = [];
 		
+		$.each(wiseMlParser.markersArray, function (index, marker) {
+			
+		google.maps.event.clearListeners(marker, 'click');
+		google.maps.event.addListener(marker, 'click', function (){
+			 if(marker.getIcon().url == 'img/node.png'){
+				 wiseMlParser.map.selectURNs([marker.urn]);
+			 }else{
+				 wiseMlParser.map.selectURNs([marker.urn], true);
+			 }
+		     var selectedFun =function(data) {
+					var nodeids = wiseMlParser.map.selectedURNs;
+					for(var i = 0; i < nodeids.length; i++) {
+						if(data.id == nodeids[i]) return true;
+					}
+					return false;
+				} 
+	            
+	           that.table.applySelected(selectedFun);
+		})
+		
+
+        });
+		
 		wiseMlParser.map.selectURNs = function(urns, deselect){
 			var image;
 			if(!deselect){ 
@@ -606,6 +629,8 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 						}else{
 							wiseMlParser.map.selectedURNs.splice(index,1);
 						}
+					}else{
+						if(deselect) wiseMlParser.map.selectedURNs.splice(index,1);
 					}	
 			})
 		}
@@ -631,15 +656,13 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 		
 		google.maps.event.addListener(dz, 'dragend', function(bounds) {
             console.log('DragZoom DragEnd :' + bounds);
-//          get markers in bound
-            var markersInBound = [];
+           
             var selectedURNs = [];
             var deselectedURNs = [];
             
             // get nodes that have been (de-)selected
             $.each(wiseMlParser.markersArray, function (index, marker) {
                 if (bounds.contains(marker.getPosition()) && marker.getMap() != null) {
-                    markersInBound.push(marker);
                     if(marker.getIcon().url == 'img/node.png'){
                     selectedURNs.push(marker.urn);
                     }else{
@@ -652,8 +675,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
             wiseMlParser.map.selectURNs(selectedURNs);
             wiseMlParser.map.selectURNs(deselectedURNs, true);
             
-            //add all newly selected nodes
-            wiseMlParser.map.selectedURNs = wiseMlParser.map.selectedURNs.concat(selectedURNs);
+            
             //remove all deselected nodes
             wiseMlParser.map.selectedURNs = wiseMlParser.map.selectedURNs.diff(deselectedURNs);
             //update selection in table
