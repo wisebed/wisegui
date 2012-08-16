@@ -1,3 +1,5 @@
+var wisebedWebSocketBaseUrl = 'ws://wisebed.itm.uni-luebeck.de:80';
+var wisebedBaseUrl = "http://wisebed.itm.uni-luebeck.de";
 
 if( typeof wisebedBaseUrl === 'undefined' )
 	var wisebedBaseUrl = "";
