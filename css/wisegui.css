@@ -15,6 +15,7 @@ body {
 
 .reservation-body {
 	height: 610px;
+	max-height: 610px;
 	overflow: auto;
 }
 
