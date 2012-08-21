@@ -49,12 +49,12 @@ WiseMLParser.prototype.parseNode = function(node) {
 	var n = new Node(id, node.description, finalCo);
 
 	this.nodes.push(n);
-}
+};
 
 WiseMLParser.prototype.convertIdToIp = function(id) {
 	// id = id.substring(id.lastIndexOf(":")+3);
 	return id;
-}
+};
 
 WiseMLParser.prototype.buildView = function(parentDiv) {
 	this.view = $('<div style="height:500px;"/>');
@@ -72,7 +72,7 @@ WiseMLParser.prototype.buildView = function(parentDiv) {
 
 	// Adjust map
 	this.setBounds();
-}
+};
 
 /**
  * Adds a Marker to the map
@@ -165,7 +165,6 @@ WiseMLParser.prototype.setBounds = function() {
 	if (this.markersArray.length > 1) {
 		var bounds = new google.maps.LatLngBounds();
 		
-		var self = this;
 		$.each(this.markersArray, function(index, marker) {
 			bounds.extend(marker.getPosition());
 		});
