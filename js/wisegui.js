@@ -2211,6 +2211,13 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 		  	+ '						<button class="btn btn-primary WiseGuiExperimentsViewSendControlSendMessage span2">Send message</button><br/>'
 		  	+ '					</div>'
 		  	+ '				</div>'
+		  	+ '				<div class="row">'
+			+ '					<div class="offset6 span10">'
+			+ '						<div class="inputs-list">'
+			+ '							<label class="checkbox inline"><input class="WiseGuiExperimentsViewSendControlLineFeed" type="checkbox"> always append line feed</label>'
+			+ '						</div>'
+			+ '					</div>'
+		  	+ '				</div>'
 		  	+ '			</div>'
 			+ '			<div class="tab-pane WiseGuiExperimentsViewScriptingControl" id="'+this.scriptingEditorDivId+'">'
 			+ '				<div class="row" style="padding-bottom:10px;">'
@@ -2250,6 +2257,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	this.sendModeSelect               = this.view.find('select.WiseGuiExperimentsViewSendControlSelectMode').first();
 	this.sendMessageInput             = this.view.find('input.WiseGuiExperimentsViewSendControlSendMessageInput').first();
 	this.sendSendButton               = this.view.find('button.WiseGuiExperimentsViewSendControlSendMessage').first();
+	this.sendLineFeedCheckbox         = this.view.find('input.WiseGuiExperimentsViewSendControlLineFeed').first()[0];
 
 	// ******* start ACE displaying error workaround ********
 	// ace editor is not correctly displayed if parent tab is hidden when creating it. therefore we need to workaround
@@ -2383,7 +2391,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	this.sendNodeSelectionButton.bind('click', self, function(e) { self.onSendMessageNodeSelectionButtonClicked(); });
 	this.sendSendButton.bind('click', self, function(e) { self.onSendMessageButtonClicked(e); });
 
-	this.sendMessageInput.bind('keyup', self, function(e) { self.updateSendControls(); });
+	this.sendMessageInput.bind('keyup', self, function(e) { self.updateSendControls(e.which); });
 	this.sendMessageInput.popover({
 		placement : 'below',
 		trigger   : 'manual',
@@ -2572,7 +2580,7 @@ WiseGuiExperimentationView.prototype.isSendMessageInputValid = function() {
 	return this.parseSendMessagePayloadBase64() != null;
 };
 
-WiseGuiExperimentationView.prototype.updateSendControls = function() {
+WiseGuiExperimentationView.prototype.updateSendControls = function(keycode) {
 
 	var sendButtonText = this.sendSelectedNodeUrns.length == 1 ?
 			"1 node selected" :
@@ -2589,7 +2597,14 @@ WiseGuiExperimentationView.prototype.updateSendControls = function() {
 
 	var areSendMessageNodesSelected = this.sendSelectedNodeUrns instanceof Array && this.sendSelectedNodeUrns.length > 0;
 
-	this.sendSendButton.attr('disabled', !isSendMessageInputValid || !areSendMessageNodesSelected);
+	var valid = isSendMessageInputValid && areSendMessageNodesSelected;
+	this.sendSendButton.attr('disabled', !valid);
+	
+	// send on Enter
+	if (valid && keycode==13) {
+		this.onSendMessageButtonClicked();
+	}
+	
 };
 
 WiseGuiExperimentationView.prototype.onSendMessageButtonClicked = function(e) {
@@ -2625,6 +2640,10 @@ WiseGuiExperimentationView.prototype.parseSendMessagePayloadBase64 = function() 
 
 	if (messageString === undefined || '') {
 		return null;
+	}
+	
+	if (this.sendLineFeedCheckbox.checked) {
+		messageString += '\n';
 	}
 
 	messageBytes = this.getSendMode() == 'binary' ?
