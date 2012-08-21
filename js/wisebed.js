@@ -1,3 +1,4 @@
+
 if( typeof wisebedBaseUrl === 'undefined' )
 	var wisebedBaseUrl = "";
 
