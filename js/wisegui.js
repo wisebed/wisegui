@@ -680,10 +680,13 @@ WiseGuiReservationDialog.prototype.buildView = function() {
         });
 		
 		tabs.find('li a[href=#WisebedTestbedMakeReservationMap]').bind('click', function(e) {
-				console.log("resizing Map");
-				google.maps.event.trigger(wiseMlParser.map, 'resize');
-				wiseMlParser.setBounds();
+				setTimeout(function() {
+					console.log("resizing Map");
+					google.maps.event.trigger(wiseMlParser.map, 'resize');
+					wiseMlParser.setBounds();
+				}, 100);
 		});
+		
 	};
 	
 	Wisebed.getWiseMLAsJSON(this.testbedId, null, showMap,
