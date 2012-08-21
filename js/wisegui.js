@@ -545,7 +545,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 			+ '</div>');	
 	
 	tabs.find('#WisebedTestbedMakeReservationList').append(p_nodes);
-	
+
 	var showTable = function (wiseML) {
 		that.table = new WiseGuiNodeTable(wiseML, p_nodes, true, true);
 	};
@@ -556,11 +556,34 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 			}
 	);
 
-	 //Show google map
+	 //Show specialized google map for reservation 
 	var showMap = function(wiseML){
 		var wiseMlParser = new WiseMLParser(wiseML, tabs.find('#WisebedTestbedMakeReservationMap'));
 		wiseMlParser.map.enableKeyDragZoom();
 		wiseMlParser.map.selectedURNs = [];
+		
+		$.each(wiseMlParser.markersArray, function (index, marker) {
+			
+		google.maps.event.clearListeners(marker, 'click');
+		google.maps.event.addListener(marker, 'click', function (){
+			 if(marker.getIcon().url == 'img/node.png'){
+				 wiseMlParser.map.selectURNs([marker.urn]);
+			 }else{
+				 wiseMlParser.map.selectURNs([marker.urn], true);
+			 }
+		     var selectedFun =function(data) {
+					var nodeids = wiseMlParser.map.selectedURNs;
+					for(var i = 0; i < nodeids.length; i++) {
+						if(data.id == nodeids[i]) return true;
+					}
+					return false;
+				};
+	            
+	           that.table.applySelected(selectedFun);
+		});
+		
+
+        });
 		
 		wiseMlParser.map.selectURNs = function(urns, deselect){
 			var image;
@@ -595,11 +618,13 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 						}else{
 							wiseMlParser.map.selectedURNs.splice(index,1);
 						}
+					}else{
+						if(deselect) wiseMlParser.map.selectedURNs.splice(index,1);
 					}	
 			});
 		};
 		
-		//TODO FMA: 
+
 		//Filter out all markers but the ones with the urns given
 		wiseMlParser.map.filter = function(urns){
 			//loop over markers and set new image
@@ -620,15 +645,13 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 		
 		google.maps.event.addListener(dz, 'dragend', function(bounds) {
             console.log('DragZoom DragEnd :' + bounds);
-            // get markers in bound
-            var markersInBound = [];
+           
             var selectedURNs = [];
             var deselectedURNs = [];
             
             // get nodes that have been (de-)selected
             $.each(wiseMlParser.markersArray, function (index, marker) {
                 if (bounds.contains(marker.getPosition()) && marker.getMap() != null) {
-                    markersInBound.push(marker);
                     if(marker.getIcon().url == 'img/node.png'){
                     selectedURNs.push(marker.urn);
                     }else{
@@ -641,8 +664,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
             wiseMlParser.map.selectURNs(selectedURNs);
             wiseMlParser.map.selectURNs(deselectedURNs, true);
             
-            //add all newly selected nodes
-            wiseMlParser.map.selectedURNs = wiseMlParser.map.selectedURNs.concat(selectedURNs);
+            
             //remove all deselected nodes
             wiseMlParser.map.selectedURNs = wiseMlParser.map.selectedURNs.diff(deselectedURNs);
             //update selection in table
@@ -669,7 +691,9 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 				console.log('TODO handle error in WiseGuiReservationDialog');
 			}
 	);
-	
+
+	tabs.find('#WisebedTestbedMakeReservationMap').append("<h4>Click on single nodes or Shift+Click for bounding box</h4>");
+
 	// Add the picker
     input_date_start.datepicker({dateFormat: 'dd.mm.yy'});
     input_date_end.datepicker({dateFormat: 'dd.mm.yy'});

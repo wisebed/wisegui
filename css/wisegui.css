@@ -10,12 +10,12 @@ body {
 .reservation {
 	margin: -360px 0 0 -491px;
     width: 980px;
-    height: 750px;
+    height: 795px;
 }
 
 .reservation-body {
-	height: 610px;
-	max-height: 610px;
+	height: 655px;
+	max-height: 655px;
 	overflow: auto;
 }
 
