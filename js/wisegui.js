@@ -2040,6 +2040,39 @@ WiseGuiExperimentationView.prototype.printMessagesToTextArea = function() {
 	}
 };
 
+WiseGuiExperimentationView.prototype.printMessage = function(message) {
+
+	// remove messages that are too much
+	if (this.outputs.length > this.outputsNumMessages) {
+		var elementsToRemove = this.outputs.length - this.outputsNumMessages;
+		this.outputs.splice(0, elementsToRemove);
+	}
+	while (this.outputsTable.children().length > this.outputsNumMessages) {
+        this.outputsTable.children().last().remove();
+    }
+
+	// add row
+	var col = function(text) {
+		return $('<td>').append(text);
+	};
+	var row = $('<tr></tr>');
+	var cols = [
+			col(message.timestamp),
+			col(message.sourceNodeUrn),
+			col(atob(message.payloadBase64))
+	];
+	$.each(cols, function(i, val) {
+		row.append(col(val));
+	});
+	this.outputsTable.prepend(row);
+
+	// scroll down if active
+	//TODO
+	if (this.outputsFollow) {
+		this.outputsTextarea.scrollTop(this.outputsTextArea[0].scrollHeight);
+	}
+};
+
 WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
 
 	var message = JSON.parse(event.data);
@@ -2054,7 +2087,8 @@ WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
 		// append new message
 		this.outputs[this.outputs.length] = message.timestamp + " | " + message.sourceNodeUrn + " | " + atob(message.payloadBase64);
 
-		this.printMessagesToTextArea();
+		//this.printMessagesToTextArea();
+		this.printMessage(message);
 
 	} else if (message.type == 'notification') {
 		var blockAlertActions = null;
@@ -2129,8 +2163,9 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '		</div>'
 			+ '	</div>'
 			+ '	<div class="row">'
-			+ '		<div class="span12">'
-			+ '			<textarea class="WiseGuiExperimentViewOutputsTextArea" id="'+this.outputsTextAreaId+'" style="width: 100%; height:300px;" readonly disabled></textarea>'
+			+ '		<div class="span12" style="height:300px; overflow:auto;">'
+//			+ '			<textarea class="WiseGuiExperimentViewOutputsTextArea" id="'+this.outputsTextAreaId+'" style="width: 100%; height:300px;" readonly disabled></textarea>'
+			+ '			<table class="table WiseGuiExperimentViewOutputsTable"><thead></thead><tbody></tbody></table>'
 			+ '		</div>'
 			+ '	</div>'
 			+ '	<div class="row">'
@@ -2240,6 +2275,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 
 	this.outputsNumMessagesInput      = this.view.find('input.WiseGuiExperimentViewOutputNumMessages').first();
 	this.outputsTextArea              = this.view.find('textarea.WiseGuiExperimentViewOutputsTextArea').first();
+	this.outputsTable                 = this.view.find('table.WiseGuiExperimentViewOutputsTable tbody').first();
 	this.outputsClearButton           = this.view.find('button.WiseGuiExperimentViewOutputsClearButton').first();
 	this.outputsFollowCheckbox        = this.view.find('input.FollowOutputsCheckbox').first();
 
