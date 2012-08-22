@@ -2057,9 +2057,9 @@ WiseGuiExperimentationView.prototype.printMessage = function(message) {
 	};
 	var row = $('<tr></tr>');
 	var cols = [
-			col(message.timestamp),
-			col(message.sourceNodeUrn),
-			col(atob(message.payloadBase64))
+			message.timestamp,
+			message.sourceNodeUrn,
+			atob(message.payloadBase64)
 	];
 	$.each(cols, function(i, val) {
 		row.append(col(val));
@@ -2163,7 +2163,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '		</div>'
 			+ '	</div>'
 			+ '	<div class="row">'
-			+ '		<div class="span12" style="height:300px; overflow:auto;">'
+			+ '		<div class="span12"><div class="well" style="height:300px; overflow:auto;">'
 //			+ '			<textarea class="WiseGuiExperimentViewOutputsTextArea" id="'+this.outputsTextAreaId+'" style="width: 100%; height:300px;" readonly disabled></textarea>'
 			+ '			<table class="table WiseGuiExperimentViewOutputsTable">'
 			+ '				<thead>'
@@ -2173,7 +2173,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '				</thead>'
 			+ '				<tbody></tbody>'
 			+'			</table>'
-			+ '		</div>'
+			+ '		</div></div>'
 			+ '	</div>'
 			+ '	<div class="row">'
 			+ '			<div class="span6">'
