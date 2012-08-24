@@ -1787,21 +1787,47 @@ WiseGuiNotificationsViewer.prototype.buildView = function() {
 	this.view.hide();
 	
 	this.roster = $('<div class="WiseGuiNotificationsRoster row">'
-			+ ' <div id="notification-flash" class="span10">&nbsp;</div>'
-			+ '	<div class="span2" style="text-align:right;"><a id="roster-btn" class="btn" href="#">'
+			+ ' <div id="notification-flash" class="span11">&nbsp;</div>'
+			//*
+			+ '<div class="span1">'
+			+ '<div class="btn-group">'
+			+ '	<a class="btn btn-mini" id="roster-btn" href="#">'
 			+ '		<span class="badge" id="notifications-counter">0</span>'
-			+ '		<i class="icon-arrow-down" style="margin-top: 2px;"></i>'
-			+ '	</a></div>'
+			+ '	<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">'
+			+ '     <span class="caret"></span>'
+			+ '	</a>'
+			+ '	<ul class="dropdown-menu" id="roster-dropdown">'
+			+ '		<li><a id="roster-clear" href="#">Clear</a></li>'
+			+ '	</ul>'
+			+ '</div>'
 			+ '</div>');
+			//*/
+			/*
+			+ '	<div class="span1" style="text-align:right;">'
+			+ ' 	<a id="roster-btn" class="btn btn-mini" href="#">'
+			+ '			<span class="badge" id="notifications-counter">0</span>'
+			+ '			<i class="icon-arrow-down"></i>'
+			+ '		</a>'
+			+ ' 	<a id="roster-clear" class="btn btn-mini" href="#">'
+			+ '			<i class="icon-remove-circle"></i>'
+			+ '		</a>'
+			+ ' </div>'
+			+ '</div>');
+			//*/
 	this.flashArea = this.roster.find('#notification-flash').first();
-	this.button = this.roster.find('#roster-btn');
+	this.button = this.roster.find('.btn-group');
 	this.button.hide();
 	
 	var self = this;
 	this.view.on("closed", ".alert", function(e){
 		setTimeout(function(){self.updateCounter();}, 100);
 	});
-	this.button.click(function(e) {
+	this.button.find('#roster-clear').click(function(e) {
+		e.preventDefault();
+		self.view.html('');
+		self.updateCounter();
+	});
+	this.button.find('#roster-btn').click(function(e) {
 		var notifications = $('.WiseGuiNotificationsContainer').first();
 		
 		e.preventDefault();

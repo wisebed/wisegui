@@ -97,6 +97,15 @@ input.success {
 	height: 28px;
 }
 
+#notifications-counter {
+	padding: 0 9px 0;
+}
+
+#roster-dropdown {
+	min-width: 0;
+	padding: 0;
+}
+
 #WisebedContainer {
 	padding-bottom: 150px;
 }
