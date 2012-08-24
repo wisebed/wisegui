@@ -1771,6 +1771,7 @@ WiseGuiNotificationsViewer.prototype.showBlockAlert = function(alert) {
 		}
 	}
 	this.view.append(blockAlertDiv);
+	// TODO handle flash for block alerts
 	blockAlertDiv.alert();
 };
 
@@ -1791,9 +1792,9 @@ WiseGuiNotificationsViewer.prototype.buildView = function() {
 			//*
 			+ '<div class="span1">'
 			+ '<div class="btn-group">'
-			+ '	<a class="btn btn-mini" id="roster-btn" href="#">'
+			+ '	<a class="btn btn-mini" id="roster-btn" href="#" title="show old notifications">'
 			+ '		<span class="badge" id="notifications-counter">0</span>'
-			+ '	<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#">'
+			+ '	<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#" title="remove all notifications">'
 			+ '     <span class="caret"></span>'
 			+ '	</a>'
 			+ '	<ul class="dropdown-menu" id="roster-dropdown">'
@@ -1801,19 +1802,6 @@ WiseGuiNotificationsViewer.prototype.buildView = function() {
 			+ '	</ul>'
 			+ '</div>'
 			+ '</div>');
-			//*/
-			/*
-			+ '	<div class="span1" style="text-align:right;">'
-			+ ' 	<a id="roster-btn" class="btn btn-mini" href="#">'
-			+ '			<span class="badge" id="notifications-counter">0</span>'
-			+ '			<i class="icon-arrow-down"></i>'
-			+ '		</a>'
-			+ ' 	<a id="roster-clear" class="btn btn-mini" href="#">'
-			+ '			<i class="icon-remove-circle"></i>'
-			+ '		</a>'
-			+ ' </div>'
-			+ '</div>');
-			//*/
 	this.flashArea = this.roster.find('#notification-flash').first();
 	this.button = this.roster.find('.btn-group');
 	this.button.hide();
