@@ -1715,7 +1715,8 @@ WiseGuiReservationObserver.prototype.stopObservationOf = function(testbedId) {
 
 var WiseGuiNotificationsViewer = function() {
 
-	this.view = null;
+	this.view   = null;
+	this.roster = null;
 	this.buildView();
 
 	var self = this;
@@ -1730,6 +1731,13 @@ WiseGuiNotificationsViewer.prototype.showNotification = function(notification) {
 	} else if (notification.type == 'block-alert') {
 		this.showBlockAlert(notification);
 	}
+	this.updateCounter();
+};
+
+WiseGuiNotificationsViewer.prototype.updateCounter = function() {
+	var cnt = this.view.children().length;
+	$('#notifications-counter').html(cnt);
+	this.button.toggle(cnt!=0);
 };
 
 WiseGuiNotificationsViewer.prototype.showAlert = function(alert) {
@@ -1738,6 +1746,7 @@ WiseGuiNotificationsViewer.prototype.showAlert = function(alert) {
 			+ '</div>');
 	alertDiv.append(alert.message);
 	this.view.append(alertDiv);
+	this.flash(alertDiv.clone());
 	alertDiv.alert();
 };
 
@@ -1765,8 +1774,51 @@ WiseGuiNotificationsViewer.prototype.showBlockAlert = function(alert) {
 	blockAlertDiv.alert();
 };
 
+WiseGuiNotificationsViewer.prototype.flash = function(div) {
+	var self = this;
+	div.find('button').remove();
+	this.flashArea.html('');
+	this.flashArea.append(div);
+	setTimeout(function(){self.flashArea.children().fadeOut();},2000);
+};
+
 WiseGuiNotificationsViewer.prototype.buildView = function() {
 	this.view = $('<div class="WiseGuiNotificationsContainer"></div>');
+	this.view.hide();
+	
+	this.roster = $('<div class="WiseGuiNotificationsRoster row">'
+			+ ' <div id="notification-flash" class="span10">&nbsp;</div>'
+			+ '	<div class="span2" style="text-align:right;"><a id="roster-btn" class="btn" href="#">'
+			+ '		<span class="badge" id="notifications-counter">0</span>'
+			+ '		<i class="icon-arrow-down" style="margin-top: 2px;"></i>'
+			+ '	</a></div>'
+			+ '</div>');
+	this.flashArea = this.roster.find('#notification-flash').first();
+	this.button = this.roster.find('#roster-btn');
+	this.button.hide();
+	
+	var self = this;
+	this.view.on("closed", ".alert", function(e){
+		setTimeout(function(){self.updateCounter();}, 100);
+	});
+	this.button.click(function(e) {
+		var notifications = $('.WiseGuiNotificationsContainer').first();
+		
+		e.preventDefault();
+	    if ( notifications.is(':visible') ) {
+	    	notifications.slideUp();
+	    } 
+	    else {
+	    	//FIXME dirty size hack for invisible element to make animation smooth
+	    	notifications.css({'position':'absolute','visibility':'hidden','display':'block'});
+	    	var height = notifications.height();
+	    	notifications.css({'position':'static','visibility':'visible','display':'none'});
+	    	notifications.css('height',height+'px');
+	    	notifications.slideDown('fast',function() {
+	    		notifications.css('height','auto');
+	    	});
+	    }
+	});
 };
 
 /**
@@ -3400,7 +3452,7 @@ function createNavigationContainer(navigationData) {
 
 	container.hide();
 
-	$('#WisebedContainer .WiseGuiNotificationsContainer').before(container);
+	$('#WisebedContainer .WiseGuiNotificationsRoster').before(container);
 
 	var navigationViewer = new WiseGuiNavigationViewer(navigationData);
 	container.append(navigationViewer.view);
@@ -3464,6 +3516,7 @@ var testbeds             = null;
 
 $(function () {
 
+	$('#WisebedContainer').append(notificationsViewer.roster);
 	$('#WisebedContainer').append(notificationsViewer.view);
 	
 	$('.modal').modal({

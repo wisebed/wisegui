@@ -85,6 +85,18 @@ input.success {
 	border: 0;
 }
 
+.WiseGuiNotificationsContainer {
+	overflow: hidden;
+}
+
+.WiseGuiNotificationsRoster {
+	padding-bottom: 12px;
+}
+
+#notification-flash {
+	height: 28px;
+}
+
 #WisebedContainer {
 	padding-bottom: 150px;
 }
