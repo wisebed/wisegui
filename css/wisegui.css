@@ -107,7 +107,7 @@ input.success {
 }
 
 #WiseGuiNotificationsHistory .alert{
-	max-height: 893px;
+	max-width: 893px;
 }
 
 #WiseGuiNotificationsRoster .btn-group {

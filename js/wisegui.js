@@ -2685,7 +2685,7 @@ WiseGuiExperimentationView.prototype.onSendMessageButtonClicked = function(e) {
 						"The message was sent successfully to all nodes."
 				);
 				progressView.update(result);
-				WiseGui.showInfoBlockAlert(progressView.view);
+				WiseGui.showSuccessBlockAlert(progressView.view);
 				self.sendSendButton.attr('disabled', false);
 			},
 			function(jqXHR, textStatus, errorThrown) {
@@ -3205,8 +3205,8 @@ WiseGuiOperationProgressView.prototype.update = function(operationStatus) {
 	});
 
 	if (contentsEmpty && this.successMessage) {
-		self.view.append(this.successMessage);
-		// setTimeout(function() {self.view.remove()}, 1000);
+		self.view.parent().remove();
+		WiseGui.showSuccessAlert(this.successMessage);
 	}
 };
 
