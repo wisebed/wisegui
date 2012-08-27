@@ -1717,6 +1717,7 @@ var WiseGuiNotificationsViewer = function() {
 
 	this.view   = null;
 	this.roster = null;
+	this.flashTime = 3000;
 	this.buildView();
 
 	var self = this;
@@ -1747,7 +1748,6 @@ WiseGuiNotificationsViewer.prototype.showAlert = function(alert) {
 	alertDiv.append(alert.message);
 	this.view.append(alertDiv);
 	this.flash(alertDiv.clone());
-	alertDiv.alert();
 };
 
 WiseGuiNotificationsViewer.prototype.showBlockAlert = function(alert) {
@@ -1770,9 +1770,7 @@ WiseGuiNotificationsViewer.prototype.showBlockAlert = function(alert) {
 			actionsDiv.append(' ');
 		}
 	}
-	this.view.append(blockAlertDiv);
-	// TODO handle flash for block alerts
-	blockAlertDiv.alert();
+	this.roster.find('#notification-blocks').append(blockAlertDiv);
 };
 
 WiseGuiNotificationsViewer.prototype.flash = function(div) {
@@ -1780,16 +1778,15 @@ WiseGuiNotificationsViewer.prototype.flash = function(div) {
 	div.find('button').remove();
 	this.flashArea.html('');
 	this.flashArea.append(div);
-	setTimeout(function(){self.flashArea.children().fadeOut();},2000);
+	setTimeout(function(){self.flashArea.children().fadeOut();},this.flashTime);
 };
 
 WiseGuiNotificationsViewer.prototype.buildView = function() {
-	this.view = $('<div class="WiseGuiNotificationsContainer"></div>');
+	this.view = $('<div class="WiseGuiNotificationsContainer">');
 	this.view.hide();
 	
 	this.roster = $('<div class="WiseGuiNotificationsRoster row">'
 			+ ' <div id="notification-flash" class="span11">&nbsp;</div>'
-			//*
 			+ '<div class="span1">'
 			+ '<div class="btn-group">'
 			+ '	<a class="btn btn-mini" id="roster-btn" href="#" title="show old notifications">'
@@ -1801,7 +1798,8 @@ WiseGuiNotificationsViewer.prototype.buildView = function() {
 			+ '		<li><a id="roster-clear" href="#">Clear</a></li>'
 			+ '	</ul>'
 			+ '</div>'
-			+ '</div>');
+			+ '</div>'
+			+ '</div><div class="span12" id="notification-blocks"></div>');
 	this.flashArea = this.roster.find('#notification-flash').first();
 	this.button = this.roster.find('.btn-group');
 	this.button.hide();
@@ -2674,7 +2672,7 @@ WiseGuiExperimentationView.prototype.onSendMessageButtonClicked = function(e) {
 						"The message was sent successfully to all nodes."
 				);
 				progressView.update(result);
-				WiseGui.showInfoAlert(progressView.view);
+				WiseGui.showInfoBlockAlert(progressView.view);
 				self.sendSendButton.attr('disabled', false);
 			},
 			function(jqXHR, textStatus, errorThrown) {
@@ -3022,7 +3020,7 @@ WiseGuiExperimentationView.prototype.executeFlashNodes = function() {
 			flashFormData,
 			function(result) {
 				if (!progressViewerShown) {
-					WiseGui.showInfoAlert(progressViewer.view);
+					WiseGui.showInfoBlockAlert(progressViewer.view);
 					progressViewerShown = true;
 				}
 				self.setFlashButtonDisabled(false);
@@ -3030,7 +3028,7 @@ WiseGuiExperimentationView.prototype.executeFlashNodes = function() {
 			},
 			function(progress) {
 				if (!progressViewerShown) {
-					WiseGui.showInfoAlert(progressViewer.view);
+					WiseGui.showInfoBlockAlert(progressViewer.view);
 					progressViewerShown = true;
 				}
 				progressViewer.update(progress);
