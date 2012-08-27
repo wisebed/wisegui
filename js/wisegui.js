@@ -1716,7 +1716,7 @@ WiseGuiReservationObserver.prototype.stopObservationOf = function(testbedId) {
 var WiseGuiNotificationsViewer = function() {
 
 	this.view   = null;
-	this.roster = null;
+	this.history = null;
 	this.flashTime = 3000;
 	this.buildView();
 
@@ -1736,9 +1736,12 @@ WiseGuiNotificationsViewer.prototype.showNotification = function(notification) {
 };
 
 WiseGuiNotificationsViewer.prototype.updateCounter = function() {
-	var cnt = this.view.children().length;
-	$('#notifications-counter').html(cnt);
-	this.button.toggle(cnt!=0);
+	var cnt = this.history.children().length;
+	this.view.find('#notifications-counter').html(cnt);
+	if (cnt===0) {
+		this.history.hide();
+		this.button.removeClass('open');
+	}
 };
 
 WiseGuiNotificationsViewer.prototype.showAlert = function(alert) {
@@ -1746,12 +1749,12 @@ WiseGuiNotificationsViewer.prototype.showAlert = function(alert) {
 			+ '<button class="close" data-dismiss="alert">&times;</button>'
 			+ '</div>');
 	alertDiv.append(alert.message);
-	this.view.append(alertDiv);
+	this.history.append(alertDiv);
 	this.flash(alertDiv.clone());
 };
 
 WiseGuiNotificationsViewer.prototype.showBlockAlert = function(alert) {
-	var blockAlertDiv = $('<div class="alert block-message '+alert.severity+'">'
+	var blockAlertDiv = $('<div class="alert block-message alert-'+alert.severity+'">'
 			+ '	<button class="close" data-dismiss="alert">x</button>'
 			+ '	<div class="alert-actions">'
 			+ '	</div>'
@@ -1770,7 +1773,10 @@ WiseGuiNotificationsViewer.prototype.showBlockAlert = function(alert) {
 			actionsDiv.append(' ');
 		}
 	}
-	this.roster.find('#notification-blocks').append(blockAlertDiv);
+	// TODO block alerts
+	var flashDiv = $('<div class="alert alert-'+alert.severity+'">New Block Alert. Click there &#8594;</div>');
+	this.flash(flashDiv);
+	this.history.append(blockAlertDiv);
 };
 
 WiseGuiNotificationsViewer.prototype.flash = function(div) {
@@ -1782,52 +1788,59 @@ WiseGuiNotificationsViewer.prototype.flash = function(div) {
 };
 
 WiseGuiNotificationsViewer.prototype.buildView = function() {
-	this.view = $('<div class="WiseGuiNotificationsContainer">');
-	this.view.hide();
-	
-	this.roster = $('<div class="WiseGuiNotificationsRoster row">'
+	this.view = $('<div class="WiseGuiNotificationsContainer">'
+			+ '<div id="WiseGuiNotificationsHistory"></div>'
+			+ '<div id="WiseGuiNotificationsRoster">'
 			+ ' <div id="notification-flash" class="span11">&nbsp;</div>'
-			+ '<div class="span1">'
-			+ '<div class="btn-group">'
-			+ '	<a class="btn btn-mini" id="roster-btn" href="#" title="show old notifications">'
-			+ '		<span class="badge" id="notifications-counter">0</span>'
-			+ '	<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#" title="remove all notifications">'
-			+ '     <span class="caret"></span>'
-			+ '	</a>'
-			+ '	<ul class="dropdown-menu" id="roster-dropdown">'
-			+ '		<li><a id="roster-clear" href="#">Clear</a></li>'
-			+ '	</ul>'
+			+ '	<div class="span1" id="WiseGuiNotificationsButton">'
+			+ '		<div class="btn-group">'
+			+ '			<a class="btn btn-mini" id="roster-btn" href="#" title="show old notifications">'
+			+ '			<span class="badge" id="notifications-counter">0</span>'
+			+ '			<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#" title="remove all notifications">'
+			+ '    		<span>&#9650;</span>'
+			+ '			</a>'
+			+ '		<ul class="dropdown-menu" id="roster-dropdown">'
+			+ '			<li><a id="roster-clear" href="#">Clear</a></li>'
+			+ '		</ul>'
+			+ '	</div>'
 			+ '</div>'
-			+ '</div>'
-			+ '</div><div class="span12" id="notification-blocks"></div>');
-	this.flashArea = this.roster.find('#notification-flash').first();
-	this.button = this.roster.find('.btn-group');
-	this.button.hide();
+			+ '</div>');
+	this.history = this.view.find('#WiseGuiNotificationsHistory');
+	this.history.hide();
+
+	this.flashArea = this.view.find('#notification-flash').first();
+	this.button = this.view.find('#WiseGuiNotificationsButton');
 	
 	var self = this;
-	this.view.on("closed", ".alert", function(e){
+	this.history.on("closed", ".alert", function(e){
 		setTimeout(function(){self.updateCounter();}, 100);
 	});
 	this.button.find('#roster-clear').click(function(e) {
 		e.preventDefault();
-		self.view.html('');
+		self.history.html('');
 		self.updateCounter();
 	});
 	this.button.find('#roster-btn').click(function(e) {
-		var notifications = $('.WiseGuiNotificationsContainer').first();
-		
 		e.preventDefault();
-	    if ( notifications.is(':visible') ) {
-	    	notifications.slideUp();
+		
+		// if there are no old notifications do nothing
+		if (self.history.children().length === 0) {
+			return;
+		}
+
+	    if ( self.history.is(':visible') ) {
+	    	self.history.slideUp();
+	    	self.button.removeClass('open');
 	    } 
 	    else {
 	    	//FIXME dirty size hack for invisible element to make animation smooth
-	    	notifications.css({'position':'absolute','visibility':'hidden','display':'block'});
-	    	var height = notifications.height();
-	    	notifications.css({'position':'static','visibility':'visible','display':'none'});
-	    	notifications.css('height',height+'px');
-	    	notifications.slideDown('fast',function() {
-	    		notifications.css('height','auto');
+	    	//notifications.css({'position':'absolute','visibility':'hidden','display':'block'});
+	    	//var height = notifications.height();
+	    	//notifications.css({'position':'static','visibility':'visible','display':'none'});
+	    	//notifications.css('height',height+'px');
+	    	self.history.slideDown('fast',function() {
+	    		self.history.css('height','auto');
+	    		self.button.addClass('open');
 	    	});
 	    }
 	});
@@ -3464,7 +3477,7 @@ function createNavigationContainer(navigationData) {
 
 	container.hide();
 
-	$('#WisebedContainer .WiseGuiNotificationsRoster').before(container);
+	$('#WisebedContainer .WiseGuiNotificationsContainer').before(container);
 
 	var navigationViewer = new WiseGuiNavigationViewer(navigationData);
 	container.append(navigationViewer.view);
@@ -3528,7 +3541,6 @@ var testbeds             = null;
 
 $(function () {
 
-	$('#WisebedContainer').append(notificationsViewer.roster);
 	$('#WisebedContainer').append(notificationsViewer.view);
 	
 	$('.modal').modal({

@@ -86,11 +86,38 @@ input.success {
 }
 
 .WiseGuiNotificationsContainer {
-	overflow: hidden;
+	position: fixed;
+	bottom: 10px;	
 }
 
-.WiseGuiNotificationsRoster {
-	padding-bottom: 12px;
+#WiseGuiNotificationsHistory {
+	max-height: 500px;
+	overflow: auto;
+	background-color: #EEE;
+	padding: 8px;
+	border-top-left-radius: 3px;
+	border-top-right-radius: 3px;
+	border-bottom-right-radius: 0px;
+	border-bottom-left-radius: 3px;
+}
+
+#WiseGuiNotificationsHistory .alert{
+	max-height: 893px;
+}
+
+#WiseGuiNotificationsRoster .btn-group {
+	padding: 9px;
+}
+
+#WiseGuiNotificationsButton {
+	width: 80px;
+	margin-left: 0;
+}
+
+#WiseGuiNotificationsButton.open {
+	background-color: #EEE;
+	border-bottom-right-radius: 3px;
+	border-bottom-left-radius: 3px;
 }
 
 #notification-flash {
@@ -104,6 +131,7 @@ input.success {
 #roster-dropdown {
 	min-width: 0;
 	padding: 0;
+	top: -20px;
 }
 
 #WisebedContainer {
