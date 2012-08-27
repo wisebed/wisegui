@@ -2,6 +2,11 @@ body {
 	padding-top: 10px;
 }
 
+/* bootstrap2 vs google maps hacks */
+.gMap label { width: auto; display:inline; }
+.gMap img { max-width: none; }
+.gMap img { max-width: none; }
+
 .modal {
 	width: 800px;
 	margin: -250px 0 0 -400px;

@@ -3246,7 +3246,7 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 						+ '	<div class="span12">' + wiseML.setup.description + '</div>'
 						+ '</div>'
 						+ '<div class="row">'
-						+ '	<div class="span12 WisebedTestbedDetailsOverviewMap"></div>'
+						+ '	<div class="span12 WisebedTestbedDetailsOverviewMap gMap"></div>'
 						+ '</div>');
 				var overviewTabMapRow = overviewTab.find('.WisebedTestbedDetailsOverviewMap');
 
