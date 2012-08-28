@@ -2141,7 +2141,7 @@ var WiseGuiExperimentationView = function(testbedId, experimentId) {
 	this.connectToExperiment();
 };
 
-WiseGuiExperimentationView.prototype.printMessagesToTextArea = function() {
+WiseGuiExperimentationView.prototype.redrawOutput = function() {
 
 	// remove messages that are too much
 	if (this.outputs.length > this.outputsNumMessages) {
@@ -2149,12 +2149,66 @@ WiseGuiExperimentationView.prototype.printMessagesToTextArea = function() {
 		this.outputs.splice(0, elementsToRemove);
 	}
 
-	// 'draw' messages to textarea
-	this.outputsTextArea.html(this.outputs.join("\n"));
+	// 'draw' messages to table
+	this.outputsTable.empty();
+	console.log(this.outputs.length);
+	var rows = null;
+	for (var i=0; i<this.outputs.length; i++) {
+		var message = this.outputs[i];
+		var col = function(text) {
+			return $('<td>').append(text);
+		};
+		var row = $('<tr></tr>');
+		var cols = [
+				message.timestamp,
+				message.sourceNodeUrn,
+				atob(message.payloadBase64)
+		];
+		$.each(cols, function(i, val) {
+			row.append(col(val));
+		});
+		rows = rows ? rows.after(row) : row;
+	}
+
+	this.outputsTable.append(rows);
 
 	// scroll down if active
 	if (this.outputsFollow) {
-		this.outputsTextArea.scrollTop(this.outputsTextArea[0].scrollHeight);
+		var scrollArea = this.outputsTable.parent().parent();
+		scrollArea.scrollTop(scrollArea[0].scrollHeight);
+	}
+};
+
+WiseGuiExperimentationView.prototype.printMessage = function(message) {
+
+	// remove messages that are too much
+	if (this.outputs.length > this.outputsNumMessages) {
+		var elementsToRemove = this.outputs.length - this.outputsNumMessages-1;
+		this.outputs.splice(0, elementsToRemove);
+	}
+	while (this.outputsTable.children().length > this.outputsNumMessages-1) {
+        this.outputsTable.children().first().remove();
+    }
+
+	// add row
+	var col = function(text) {
+		return $('<td>').append(text);
+	};
+	var row = $('<tr></tr>');
+	var cols = [
+			message.timestamp,
+			message.sourceNodeUrn,
+			atob(message.payloadBase64)
+	];
+	$.each(cols, function(i, val) {
+		row.append(col(val));
+	});
+	this.outputsTable.append(row);
+
+	// scroll down if active
+	if (this.outputsFollow) {
+		var scrollArea = this.outputsTable.parent().parent();
+		scrollArea.scrollTop(scrollArea[0].scrollHeight);
 	}
 };
 
@@ -2172,8 +2226,8 @@ WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
 		// append new message if in whitelist or whitelist empty
 		if (   this.outputsFilterNodes.length == 0
 				|| $.inArray(message.sourceNodeUrn, this.outputsFilterNodes) != -1 ) {
-			this.outputs[this.outputs.length] = message.timestamp + " | " + message.sourceNodeUrn + " | " + atob(message.payloadBase64);
-			this.printMessagesToTextArea();
+			this.outputs[this.outputs.length] = message;
+			this.printMessage(message);
 		}
 
 	} else if (message.type == 'notification') {
@@ -2310,9 +2364,17 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '		</div>'
 			+ '	</div>'
 			+ '	<div class="row">'
-			+ '		<div class="span12">'
-			+ '			<textarea class="WiseGuiExperimentViewOutputsTextArea" id="'+this.outputsTextAreaId+'" style="width: 100%; height:300px;" readonly disabled></textarea>'
-			+ '		</div>'
+			+ '		<div class="span12"><div class="well" style="height:300px; overflow:auto;">'
+//			+ '			<textarea class="WiseGuiExperimentViewOutputsTextArea" id="'+this.outputsTextAreaId+'" style="width: 100%; height:300px;" readonly disabled></textarea>'
+			+ '			<table class="table WiseGuiExperimentViewOutputsTable">'
+			+ '				<thead>'
+			+ '					<th>Timestamp</th>'
+			+ '					<th>Source-Node</th>'
+			+ '					<th style="width:100%;">Message</th>'
+			+ '				</thead>'
+			+ '				<tbody></tbody>'
+			+'			</table>'
+			+ '		</div></div>'
 			+ '	</div>'
 			+ '<div class="WiseGuiExperimentationViewControls">'
 			+ '	<h2>Controls</h2></div>'
@@ -2408,7 +2470,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '</div>');
 	
 	this.outputsNumMessagesInput      = this.view.find('#num-outputs').first();
-	this.outputsTextArea              = this.view.find('textarea.WiseGuiExperimentViewOutputsTextArea').first();
+	this.outputsTable                 = this.view.find('table.WiseGuiExperimentViewOutputsTable tbody').first();
 	this.outputsClearButton           = this.view.find('.btn#clear-output').first();
 	this.outputsFollowCheckbox        = this.view.find('#auto-scroll').first();
 	this.outputsFilterButton          = this.view.find('.btn#filter-nodes').first();
@@ -2550,7 +2612,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 		} else {
 			self.outputsNumMessagesInput.removeClass('error');
 			self.outputsNumMessages = fieldValue;
-			self.printMessagesToTextArea();
+			self.redrawOutput();
 		}
 	});
 
@@ -2560,7 +2622,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 
 	this.outputsClearButton.bind('click', self, function(e) {
 		self.outputs.length = 0;
-		self.printMessagesToTextArea();
+		self.redrawOutput();
 	});
 	
 	this.outputsFilterButton.click(function(e) {

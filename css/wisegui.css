@@ -165,6 +165,10 @@ input.success {
 	padding-bottom: 150px;
 }
 
+.WiseGuiExperimentViewOutputsTable {
+	width: auto;
+}
+
 .CopyrightContainer, .CopyrightContainer > a {
 	color: #CCC;
 	margin-top: 20px;
