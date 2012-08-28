@@ -553,6 +553,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 	Wisebed.getWiseMLAsJSON(this.testbedId, null, showTable,
 			function(jqXHR, textStatus, errorThrown) {
 				console.log('TODO handle error in WiseGuiReservationDialog');
+				WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
 			}
 	);
 
@@ -692,6 +693,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 	Wisebed.getWiseMLAsJSON(this.testbedId, null, showMap,
 			function(jqXHR, textStatus, errorThrown) {
 				console.log('TODO handle error in WiseGuiReservationDialog');
+				WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
 			}
 	);
 
@@ -1950,6 +1952,7 @@ WiseGuiNodeSelectionDialog.prototype.show = function(callbackOK, callbackCancel)
 	Wisebed.getWiseMLAsJSON(this.testbedId, this.experimentId, showDialogInternal,
 			function(jqXHR, textStatus, errorThrown) {
 				console.log('TODO handle error in WiseGuiNodeSelectionDialog');
+				WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
 			}
 	);
 };
@@ -2130,26 +2133,65 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '	<div class="row">'
 			+ '		<div class="span6"><h2>Live Data</h2></div>'
 			+ '		<div class="span6">'
-			+ '			<div class="btn-group  pull-right">'
-			+ '				<button id="clear-output" class="btn" title="Clear output."><i class="icon-remove"></i></button>'
-			+ '				<button id="filter-nodes" class="btn" title="Filter output for nodes."><i class="icon-filter"></i></button>'
-			+ '				<button class="btn dropdown-toggle" data-toggle="dropdown" title="Show output options."><i class="icon-wrench"></i></button>'
-			+ '				<ul class="dropdown-menu">'
-			+ '					<li>'
-			+ '						<form class="form-inline">'
-			+ '							<label class="checkbox">'
-	    + '								<input id="auto-scroll" checked="checked" type="checkbox">auto scroll</input>'
-	    + '							</label>'
-	    + '						</form>'
-	    + '					</li>'	
-			+ '					<li>'
-			+ '						<form class="form-inline">'
-			+ '							<label title="press enter to save">'
-	    + '								Show <input type="text" value="'+this.outputsNumMessages+'" id="num-outputs" style="width: 30px; height: 10px;"> messages'
-	    + '							</label>'
-	    + '						</form>'
-	    + '					</li>'
-			+ '				</ul>'
+			+ '			<div class="btn-toolbar btn-toolbar2  pull-right">'
+			+ '				<div class="btn-group">'
+			+ '					<button id="clear-output" class="btn" title="Clear output."><i class="icon-remove"></i></button>'
+			+ '				</div>'
+			+ '				<div class="btn-group">'			
+			+ '					<button id="output-view" data-toggle="dropdown" class="btn dropdown-toggle" title="Change view options">'
+			+ '						<i class="icon-eye-open"></i>&nbsp;<span class="caret"</span>'
+			+ '					</button>'
+			+ '					<ul class="dropdown-menu">'
+			+ '						<li>'
+			+ '							<label class="radio">'
+		  + '								<input type="radio" name="viewRadio" id="optionsRadios1" value="ascii" checked>'
+		  + '									ASCII'
+		  + '							</label>'
+	    + '						</li>'	
+			+ '						<li>'
+			+ '							<label class="radio">'
+		  + '								<input type="radio" name="viewRadio" id="optionsRadios1" value="hex">'
+		  + '									Hex'
+		  + '							</label>'
+	    + '						</li>'
+			+ '						<li>'
+			+ '							<label class="radio">'
+		  + '								<input type="radio" name="viewRadio" id="optionsRadios1" value="decimal">'
+		  + '									Decimal'
+		  + '							</label>'
+	    + '						</li>'
+			+ '						<li>'
+			+ '							<label class="radio">'
+		  + '								<input type="radio" name="viewRadio" id="optionsRadios1" value="binary">'
+		  + '									Binary'
+		  + '							</label>'
+	    + '						</li>'
+			+ '					</ul>'
+			+ '				</div>'
+			+ '				<div class="btn-group">'
+			+ '					<button id="filter-nodes" class="btn" title="Filter output for nodes."><i class="icon-filter"></i></button>'
+			+ '				</div>'
+			+ '				<div class="btn-group">'
+			+ '					<button class="btn dropdown-toggle" data-toggle="dropdown" title="Show output options.">'
+			+ '						<i class="icon-wrench"></i>&nbsp;<span class="caret"</span>'
+			+ '					</button>'
+			+ '					<ul id="options-dropdown" class="dropdown-menu">'
+			+ '						<li>'
+			+ '							<form class="form-inline">'
+			+ '								<label class="checkbox">'
+	    + '									<input id="auto-scroll" checked="checked" type="checkbox">auto scroll</input>'
+	    + '								</label>'
+	    + '							</form>'
+	    + '						</li>'	
+			+ '						<li>'
+			+ '							<form class="form-inline">'
+			+ '								<label title="press enter to save">'
+	    + '									Show <input type="text" value="'+this.outputsNumMessages+'" id="num-outputs" style="width: 30px; height: 10px;"> messages'
+	    + '								</label>'
+	    + '							</form>'
+	    + '						</li>'
+			+ '					</ul>'
+			+ '				</div>'
 			+ '			</div>'
 			+ '		</div>'
 			+ '	</div>'
@@ -2889,6 +2931,7 @@ WiseGuiExperimentationView.prototype.addFlashConfiguration = function(conf) {
 			Wisebed.getWiseMLAsJSON(this.testbedId, this.experimentId, checkNodes,
 					function(jqXHR, textStatus, errorThrown) {
 						console.log('TODO handle error in WiseGuiExperimentationView');
+						WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
 					}
 			);
 		}
