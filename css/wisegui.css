@@ -169,6 +169,18 @@ input.success {
 	width: auto;
 }
 
+.WiseGuiExperimentViewOutputsTable thead tr:last-child {
+	width: 100%;
+}
+
+.dropdown-menu strong {
+	padding: 5px;
+}
+
+#column-dropdown {
+	width: 130px;
+}
+
 .CopyrightContainer, .CopyrightContainer > a {
 	color: #CCC;
 	margin-top: 20px;

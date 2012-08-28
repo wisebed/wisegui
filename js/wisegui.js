@@ -2116,7 +2116,12 @@ var WiseGuiExperimentationView = function(testbedId, experimentId) {
 
 	this.testbedId = testbedId;
 	this.experimentId = experimentId;
-
+	this.columns = {
+			'time' : true,
+			'urn' : true,
+			'message' : true
+	};
+	
 	this.experimentationDivId    = 'WisebedExperimentationDiv-'+testbedId+'-'+experimentId.replace(/=/g, '');
 	this.outputsTextAreaId       = this.experimentationDivId+'-outputs-textarea';
 	this.sendDivId               = this.experimentationDivId+'-send';
@@ -2142,31 +2147,32 @@ var WiseGuiExperimentationView = function(testbedId, experimentId) {
 };
 
 WiseGuiExperimentationView.prototype.redrawOutput = function() {
-
+	var self = this;
 	// remove messages that are too much
 	if (this.outputs.length > this.outputsNumMessages) {
 		var elementsToRemove = this.outputs.length - this.outputsNumMessages;
 		this.outputs.splice(0, elementsToRemove);
 	}
 
+	// draw header
+	var thead = this.outputsTable.parent().find('thead tr');
+	thead.empty();
+	var header = {
+			'time' : 'Timestamp',
+			'urn' : 'Source-Node',
+			'message' : 'Message'
+	};
+	$.each(header, function(key, val) {
+		if (self.columns[key])
+			thead.append($('<th>'+header[key]+'</th>'));
+	});
+	
+	
 	// 'draw' messages to table
 	this.outputsTable.empty();
-	console.log(this.outputs.length);
 	var rows = null;
 	for (var i=0; i<this.outputs.length; i++) {
-		var message = this.outputs[i];
-		var col = function(text) {
-			return $('<td>').append(text);
-		};
-		var row = $('<tr></tr>');
-		var cols = [
-				message.timestamp,
-				message.sourceNodeUrn,
-				atob(message.payloadBase64)
-		];
-		$.each(cols, function(i, val) {
-			row.append(col(val));
-		});
+		var row = this.generateRow(this.outputs[i]);
 		rows = rows ? rows.after(row) : row;
 	}
 
@@ -2191,25 +2197,32 @@ WiseGuiExperimentationView.prototype.printMessage = function(message) {
     }
 
 	// add row
-	var col = function(text) {
-		return $('<td>').append(text);
-	};
-	var row = $('<tr></tr>');
-	var cols = [
-			message.timestamp,
-			message.sourceNodeUrn,
-			atob(message.payloadBase64)
-	];
-	$.each(cols, function(i, val) {
-		row.append(col(val));
-	});
-	this.outputsTable.append(row);
+	this.outputsTable.append(this.generateRow(message));
 
 	// scroll down if active
 	if (this.outputsFollow) {
 		var scrollArea = this.outputsTable.parent().parent();
 		scrollArea.scrollTop(scrollArea[0].scrollHeight);
 	}
+};
+
+WiseGuiExperimentationView.prototype.generateRow = function(message) {
+	var self = this;
+	var col = function(text) {
+		return $('<td>').append(text);
+	};
+	var row = $('<tr></tr>');
+	var cols = {
+			'time' : message.timestamp,
+			'urn' : message.sourceNodeUrn,
+			'message' : atob(message.payloadBase64)
+	};
+	$.each(cols, function(key, val) {
+		if (self.columns[key])
+			row.append(col(val));
+	});
+	
+	return row;
 };
 
 WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
@@ -2256,12 +2269,10 @@ WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
 
 WiseGuiExperimentationView.prototype.onWebSocketOpen = function(event) {
 
-	this.outputsTextArea.attr('disabled', false);
 };
 
 WiseGuiExperimentationView.prototype.onWebSocketClose = function(event) {
 
-	this.outputsTextArea.attr('disabled', true);
 };
 
 WiseGuiExperimentationView.prototype.connectToExperiment = function() {
@@ -2296,7 +2307,7 @@ WiseGuiExperimentationView.prototype.send = function(targetNodeUrns, payloadBase
 /** ******************************************************************************************************************* */
 
 WiseGuiExperimentationView.prototype.buildView = function() {
-
+	var self = this;
 	this.view.append('<div class="WiseGuiExperimentationViewOutputs">'
 			+ '	<div class="row">'
 			+ '		<div class="span6"><h2>Live Data</h2></div>'
@@ -2304,6 +2315,32 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '			<div class="btn-toolbar btn-toolbar2  pull-right">'
 			+ '				<div class="btn-group">'
 			+ '					<button id="clear-output" class="btn" title="Clear output."><i class="icon-remove"></i></button>'
+			+ '				</div>'
+			+ '				<div class="btn-group">'			
+			+ '					<button id="output-view" data-toggle="dropdown" class="btn dropdown-toggle" title="Change shown columns">'
+			+ '						<i class="icon-th"></i>&nbsp;<span class="caret"</span>'
+			+ '					</button>'
+			+ '					<ul id="column-dropdown" class="dropdown-menu">'
+			+ '						<li><strong>Show Columns:</strong></li>'
+			+ '						<li>'
+			+ '							<label class="radio">'
+		  + '								<input type="checkbox" data-col="time" checked>'
+		  + '									Timestamp'
+		  + '							</label>'
+	    + '						</li>'	
+			+ '						<li>'
+			+ '							<label class="radio">'
+		  + '								<input type="checkbox" data-col="urn" checked>'
+		  + '									Node URN'
+		  + '							</label>'
+	    + '						</li>'
+			+ '						<li>'
+			+ '							<label class="radio">'
+		  + '								<input type="checkbox" data-col="message" checked>'
+		  + '									Message'
+		  + '							</label>'
+	    + '						</li>'
+			+ '					</ul>'
 			+ '				</div>'
 			+ '				<div class="btn-group">'			
 			+ '					<button id="output-view" data-toggle="dropdown" class="btn dropdown-toggle" title="Change view options">'
@@ -2474,10 +2511,17 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	this.outputsClearButton           = this.view.find('.btn#clear-output').first();
 	this.outputsFollowCheckbox        = this.view.find('#auto-scroll').first();
 	this.outputsFilterButton          = this.view.find('.btn#filter-nodes').first();
+	this.outputsColumnDropdown        = this.view.find('#column-dropdown');
 	
 	// don't close popup when clicking on a form
 	this.view.find('.dropdown-menu').click(function(e) {
 		e.stopPropagation();
+	});
+	
+	// watch shown-columns-checkbox changes
+	this.outputsColumnDropdown.find('input[type="checkbox"]').change(function() {
+		self.columns[$(this).data('col')] = $(this).is(':checked');
+		self.redrawOutput();
 	});
 
 	this.flashAddSetButton            = this.view.find('button.WiseGuiExperimentsViewFlashControlAddSet').first();
