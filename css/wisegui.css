@@ -38,6 +38,20 @@ body {
 	border-radius: 4px;
 }
 
+.WiseGuiExperimentationViewOutputs .dropdown-menu {
+	min-width: 170px;
+}
+
+.WiseGuiExperimentationViewOutputs .dropdown-menu form {
+	margin: 0;
+}
+
+.WiseGuiExperimentationViewOutputs .dropdown-menu li form {
+	padding: 3px 15px;
+}
+.WiseGuiExperimentationViewOutputs .dropdown-menu label {
+	cursor: pointer;
+}
 .WiseGuiExperimentationViewOutputsDiv {
 	padding-bottom: 10px;
 }
@@ -50,7 +64,7 @@ body {
 	padding-top: 10px;
 }
 
-.dropdown-menu {
+.WiseGuiNavigationContainer .dropdown-menu {
 	min-width: 600px;
 	max-width: none;
 }
