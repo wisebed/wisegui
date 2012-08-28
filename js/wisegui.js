@@ -2023,7 +2023,7 @@ var WiseGuiExperimentationView = function(testbedId, experimentId) {
 	this.connectToExperiment();
 };
 
-WiseGuiExperimentationView.prototype.printMessagesToTextArea = function() {
+WiseGuiExperimentationView.prototype.redrawOutput = function() {
 
 	// remove messages that are too much
 	if (this.outputs.length > this.outputsNumMessages) {
@@ -2031,12 +2031,33 @@ WiseGuiExperimentationView.prototype.printMessagesToTextArea = function() {
 		this.outputs.splice(0, elementsToRemove);
 	}
 
-	// 'draw' messages to textarea
-	this.outputsTextArea.html(this.outputs.join("\n"));
+	// 'draw' messages to table
+	this.outputsTable.empty();
+	console.log(this.outputs.length);
+	var rows = null;
+	for (var i=0; i<this.outputs.length; i++) {
+		var message = this.outputs[i];
+		var col = function(text) {
+			return $('<td>').append(text);
+		};
+		var row = $('<tr></tr>');
+		var cols = [
+				message.timestamp,
+				message.sourceNodeUrn,
+				atob(message.payloadBase64)
+		];
+		$.each(cols, function(i, val) {
+			row.append(col(val));
+		});
+		rows = rows ? rows.after(row) : row;
+	}
+
+	this.outputsTable.append(rows);
 
 	// scroll down if active
 	if (this.outputsFollow) {
-		this.outputsTextArea.scrollTop(this.outputsTextArea[0].scrollHeight);
+		var scrollArea = this.outputsTable.parent().parent();
+		scrollArea.scrollTop(scrollArea[0].scrollHeight);
 	}
 };
 
@@ -2044,11 +2065,11 @@ WiseGuiExperimentationView.prototype.printMessage = function(message) {
 
 	// remove messages that are too much
 	if (this.outputs.length > this.outputsNumMessages) {
-		var elementsToRemove = this.outputs.length - this.outputsNumMessages;
+		var elementsToRemove = this.outputs.length - this.outputsNumMessages-1;
 		this.outputs.splice(0, elementsToRemove);
 	}
-	while (this.outputsTable.children().length > this.outputsNumMessages) {
-        this.outputsTable.children().last().remove();
+	while (this.outputsTable.children().length > this.outputsNumMessages-1) {
+        this.outputsTable.children().first().remove();
     }
 
 	// add row
@@ -2064,12 +2085,12 @@ WiseGuiExperimentationView.prototype.printMessage = function(message) {
 	$.each(cols, function(i, val) {
 		row.append(col(val));
 	});
-	this.outputsTable.prepend(row);
+	this.outputsTable.append(row);
 
 	// scroll down if active
-	//TODO
 	if (this.outputsFollow) {
-		this.outputsTextarea.scrollTop(this.outputsTextArea[0].scrollHeight);
+		var scrollArea = this.outputsTable.parent().parent();
+		scrollArea.scrollTop(scrollArea[0].scrollHeight);
 	}
 };
 
@@ -2085,7 +2106,7 @@ WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
 	if (message.type == 'upstream') {
 
 		// append new message
-		this.outputs[this.outputs.length] = message.timestamp + " | " + message.sourceNodeUrn + " | " + atob(message.payloadBase64);
+		this.outputs[this.outputs.length] = message;
 
 		//this.printMessagesToTextArea();
 		this.printMessage(message);
@@ -2169,7 +2190,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '				<thead>'
 			+ '					<th>Timestamp</th>'
 			+ '					<th>Source-Node</th>'
-			+ '					<th>Message</th>'
+			+ '					<th style="width:100%;">Message</th>'
 			+ '				</thead>'
 			+ '				<tbody></tbody>'
 			+'			</table>'
@@ -2418,7 +2439,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 		} else {
 			self.outputsNumMessagesInput.removeClass('error');
 			self.outputsNumMessages = fieldValue;
-			self.printMessagesToTextArea();
+			self.redrawOutput();
 		}
 	});
 
@@ -2428,7 +2449,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 
 	this.outputsClearButton.bind('click', self, function(e) {
 		self.outputs.length = 0;
-		self.printMessagesToTextArea();
+		self.redrawOutput();
 	});
 
 	this.sendNodeSelectionButton.bind('click', self, function(e) { self.onSendMessageNodeSelectionButtonClicked(); });
