@@ -2054,7 +2054,7 @@ WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
 
 		// append new message if in whitelist or whitelist empty
 		if (   this.outputsFilterNodes.length == 0
-				|| $.inArray(message.sourceNodeUrn, this.outputsFilterNodes != -1) ) {
+				|| $.inArray(message.sourceNodeUrn, this.outputsFilterNodes) != -1 ) {
 			this.outputs[this.outputs.length] = message.timestamp + " | " + message.sourceNodeUrn + " | " + atob(message.payloadBase64);
 			this.printMessagesToTextArea();
 		}
@@ -2405,7 +2405,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 				self.testbedId,
 				self.experimentId,
 				'Select Nodes',
-				'Please select the nodes you want to see output from.',
+				'Please select the nodes you want to see output from. If no nodes are selected, every output will be shown.',
 				self.preselectNodes(self.outputsFilterNodes)
 		);
 
