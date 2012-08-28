@@ -2381,7 +2381,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 		  	+ '					</div>'
 		  	+ '				</div>'
 		  	+ '				<div class="row">'
-			+ '					<div class="offset6 span10">'
+			+ '					<div class="offset4 span8">'
 			+ '						<div class="inputs-list">'
 			+ '							<label class="checkbox inline"><input class="WiseGuiExperimentsViewSendControlLineFeed" type="checkbox"> always append line feed</label>'
 			+ '						</div>'
