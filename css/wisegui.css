@@ -147,6 +147,10 @@ table thead tr .headerSortDown {
     background: url(../img/sort_asc.png) no-repeat center right;;
 }
 
+/*
+	btn-toolbar2 source: http://stackoverflow.com/a/11091453/236351
+*/
+
 .btn-toolbar2 >.btn-group + .btn-group {
 margin-left: -5px;
 }
