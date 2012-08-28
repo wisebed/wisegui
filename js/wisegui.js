@@ -1714,13 +1714,29 @@ WiseGuiReservationObserver.prototype.stopObservationOf = function(testbedId) {
  */
 
 var WiseGuiNotificationsViewer = function() {
-
+	var self = this;
 	this.view   = null;
 	this.history = null;
 	this.flashTime = 3000;
+	this.blinker = {
+			count : 0,
+			maxCount : 6,
+			interval: 1000,
+			timer: null,
+			stop : function () {
+				if (this.timer) {
+					clearTimeout(this.timer);
+				}
+				this.count = 0;
+				self.button.find('#notifications-counter').removeClass(
+						  'badge-info'
+						+ 'badge-success'
+						+ 'badge-warning'
+						+ 'badge-error');
+			}
+	};
 	this.buildView();
 
-	var self = this;
 	$(window).bind('wisegui-notification', function(e, data) {
 		self.showNotification(data);
 	});
@@ -1733,6 +1749,27 @@ WiseGuiNotificationsViewer.prototype.showNotification = function(notification) {
 		this.showBlockAlert(notification);
 	}
 	this.updateCounter();
+};
+
+WiseGuiNotificationsViewer.prototype.blink = function(severity) {
+	// mean hack because red badges are 'important' rateher than 'error'
+	severity = (severity==='error') ? 'important' : severity;
+	var self = this;
+	var b = this.blinker;
+	// reset if already running
+	if (this.blinker.timer) {
+		b.stop();
+	}
+	this.blinker.timer = setInterval(function() {
+		
+		if (b.count >= b.maxCount) {
+			b.stop();
+		} else {
+			b.count++;
+			self.button.find('#notifications-counter').toggleClass('badge-'+severity);
+		}
+		
+	}, 	this.blinker.interval);
 };
 
 WiseGuiNotificationsViewer.prototype.updateCounter = function() {
@@ -1773,9 +1810,9 @@ WiseGuiNotificationsViewer.prototype.showBlockAlert = function(alert) {
 			actionsDiv.append(' ');
 		}
 	}
-	// TODO block alerts
 	var flashDiv = $('<div class="alert alert-'+alert.severity+'">New Block Alert. Click there &#8594;</div>');
 	this.flash(flashDiv);
+	this.blink(alert.severity);
 	this.history.append(blockAlertDiv);
 };
 
