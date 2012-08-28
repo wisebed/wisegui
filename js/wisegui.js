@@ -1720,7 +1720,7 @@ var WiseGuiNotificationsViewer = function() {
 	this.flashTime = 3000;
 	this.blinker = {
 			count : 0,
-			maxCount : 6,
+			maxCount : 9,
 			interval: 1000,
 			timer: null,
 			stop : function () {

@@ -112,6 +112,7 @@ input.success {
 
 #WiseGuiNotificationsRoster .btn-group {
 	padding: 9px;
+	z-index: 10;
 }
 
 #WiseGuiNotificationsButton {
