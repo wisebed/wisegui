@@ -2,6 +2,11 @@ body {
 	padding-top: 10px;
 }
 
+/* bootstrap2 vs google maps hacks */
+.gMap label { width: auto; display:inline; }
+.gMap img { max-width: none; }
+.gMap img { max-width: none; }
+
 .modal {
 	width: 800px;
 	margin: -250px 0 0 -400px;
@@ -83,6 +88,56 @@ input.success {
 
 .WiseGuiNotificationsContainer table td {
 	border: 0;
+}
+
+.WiseGuiNotificationsContainer {
+	position: fixed;
+	bottom: 10px;	
+}
+
+#WiseGuiNotificationsHistory {
+	max-height: 500px;
+	overflow: auto;
+	background-color: #EEE;
+	padding: 8px;
+	border-top-left-radius: 3px;
+	border-top-right-radius: 3px;
+	border-bottom-right-radius: 0px;
+	border-bottom-left-radius: 3px;
+}
+
+#WiseGuiNotificationsHistory .alert{
+	max-width: 893px;
+}
+
+#WiseGuiNotificationsRoster .btn-group {
+	padding: 9px;
+	z-index: 10;
+}
+
+#WiseGuiNotificationsButton {
+	width: 80px;
+	margin-left: 0;
+}
+
+#WiseGuiNotificationsButton.open {
+	background-color: #EEE;
+	border-bottom-right-radius: 3px;
+	border-bottom-left-radius: 3px;
+}
+
+#notification-flash {
+	height: 28px;
+}
+
+#notifications-counter {
+	padding: 0 9px 0;
+}
+
+#roster-dropdown {
+	min-width: 0;
+	padding: 0;
+	top: -20px;
 }
 
 #WisebedContainer {
