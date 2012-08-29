@@ -1732,9 +1732,9 @@ var WiseGuiNotificationsViewer = function() {
 				this.count = 0;
 				self.button.find('#notifications-counter').removeClass(
 						  'badge-info'
-						+ 'badge-success'
-						+ 'badge-warning'
-						+ 'badge-important');
+						+ ' badge-success'
+						+ ' badge-warning'
+						+ ' badge-important');
 			}
 	};
 	this.buildView();
