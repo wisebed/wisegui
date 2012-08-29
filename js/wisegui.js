@@ -1714,11 +1714,29 @@ WiseGuiReservationObserver.prototype.stopObservationOf = function(testbedId) {
  */
 
 var WiseGuiNotificationsViewer = function() {
-
-	this.view = null;
+	var self = this;
+	this.view   = null;
+	this.history = null;
+	this.flashTime = 3000;
+	this.blinker = {
+			count : 0,
+			maxCount : 9,
+			interval: 1000,
+			timer: null,
+			stop : function () {
+				if (this.timer) {
+					clearTimeout(this.timer);
+				}
+				this.count = 0;
+				self.button.find('#notifications-counter').removeClass(
+						  'badge-info'
+						+ 'badge-success'
+						+ 'badge-warning'
+						+ 'badge-error');
+			}
+	};
 	this.buildView();
 
-	var self = this;
 	$(window).bind('wisegui-notification', function(e, data) {
 		self.showNotification(data);
 	});
@@ -1730,6 +1748,37 @@ WiseGuiNotificationsViewer.prototype.showNotification = function(notification) {
 	} else if (notification.type == 'block-alert') {
 		this.showBlockAlert(notification);
 	}
+	this.updateCounter();
+};
+
+WiseGuiNotificationsViewer.prototype.blink = function(severity) {
+	// mean hack because red badges are 'important' rateher than 'error'
+	severity = (severity==='error') ? 'important' : severity;
+	var self = this;
+	var b = this.blinker;
+	// reset if already running
+	if (this.blinker.timer) {
+		b.stop();
+	}
+	this.blinker.timer = setInterval(function() {
+		
+		if (b.count >= b.maxCount) {
+			b.stop();
+		} else {
+			b.count++;
+			self.button.find('#notifications-counter').toggleClass('badge-'+severity);
+		}
+		
+	}, 	this.blinker.interval);
+};
+
+WiseGuiNotificationsViewer.prototype.updateCounter = function() {
+	var cnt = this.history.children().length;
+	this.view.find('#notifications-counter').html(cnt);
+	if (cnt===0) {
+		this.history.hide();
+		this.button.removeClass('open');
+	}
 };
 
 WiseGuiNotificationsViewer.prototype.showAlert = function(alert) {
@@ -1737,12 +1786,12 @@ WiseGuiNotificationsViewer.prototype.showAlert = function(alert) {
 			+ '<button class="close" data-dismiss="alert">&times;</button>'
 			+ '</div>');
 	alertDiv.append(alert.message);
-	this.view.append(alertDiv);
-	alertDiv.alert();
+	this.history.append(alertDiv);
+	this.flash(alertDiv.clone());
 };
 
 WiseGuiNotificationsViewer.prototype.showBlockAlert = function(alert) {
-	var blockAlertDiv = $('<div class="alert block-message '+alert.severity+'">'
+	var blockAlertDiv = $('<div class="alert block-message alert-'+alert.severity+'">'
 			+ '	<button class="close" data-dismiss="alert">x</button>'
 			+ '	<div class="alert-actions">'
 			+ '	</div>'
@@ -1761,12 +1810,77 @@ WiseGuiNotificationsViewer.prototype.showBlockAlert = function(alert) {
 			actionsDiv.append(' ');
 		}
 	}
-	this.view.append(blockAlertDiv);
-	blockAlertDiv.alert();
+	var flashDiv = $('<div class="alert alert-'+alert.severity+'">New Block Alert. Click there &#8594;</div>');
+	this.flash(flashDiv);
+	this.blink(alert.severity);
+	this.history.append(blockAlertDiv);
+};
+
+WiseGuiNotificationsViewer.prototype.flash = function(div) {
+	var self = this;
+	div.find('button').remove();
+	this.flashArea.html('');
+	this.flashArea.append(div);
+	setTimeout(function(){self.flashArea.children().fadeOut();},this.flashTime);
 };
 
 WiseGuiNotificationsViewer.prototype.buildView = function() {
-	this.view = $('<div class="WiseGuiNotificationsContainer"></div>');
+	this.view = $('<div class="WiseGuiNotificationsContainer">'
+			+ '<div id="WiseGuiNotificationsHistory"></div>'
+			+ '<div id="WiseGuiNotificationsRoster">'
+			+ ' <div id="notification-flash" class="span11">&nbsp;</div>'
+			+ '	<div class="span1" id="WiseGuiNotificationsButton">'
+			+ '		<div class="btn-group">'
+			+ '			<a class="btn btn-mini" id="roster-btn" href="#" title="show old notifications">'
+			+ '			<span class="badge" id="notifications-counter">0</span>'
+			+ '			<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#" title="remove all notifications">'
+			+ '    		<span>&#9650;</span>'
+			+ '			</a>'
+			+ '		<ul class="dropdown-menu" id="roster-dropdown">'
+			+ '			<li><a id="roster-clear" href="#">Clear</a></li>'
+			+ '		</ul>'
+			+ '	</div>'
+			+ '</div>'
+			+ '</div>');
+	this.history = this.view.find('#WiseGuiNotificationsHistory');
+	this.history.hide();
+
+	this.flashArea = this.view.find('#notification-flash').first();
+	this.button = this.view.find('#WiseGuiNotificationsButton');
+	
+	var self = this;
+	this.history.on("closed", ".alert", function(e){
+		setTimeout(function(){self.updateCounter();}, 100);
+	});
+	this.button.find('#roster-clear').click(function(e) {
+		e.preventDefault();
+		self.history.html('');
+		self.updateCounter();
+	});
+	this.button.find('#roster-btn').click(function(e) {
+		e.preventDefault();
+		
+		// if there are no old notifications do nothing
+		if (self.history.children().length === 0) {
+			return;
+		}
+
+	    if ( self.history.is(':visible') ) {
+	    	self.history.slideUp();
+	    	self.button.removeClass('open');
+	    } 
+	    else {
+	    	//FIXME dirty size hack for invisible element to make animation smooth
+	    	//notifications.css({'position':'absolute','visibility':'hidden','display':'block'});
+	    	//var height = notifications.height();
+	    	//notifications.css({'position':'static','visibility':'visible','display':'none'});
+	    	//notifications.css('height',height+'px');
+	    	self.history.slideDown('fast',function() {
+	    		self.history.css('height','auto');
+	    		self.button.addClass('open');
+	    	});
+	    }
+	});
 };
 
 /**
@@ -2608,7 +2722,7 @@ WiseGuiExperimentationView.prototype.onSendMessageButtonClicked = function(e) {
 						"The message was sent successfully to all nodes."
 				);
 				progressView.update(result);
-				WiseGui.showInfoAlert(progressView.view);
+				WiseGui.showSuccessBlockAlert(progressView.view);
 				self.sendSendButton.attr('disabled', false);
 			},
 			function(jqXHR, textStatus, errorThrown) {
@@ -2956,7 +3070,7 @@ WiseGuiExperimentationView.prototype.executeFlashNodes = function() {
 			flashFormData,
 			function(result) {
 				if (!progressViewerShown) {
-					WiseGui.showInfoAlert(progressViewer.view);
+					WiseGui.showInfoBlockAlert(progressViewer.view);
 					progressViewerShown = true;
 				}
 				self.setFlashButtonDisabled(false);
@@ -2964,7 +3078,7 @@ WiseGuiExperimentationView.prototype.executeFlashNodes = function() {
 			},
 			function(progress) {
 				if (!progressViewerShown) {
-					WiseGui.showInfoAlert(progressViewer.view);
+					WiseGui.showInfoBlockAlert(progressViewer.view);
 					progressViewerShown = true;
 				}
 				progressViewer.update(progress);
@@ -3128,8 +3242,8 @@ WiseGuiOperationProgressView.prototype.update = function(operationStatus) {
 	});
 
 	if (contentsEmpty && this.successMessage) {
-		self.view.append(this.successMessage);
-		// setTimeout(function() {self.view.remove()}, 1000);
+		self.view.parent().remove();
+		WiseGui.showSuccessAlert(this.successMessage);
 	}
 };
 
@@ -3169,7 +3283,7 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 						+ '	<div class="span12">' + wiseML.setup.description + '</div>'
 						+ '</div>'
 						+ '<div class="row">'
-						+ '	<div class="span12 WisebedTestbedDetailsOverviewMap"></div>'
+						+ '	<div class="span12 WisebedTestbedDetailsOverviewMap gMap"></div>'
 						+ '</div>');
 				var overviewTabMapRow = overviewTab.find('.WisebedTestbedDetailsOverviewMap');
 
