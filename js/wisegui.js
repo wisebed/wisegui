@@ -2236,7 +2236,7 @@ WiseGuiExperimentationView.prototype.formatBase64 = function(base64) {
 	var wrapEach = function(str) {
 		var ret = '';
 		$.each(str.split(' '), function(i, val) {
-			ret += $('<span class="WiseGuiNumber">').append(val).wrap('<div></div>').parent().html();
+			ret += ' ' + $('<span class="WiseGuiNumber">').append(val).wrap('<div></div>').parent().html();
 		});
 		return ret;
 	};
@@ -2275,7 +2275,9 @@ WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
 		return;
 	}
 
-	if (message.type == 'upstream') {
+	var paused = this.view.find('#pause-output').is('.active');
+	
+	if (message.type == 'upstream'  && !paused) {
 
 		// append new message if in whitelist or whitelist empty
 		if (   this.outputsFilterNodes.length == 0
@@ -2354,6 +2356,9 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '		<div class="span6"><h2>Live Data</h2></div>'
 			+ '		<div class="span6">'
 			+ '			<div class="btn-toolbar btn-toolbar2  pull-right">'
+			+ '				<div class="btn-group">'
+			+ '					<button id="pause-output" class="btn" data-toggle="button" title="Pause receiving messages."><i class="icon-pause"></i></button>'
+			+ '				</div>'
 			+ '				<div class="btn-group">'
 			+ '					<button id="clear-output" class="btn" title="Clear output."><i class="icon-remove"></i></button>'
 			+ '				</div>'

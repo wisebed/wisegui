@@ -170,7 +170,7 @@ input.success {
 	width: auto;
 }
 
-.WiseGuiExperimentViewOutputsTable thead tr:last-child {
+.WiseGuiExperimentViewOutputsTable thead th:last-child {
 	width: 100%;
 }
 
