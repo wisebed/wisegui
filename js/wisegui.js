@@ -2207,6 +2207,12 @@ WiseGuiExperimentationView.prototype.printMessage = function(message) {
 };
 
 WiseGuiExperimentationView.prototype.generateRow = function(message) {
+	//no ouput if message source in not in whitelist
+	if (   this.outputsFilterNodes.length != 0
+			&& $.inArray(message.sourceNodeUrn, this.outputsFilterNodes) == -1 ) {
+		return '';
+	}
+	
 	var self = this;
 	var col = function(text) {
 		return $('<td>').append(text);
@@ -2682,10 +2688,12 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 		self.outputsFilterButton.attr('disabled', true);
 		nodeSelectionDialog.show(
 			function(nodeUrns) {
+				// TODO filterActive should also be false if all nodes are selected
+				var filterActive = nodeUrns.length > 0;
 				self.outputsFilterButton.attr('disabled', false);
 				self.outputsFilterNodes = nodeUrns;
-				// TODO show how many nodes filtered
-				//nodeSelectionButton.html((nodeUrns.length == 1 ? '1 node selected' : (nodeUrns.length + ' nodes selected')));
+				self.redrawOutput();
+				self.outputsFilterButton.toggleClass('btn-info', filterActive);
 			}, function() {
 				self.outputsFilterButton.attr('disabled', false);
 			}
