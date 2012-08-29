@@ -61,7 +61,8 @@ body {
 .WiseGuiExperimentationViewOutputs .dropdown-menu label {
 	cursor: pointer;
 }
-.WiseGuiExperimentationViewOutputs .dropdown-menu label.radio {
+.WiseGuiExperimentationViewOutputs .dropdown-menu label.radio,
+.WiseGuiExperimentationViewOutputs .dropdown-menu label.checkbox {
 	margin: 4px;
 }
 .WiseGuiExperimentationViewOutputsDiv {
@@ -169,8 +170,15 @@ input.success {
 	width: auto;
 }
 
-.WiseGuiExperimentViewOutputsTable thead tr:last-child {
+.WiseGuiExperimentViewOutputsTable thead th:last-child {
 	width: 100%;
+}
+
+.WiseGuiNumber {
+	padding: 0 3px;
+	border: 1px solid #AAA;
+	border-radius: 5px;
+	margin-right: 2px;
 }
 
 .dropdown-menu strong {
@@ -179,6 +187,10 @@ input.success {
 
 #column-dropdown {
 	width: 130px;
+}
+
+#view-dropdown {
+	width: 125px;
 }
 
 .CopyrightContainer, .CopyrightContainer > a {
