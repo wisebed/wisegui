@@ -2221,7 +2221,7 @@ WiseGuiExperimentationView.prototype.generateRow = function(message) {
 	var cols = {
 			'time' : message.timestamp,
 			'urn' : message.sourceNodeUrn,
-			'message' : atob(message.payloadBase64)
+			'message' : self.formatBase64(message.payloadBase64)
 	};
 	$.each(cols, function(key, val) {
 		if (self.columns[key])
@@ -2229,6 +2229,41 @@ WiseGuiExperimentationView.prototype.generateRow = function(message) {
 	});
 	
 	return row;
+};
+
+WiseGuiExperimentationView.prototype.formatBase64 = function(base64) {
+	
+	var wrapEach = function(str) {
+		var ret = '';
+		$.each(str.split(' '), function(i, val) {
+			ret += $('<span class="WiseGuiNumber">').append(val).wrap('<div></div>').parent().html();
+		});
+		return ret;
+	};
+	var res = null;
+	var msg = base64_decode(base64);
+	// TODO save type value somewhere instead of looking it up each time
+	var type = this.outputsViewDropdown.find('input[type="radio"]:checked"').attr('value');
+	switch (type) {
+		case 'ascii':
+			if (this.outputsMakePrintable.is(':checked')) {
+				res = StringUtils.makePrintable(msg);
+			} else {
+				res = atob(base64);
+			}
+			break;
+		case 'hex':
+			res = wrapEach(StringUtils.toHexString(msg));
+			break;
+		case 'decimal':
+			res = wrapEach(StringUtils.toDecimalString(msg));
+			break;
+		case 'binary':
+			res = wrapEach(StringUtils.toBinaryString(msg));
+			break;
+	}
+	
+	return res;
 };
 
 WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
@@ -2352,7 +2387,8 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '					<button id="output-view" data-toggle="dropdown" class="btn dropdown-toggle" title="Change view options">'
 			+ '						<i class="icon-eye-open"></i>&nbsp;<span class="caret"</span>'
 			+ '					</button>'
-			+ '					<ul class="dropdown-menu">'
+			+ '					<ul class="dropdown-menu" id="view-dropdown">'
+			+ '						<li><strong>Format ouput as:</strong></li>'
 			+ '						<li>'
 			+ '							<label class="radio">'
 		  + '								<input type="radio" name="viewRadio" id="optionsRadios1" value="ascii" checked>'
@@ -2376,6 +2412,11 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 		  + '								<input type="radio" name="viewRadio" id="optionsRadios1" value="binary">'
 		  + '									Binary'
 		  + '							</label>'
+	    + '						</li>'
+			+ '						<li>'
+	    + '							<label class="checkbox" title="Show non-printable chars in ASCII mode: e.g. 0x00 gets [NUL]">'
+	    + '								<input id="make-printable" checked type="checkbox">non-printables</input>'
+	    + '							</label>'
 	    + '						</li>'
 			+ '					</ul>'
 			+ '				</div>'
@@ -2518,6 +2559,8 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	this.outputsFollowCheckbox        = this.view.find('#auto-scroll').first();
 	this.outputsFilterButton          = this.view.find('.btn#filter-nodes').first();
 	this.outputsColumnDropdown        = this.view.find('#column-dropdown');
+	this.outputsViewDropdown          = this.view.find('#view-dropdown');
+	this.outputsMakePrintable         = this.view.find('#make-printable');
 	
 	// don't close popup when clicking on a form
 	this.view.find('.dropdown-menu').click(function(e) {
@@ -2527,6 +2570,10 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	// watch shown-columns-checkbox changes
 	this.outputsColumnDropdown.find('input[type="checkbox"]').change(function() {
 		self.columns[$(this).data('col')] = $(this).is(':checked');
+		self.redrawOutput();
+	});
+	
+	this.outputsViewDropdown.find('input').change(function(){
 		self.redrawOutput();
 	});
 
