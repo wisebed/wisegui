@@ -1734,7 +1734,7 @@ var WiseGuiNotificationsViewer = function() {
 						  'badge-info'
 						+ 'badge-success'
 						+ 'badge-warning'
-						+ 'badge-error');
+						+ 'badge-important');
 			}
 	};
 	this.buildView();
