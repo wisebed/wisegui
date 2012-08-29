@@ -2125,6 +2125,7 @@ var WiseGuiExperimentationView = function(testbedId, experimentId) {
 	this.view = $('<div class="WiseGuiExperimentationView"/>');
 
 	this.flashConfigurations     = [];
+	this.outputsFilterNodes      = [];
 	this.outputsNumMessages      = 100;
 	this.outputs                 = [];
 	this.outputsFollow           = true;
@@ -2165,10 +2166,12 @@ WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
 
 	if (message.type == 'upstream') {
 
-		// append new message
-		this.outputs[this.outputs.length] = message.timestamp + " | " + message.sourceNodeUrn + " | " + atob(message.payloadBase64);
-
-		this.printMessagesToTextArea();
+		// append new message if in whitelist or whitelist empty
+		if (   this.outputsFilterNodes.length == 0
+				|| $.inArray(message.sourceNodeUrn, this.outputsFilterNodes) != -1 ) {
+			this.outputs[this.outputs.length] = message.timestamp + " | " + message.sourceNodeUrn + " | " + atob(message.payloadBase64);
+			this.printMessagesToTextArea();
+		}
 
 	} else if (message.type == 'notification') {
 		var blockAlertActions = null;
@@ -2240,6 +2243,28 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	this.view.append('<div class="WiseGuiExperimentationViewOutputs">'
 			+ '	<div class="row">'
 			+ '		<div class="span6"><h2>Live Data</h2></div>'
+			+ '		<div class="span6">'
+			+ '			<div class="btn-group  pull-right">'
+			+ '				<button id="clear-output" class="btn" title="Clear output."><i class="icon-remove"></i></button>'
+			+ '				<button id="filter-nodes" class="btn" title="Filter output for nodes."><i class="icon-filter"></i></button>'
+			+ '				<button class="btn dropdown-toggle" data-toggle="dropdown" title="Show output options."><i class="icon-wrench"></i></button>'
+			+ '				<ul class="dropdown-menu">'
+			+ '					<li>'
+			+ '						<form class="form-inline">'
+			+ '							<label class="checkbox">'
+	    + '								<input id="auto-scroll" checked="checked" type="checkbox">auto scroll</input>'
+	    + '							</label>'
+	    + '						</form>'
+	    + '					</li>'	
+			+ '					<li>'
+			+ '						<form class="form-inline">'
+			+ '							<label title="press enter to save">'
+	    + '								Show <input type="text" value="'+this.outputsNumMessages+'" id="num-outputs" style="width: 30px; height: 10px;"> messages'
+	    + '							</label>'
+	    + '						</form>'
+	    + '					</li>'
+			+ '				</ul>'
+			+ '			</div>'
 			+ '		</div>'
 			+ '	</div>'
 			+ '	<div class="row">'
@@ -2247,18 +2272,6 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '			<textarea class="WiseGuiExperimentViewOutputsTextArea" id="'+this.outputsTextAreaId+'" style="width: 100%; height:300px;" readonly disabled></textarea>'
 			+ '		</div>'
 			+ '	</div>'
-			+ '	<div class="row">'
-			+ '			<div class="span6">'
-			+ '				Show <input type="text" class="span1 WiseGuiExperimentViewOutputNumMessages" value="'+this.outputsNumMessages+'" /> messages'
-			+ '			<button class="btn WiseGuiExperimentViewOutputsClearButton">Clear</button>'
-			+ '			</div>'
-			+ '			<div class="span2 offset4" style="text-align: right;"'
-			+ '				<label for="'+(this.experimentationDivId + '-follow-checkbox')+'" style="display:inline;">'
-			+ '					<input type="checkbox" id="'+(this.experimentationDivId + '-follow-checkbox')+'" class="FollowOutputsCheckbox"'+(this.outputsFollow ? ' checked' : '')+'></input>'
-			+ '					auto scroll'
-			+ '				</label>'
-			+ '			</div>'
-			+ '</div>'
 			+ '<div class="WiseGuiExperimentationViewControls">'
 			+ '	<h2>Controls</h2></div>'
 			+ '	<div>'
@@ -2344,11 +2357,17 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '		</div>'
 			+ '	</div>'
 			+ '</div>');
-
-	this.outputsNumMessagesInput      = this.view.find('input.WiseGuiExperimentViewOutputNumMessages').first();
+	
+	this.outputsNumMessagesInput      = this.view.find('#num-outputs').first();
 	this.outputsTextArea              = this.view.find('textarea.WiseGuiExperimentViewOutputsTextArea').first();
-	this.outputsClearButton           = this.view.find('button.WiseGuiExperimentViewOutputsClearButton').first();
-	this.outputsFollowCheckbox        = this.view.find('input.FollowOutputsCheckbox').first();
+	this.outputsClearButton           = this.view.find('.btn#clear-output').first();
+	this.outputsFollowCheckbox        = this.view.find('#auto-scroll').first();
+	this.outputsFilterButton          = this.view.find('.btn#filter-nodes').first();
+	
+	// don't close popup when clicking on a form
+	this.view.find('.dropdown-menu').click(function(e) {
+		e.stopPropagation();
+	});
 
 	this.flashAddSetButton            = this.view.find('button.WiseGuiExperimentsViewFlashControlAddSet').first();
 	this.flashRemoveSetButton         = this.view.find('button.WiseGuiExperimentsViewFlashControlRemoveSet').first();
@@ -2485,13 +2504,36 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 		}
 	});
 
-	this.outputsFollowCheckbox.bind('click', self, function(e) {
+	this.outputsFollowCheckbox.bind('change', self, function(e) {
 		self.outputsFollow = self.outputsFollowCheckbox[0].checked;
 	});
 
 	this.outputsClearButton.bind('click', self, function(e) {
 		self.outputs.length = 0;
 		self.printMessagesToTextArea();
+	});
+	
+	this.outputsFilterButton.click(function(e) {
+		
+		var nodeSelectionDialog = new WiseGuiNodeSelectionDialog(
+				self.testbedId,
+				self.experimentId,
+				'Select Nodes',
+				'Please select the nodes you want to see output from. If no nodes are selected, every output will be shown.',
+				self.preselectNodes(self.outputsFilterNodes)
+		);
+
+		self.outputsFilterButton.attr('disabled', true);
+		nodeSelectionDialog.show(
+			function(nodeUrns) {
+				self.outputsFilterButton.attr('disabled', false);
+				self.outputsFilterNodes = nodeUrns;
+				// TODO show how many nodes filtered
+				//nodeSelectionButton.html((nodeUrns.length == 1 ? '1 node selected' : (nodeUrns.length + ' nodes selected')));
+			}, function() {
+				self.outputsFilterButton.attr('disabled', false);
+			}
+		);
 	});
 
 	this.sendNodeSelectionButton.bind('click', self, function(e) { self.onSendMessageNodeSelectionButtonClicked(); });
