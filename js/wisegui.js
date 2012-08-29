@@ -2935,7 +2935,6 @@ WiseGuiExperimentationView.prototype.onSendMessageButtonClicked = function(e) {
 						"The message was sent successfully to all nodes."
 				);
 				progressView.update(result);
-				WiseGui.showSuccessBlockAlert(progressView.view);
 				self.sendSendButton.attr('disabled', false);
 			},
 			function(jqXHR, textStatus, errorThrown) {
@@ -3378,7 +3377,6 @@ WiseGuiExperimentationView.prototype.executeResetNodes = function() {
 						"All nodes were successfully reset."
 				);
 				progressView.update(result);
-				WiseGui.showInfoAlert(progressView.view);
 				self.setResetButtonDisabled(false);
 			},
 			function(jqXHR, textStatus, errorThrown) {
