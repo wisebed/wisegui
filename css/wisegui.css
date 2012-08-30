@@ -167,12 +167,16 @@ input.success {
 	padding-bottom: 150px;
 }
 
+.WiseGuiExperimentViewOutputsTable {
+	width: auto;
+}
+
 .WiseGuiExperimentViewOutputsTable td {
 	line-height: 12px;
 	padding: 6px;
 }
 
-.WiseGuiExperimentViewOutputsTable thead th:last-child {
+.WiseGuiExperimentViewOutputsTable td:last-child {
 	width: 100%;
 }
 
