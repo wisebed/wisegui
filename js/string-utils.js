@@ -5,48 +5,48 @@ var StringUtils = new function() {
 	};
 	
 	var replacements = [];
-	for (var i = -128; i < 0; i++) {
-		var hex = (128+i).toString(16);
-		var paddedHex = ("00" + hex).substring(hex.length);
-		replacements[128 + i] = "[0x" + paddedHex + "]";
-	}
-	replacements[128 + 0x00] = "[NUL]";
-	replacements[128 + 0x01] = "[SOH]";
-	replacements[128 + 0x02] = "[STX]";
-	replacements[128 + 0x03] = "[ETX]";
-	replacements[128 + 0x04] = "[EOT]";
-	replacements[128 + 0x05] = "[ENQ]";
-	replacements[128 + 0x06] = "[ACK]";
-	replacements[128 + 0x07] = "[BEL]";
-	replacements[128 + 0x08] = "[BS]";
-	replacements[128 + 0x09] = "[TAB]";
-	replacements[128 + 0x0a] = "[LF]";
-	replacements[128 + 0x0b] = "[VT]";
-	replacements[128 + 0x0c] = "[FF]";
-	replacements[128 + 0x0d] = "[CR]";
-	replacements[128 + 0x0e] = "[SO]";
-	replacements[128 + 0x0f] = "[SI]";
-	replacements[128 + 0x10] = "[DLE]";
-	replacements[128 + 0x11] = "[DC1]";
-	replacements[128 + 0x12] = "[DC2]";
-	replacements[128 + 0x13] = "[DC3]";
-	replacements[128 + 0x14] = "[DC4]";
-	replacements[128 + 0x15] = "[NACK]";
-	replacements[128 + 0x16] = "[SYN]";
-	replacements[128 + 0x17] = "[ETB]";
-	replacements[128 + 0x18] = "[CAN]";
-	replacements[128 + 0x19] = "[EM]";
-	replacements[128 + 0x1a] = "[SUB]";
-	replacements[128 + 0x1b] = "[ESC]";
-	replacements[128 + 0x1c] = "[FS]";
-	replacements[128 + 0x1d] = "[GS]";
-	replacements[128 + 0x1e] = "[RS]";
-	replacements[128 + 0x1f] = "[US]";
+	replacements[0x00] = "[NUL]";
+	replacements[0x01] = "[SOH]";
+	replacements[0x02] = "[STX]";
+	replacements[0x03] = "[ETX]";
+	replacements[0x04] = "[EOT]";
+	replacements[0x05] = "[ENQ]";
+	replacements[0x06] = "[ACK]";
+	replacements[0x07] = "[BEL]";
+	replacements[0x08] = "[BS]";
+	replacements[0x09] = "[TAB]";
+	replacements[0x0a] = "[LF]";
+	replacements[0x0b] = "[VT]";
+	replacements[0x0c] = "[FF]";
+	replacements[0x0d] = "[CR]";
+	replacements[0x0e] = "[SO]";
+	replacements[0x0f] = "[SI]";
+	replacements[0x10] = "[DLE]";
+	replacements[0x11] = "[DC1]";
+	replacements[0x12] = "[DC2]";
+	replacements[0x13] = "[DC3]";
+	replacements[0x14] = "[DC4]";
+	replacements[0x15] = "[NACK]";
+	replacements[0x16] = "[SYN]";
+	replacements[0x17] = "[ETB]";
+	replacements[0x18] = "[CAN]";
+	replacements[0x19] = "[EM]";
+	replacements[0x1a] = "[SUB]";
+	replacements[0x1b] = "[ESC]";
+	replacements[0x1c] = "[FS]";
+	replacements[0x1d] = "[GS]";
+	replacements[0x1e] = "[RS]";
+	replacements[0x1f] = "[US]";
 	for (var i = 0x20; i < 0x7f; i++) {
-		replacements[128 + i] = String.fromCharCode(i & 0xFF);
+		replacements[i] = String.fromCharCode(i & 0xFF);
 	}
-	replacements[128 + 0x7f] = "[DEL]";
-	
+	replacements[0x7f] = "[DEL]";
+	for (var i = 128; i < 256; i++) {
+		var hex = (i).toString(16);
+		var paddedHex = ("00" + hex).substring(hex.length);
+		replacements[i] = "[0x" + paddedHex + "]";
+	}
+	this.r = replacements;
 	/**
 	 * Construct an integer from an input string Supported Prefixes are "0x" (hexadecimal) and "0b" (binary), otherwise base 10
 	 * (decimal) is assumed. Examples: 0x0A 0x1B 0b11001001 40 40 0b11001001 0x1F
@@ -68,7 +68,7 @@ var StringUtils = new function() {
 	this.makePrintable = function(arr) {
 		var res = '';
 		for (var i=0; i<arr.length; i++) {
-			res += replacements[128 + arr[i].charCodeAt(0)];
+			res += replacements[arr[i].charCodeAt(0)];
 		}
 		return res;
 	};
