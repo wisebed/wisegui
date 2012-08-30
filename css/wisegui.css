@@ -115,6 +115,7 @@ input.success {
 .WiseGuiNotificationsContainer {
 	position: fixed;
 	bottom: 10px;	
+	z-index: 10;
 }
 
 #WiseGuiNotificationsHistory {
@@ -166,8 +167,9 @@ input.success {
 	padding-bottom: 150px;
 }
 
-.WiseGuiExperimentViewOutputsTable {
-	width: auto;
+.WiseGuiExperimentViewOutputsTable td {
+	line-height: 12px;
+	padding: 6px;
 }
 
 .WiseGuiExperimentViewOutputsTable thead th:last-child {
@@ -176,8 +178,6 @@ input.success {
 
 .WiseGuiNumber {
 	padding: 0 3px;
-	border: 1px solid #AAA;
-	border-radius: 5px;
 	margin-right: 2px;
 }
 

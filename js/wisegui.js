@@ -2147,26 +2147,11 @@ var WiseGuiExperimentationView = function(testbedId, experimentId) {
 };
 
 WiseGuiExperimentationView.prototype.redrawOutput = function() {
-	var self = this;
 	// remove messages that are too much
 	if (this.outputs.length > this.outputsNumMessages) {
 		var elementsToRemove = this.outputs.length - this.outputsNumMessages;
 		this.outputs.splice(0, elementsToRemove);
 	}
-
-	// draw header
-	var thead = this.outputsTable.parent().find('thead tr');
-	thead.empty();
-	var header = {
-			'time' : 'Timestamp',
-			'urn' : 'Source-Node',
-			'message' : 'Message'
-	};
-	$.each(header, function(key, val) {
-		if (self.columns[key])
-			thead.append($('<th>'+header[key]+'</th>'));
-	});
-	
 	
 	// 'draw' messages to table
 	this.outputsTable.empty();
@@ -2454,13 +2439,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '	</div>'
 			+ '	<div class="row">'
 			+ '		<div class="span12"><div class="well" style="height:300px; overflow:auto;">'
-//			+ '			<textarea class="WiseGuiExperimentViewOutputsTextArea" id="'+this.outputsTextAreaId+'" style="width: 100%; height:300px;" readonly disabled></textarea>'
 			+ '			<table class="table WiseGuiExperimentViewOutputsTable">'
-			+ '				<thead>'
-			+ '					<th>Timestamp</th>'
-			+ '					<th>Source-Node</th>'
-			+ '					<th style="width:100%;">Message</th>'
-			+ '				</thead>'
 			+ '				<tbody></tbody>'
 			+'			</table>'
 			+ '		</div></div>'
