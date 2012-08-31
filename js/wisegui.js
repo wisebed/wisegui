@@ -158,10 +158,31 @@ WiseGuiNavigationViewer.prototype.buildView = function() {
 			+ '				<ul class="nav"/>'
 			+ '				<ul class="nav secondary-nav pull-right">'
 			+ '					<li class="WiseGuiNavAboutButton">'
-			+ '						<a href="#">About</a>'
+			+ '						<a href="#" data-toggle="modal" data-target="#aboutModal">About</a>'
 			+ '				</li>'
 			+ '				</ul>'
 			+ '			</div>'
+			+ '		</div>'
+			+ '	</div>'
+			+ '	<div id="aboutModal" class="modal hide">'
+			+ '		<div class="modal-header">'
+			+ ' 		<h1>About</h1>'
+			+ '		</div>'
+			+ '		<div class="modal-body">'
+			+ '			This is an open-source project published under the terms of the BSD license.<br/>'
+			+ ' 		The sources are freely available from'
+			+ '			<a href="https://github.com/wisebed/rest-ws" target="_blank">github.com/wisebed/rest-ws</a>'
+			+ ' 		and'
+			+ '			<a href="https://github.com/wisebed/wisegui" target="_blank">github.com/wisebed/wisegui</a>'			
+			+ ' 		<br/>'
+			+ ' 		<br/>'
+			+ '			&copy; <a href="http://www.itm.uni-luebeck.de/people/bimschas/" target="_blank">Daniel Bimschas</a>,'
+			+ '			<a href="http://www.itm.uni-luebeck.de/people/pfisterer/" target="_blank">Dennis Pfisterer</a>,'
+			+ '			<a href="http://www.itm.uni-luebeck.de/people/boldt/" target="_blank">Dennis Boldt</a>,'
+			+ '			<a href="http://www.itm.uni-luebeck.de/people/massel/" target="_blank">Florian Massel</a>,'
+			+ '			Philipp Abraham<br/>'
+			+ '		</div>'
+			+ '		<div class="modal-footer">'
 			+ '		</div>'
 			+ '	</div>'
 	);
@@ -175,26 +196,6 @@ WiseGuiNavigationViewer.prototype.buildView = function() {
 		this.buildViewForTestbed();
 	}
 
-	this.aboutButton = this.view.find('li.WiseGuiNavAboutButton a').first();
-	this.aboutButton.popover({
-		offset    : 0,
-		placement : 'left',
-		trigger   : 'manual',
-		title     : function() {return 'About WiseGui';},
-		html      : true,
-		content   : 'This is an open-source project published under the terms of the BSD license. The sources are freely'
-				+ ' available from <a href="https://github.com/wisebed/rest-ws" target="_blank">github.com/wisebed/rest-ws</a>.'
-				+ ' <br/>'
-				+ ' <br/>'
-				+ '	&copy; <a href="http://www.itm.uni-luebeck.de/users/bimschas/" target="_blank">Daniel Bimschas</a>,'
-				+ '	<a href="http://www.itm.uni-luebeck.de/users/pfisterer/" target="_blank">Dennis Pfisterer</a><br/>'
-	}).click(function(e) { e.preventDefault();});
-	var self = this;
-	this.aboutButtonPopoverVisible = false;
-	this.aboutButton.bind('click', function(e) {
-		self.aboutButtonPopoverVisible = !self.aboutButtonPopoverVisible;
-		self.aboutButton.popover(self.aboutButtonPopoverVisible ? 'show' : 'hide');
-	});
 };
 
 /**
