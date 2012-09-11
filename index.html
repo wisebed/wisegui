@@ -42,10 +42,11 @@
 	<script type="text/javascript" src="js/lib/keydrag.js"></script>
 
 	<script type="text/javascript">
-		//*
-		var wisebedWebSocketBaseUrl = 'ws://wisebed.itm.uni-luebeck.de:80';
-		var wisebedBaseUrl = "http://wisebed.itm.uni-luebeck.de";
-		//*/
+
+		var l = window.location;
+		var wisebedWebSocketBaseUrl = 'ws://' + l.host;
+		var wisebedBaseUrl = l.protocol + '//' + l.host;
+
 	</script>
 
 	<script type="text/javascript" src="js/string-utils.js"></script>
