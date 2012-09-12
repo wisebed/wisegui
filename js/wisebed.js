@@ -317,7 +317,7 @@ var Wisebed = new function() {
 		);
 	};
 
-	this.getWiseML = function(testbedId, experimentId, callbackDone, callbackError, jsonOrXml) {
+	this.getWiseML = function(testbedId, experimentId, callbackDone, callbackError, jsonOrXml, callbackComplete) {
 
 		$.ajax({
 			url      : (experimentId ?
@@ -326,17 +326,18 @@ var Wisebed = new function() {
 			context  : document.body,
 			success  : callbackDone,
 			error    : callbackError,
+			complete : callbackComplete,
 			dataType : (!jsonOrXml ? "json" : jsonOrXml),
 			xhrFields: { withCredentials: true }
 		});
 	};
 
-	this.getWiseMLAsJSON = function(testbedId, experimentId, callbackDone, callbackError) {
-		this.getWiseML(testbedId, experimentId, callbackDone, callbackError, "json");
+	this.getWiseMLAsJSON = function(testbedId, experimentId, callbackDone, callbackError, callbackComplete) {
+		this.getWiseML(testbedId, experimentId, callbackDone, callbackError, "json", callbackComplete);
 	};
 
-	this.getWiseMLAsXML = function(testbedId, experimentId, callbackDone, callbackError) {
-		this.getWiseML(testbedId, experimentId, callbackDone, callbackError, "xml");
+	this.getWiseMLAsXML = function(testbedId, experimentId, callbackDone, callbackError, callbackComplete) {
+		this.getWiseML(testbedId, experimentId, callbackDone, callbackError, "xml", callbackComplete);
 	};
 
 	this.getNodeUrnArrayFromWiseML = function(wiseML) {

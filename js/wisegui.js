@@ -550,16 +550,26 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 	var showTable = function (wiseML) {
 		that.table = new WiseGuiNodeTable(wiseML, p_nodes, true, true);
 	};
+	
+	var createMap = function() {
+		Wisebed.getWiseMLAsJSON(that.testbedId, null, showMap,
+				function(jqXHR, textStatus, errorThrown) {
+					console.log('TODO handle error in WiseGuiReservationDialog');
+					WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
+				}
+		);
+	}
 
 	Wisebed.getWiseMLAsJSON(this.testbedId, null, showTable,
 			function(jqXHR, textStatus, errorThrown) {
 				console.log('TODO handle error in WiseGuiReservationDialog');
 				WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
-			}
+			}, createMap
 	);
 
 	 //Show specialized google map for reservation 
 	var showMap = function(wiseML){
+		console.log('showMap');
 		var wiseMlParser = new WiseMLParser(wiseML, tabs.find('#WisebedTestbedMakeReservationMap'));
 		wiseMlParser.map.enableKeyDragZoom();
 		wiseMlParser.map.selectedURNs = [];
@@ -680,21 +690,13 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 			};
             
            that.table.applySelected(selectedFun);
-        });
+    });
 		
-	};
-	
-	tabs.find('li a[href=#WisebedTestbedMakeReservationMap]').on('shown', function(e) {
+		tabs.find('li a[href=#WisebedTestbedMakeReservationMap]').on('shown', function(e) {
 			google.maps.event.trigger(that.wiseMlParser.map, 'resize');
 			that.wiseMlParser.setBounds();
-	});
-	
-	Wisebed.getWiseMLAsJSON(this.testbedId, null, showMap,
-			function(jqXHR, textStatus, errorThrown) {
-				console.log('TODO handle error in WiseGuiReservationDialog');
-				WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
-			}
-	);
+		});
+	};
 
 	tabs.find('#WisebedTestbedMakeReservationMap').append("<h4>Click on single nodes or Shift+Click for bounding box</h4>");
 
