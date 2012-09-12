@@ -563,6 +563,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 		var wiseMlParser = new WiseMLParser(wiseML, tabs.find('#WisebedTestbedMakeReservationMap'));
 		wiseMlParser.map.enableKeyDragZoom();
 		wiseMlParser.map.selectedURNs = [];
+		that.map = wiseMlParser.map;
 		
 		$.each(wiseMlParser.markersArray, function (index, marker) {
 			
@@ -681,15 +682,12 @@ WiseGuiReservationDialog.prototype.buildView = function() {
            that.table.applySelected(selectedFun);
         });
 		
-		tabs.find('li a[href=#WisebedTestbedMakeReservationMap]').bind('click', function(e) {
-				setTimeout(function() {
-					console.log("resizing Map");
-					google.maps.event.trigger(wiseMlParser.map, 'resize');
-					wiseMlParser.setBounds();
-				}, 100);
-		});
-		
 	};
+	
+	tabs.find('li a[href=#WisebedTestbedMakeReservationMap]').on('shown', function(e) {
+			google.maps.event.trigger(that.map, 'resize');
+			wiseMlParser.setBounds();
+	});
 	
 	Wisebed.getWiseMLAsJSON(this.testbedId, null, showMap,
 			function(jqXHR, textStatus, errorThrown) {
