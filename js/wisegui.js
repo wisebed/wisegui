@@ -569,7 +569,6 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 
 	 //Show specialized google map for reservation 
 	var showMap = function(wiseML){
-		console.log('showMap');
 		var wiseMlParser = new WiseMLParser(wiseML, tabs.find('#WisebedTestbedMakeReservationMap'));
 		wiseMlParser.map.enableKeyDragZoom();
 		wiseMlParser.map.selectedURNs = [];
@@ -656,9 +655,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 		
 		var dz = wiseMlParser.map.getDragZoomObject();
 		
-		google.maps.event.addListener(dz, 'dragend', function(bounds) {
-            console.log('DragZoom DragEnd :' + bounds);
-           
+		google.maps.event.addListener(dz, 'dragend', function(bounds) {       
             var selectedURNs = [];
             var deselectedURNs = [];
             
