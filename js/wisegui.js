@@ -1038,7 +1038,7 @@ WiseGuiLoginDialog.prototype.buildView = function(testbeds) {
 	}
 
 	
-	helpTextLocalStorage = 'Select this check box, log in and your credentials are stored <strong>unencrypted</strong> in your browser (HTML5 local storage). '
+	var helpTextLocalStorage = 'Select this check box, log in and your credentials are stored <strong>unencrypted</strong> in your browser (HTML5 local storage). '
 		+ '<br/><br/>'
 		+'Unselect the check box and log in to delete previously stored credentials.';
 
@@ -1052,25 +1052,24 @@ WiseGuiLoginDialog.prototype.buildView = function(testbeds) {
 	}
 
 	storeCredentials_checkbox.popover({
-		placement : 'below',
+		placement : 'bottom',
 		trigger   : 'manual',
-		animate   : true,
-		html      : true,
+		animation : true,
 		content   : helpTextLocalStorage,
-		title     : function() { return "Caution!"; }
-		});
-
-		storeCredentials_checkbox.mouseover(
+		title     : "Caution!"
+	});
+	
+	storeCredentials_checkbox.mouseover(
 		function() {
 			storeCredentials_checkbox.popover("show");
 		}
-		);
+	);
 
-		storeCredentials_checkbox.mouseout(
+	storeCredentials_checkbox.mouseout(
 		function() {
 			storeCredentials_checkbox.popover("hide");
 		}
-		);
+	);
 	
 	var tdStoreCredentials = $('<td colspan="4"/>');
 	tdStoreCredentials.append(storeCredentials_checkbox);
@@ -2133,12 +2132,16 @@ var WiseGuiExperimentationView = function(testbedId, experimentId) {
 	this.flashConfigurations     = [];
 	this.outputsFilterNodes      = [];
 	this.outputsNumMessages      = 100;
+	this.outputsRedrawLimit      = 200;
 	this.outputs                 = [];
 	this.outputsFollow           = true;
 	this.sendSelectedNodeUrns    = [];
 	this.resetSelectedNodeUrns   = [];
 	this.socket                  = null;
 	this.userScript      = {};
+	
+	var self = this;
+	this.throttledRedraw = $.throttle(self.outputsRedrawLimit, function(){	self.redrawOutput();});
 
 	this.buildView();
 	this.connectToExperiment();
@@ -2250,7 +2253,7 @@ WiseGuiExperimentationView.prototype.formatBase64 = function(base64) {
 };
 
 WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
-
+	var self = this;
 	var message = JSON.parse(event.data);
 
 	if (!message.type) {
@@ -2263,12 +2266,12 @@ WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
 	if (message.type == 'upstream'  && !paused) {
 
 		// append new message if in whitelist or whitelist empty
-		if (   this.outputsFilterNodes.length == 0
-				|| $.inArray(message.sourceNodeUrn, this.outputsFilterNodes) != -1 ) {
-			this.outputs[this.outputs.length] = message;
-			this.printMessage(message);
-		}
-
+			if (   self.outputsFilterNodes.length == 0
+					|| $.inArray(message.sourceNodeUrn, self.outputsFilterNodes) != -1 ) {
+				self.outputs[self.outputs.length] = message;
+				self.throttledRedraw();
+		};
+		
 	} else if (message.type == 'notification') {
 		var blockAlertActions = null;
 		var blockAlertMessage = $(
@@ -2430,6 +2433,13 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	    + '								</label>'
 	    + '							</form>'
 	    + '						</li>'
+	    + '						<li>'
+			+ '							<form class="form-inline">'
+			+ '								<label title="Incresing helps if your browser freezes due to too many messages. Press enter to save.">'
+	    + '									Redraw at most every <input type="text" value="'+this.outputsRedrawLimit+'" id="redraw-limit" style="width: 30px; height: 10px;"> ms'
+	    + '								</label>'
+	    + '							</form>'
+	    + '						</li>'
 			+ '					</ul>'
 			+ '				</div>'
 			+ '			</div>'
@@ -2536,6 +2546,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '</div>');
 	
 	this.outputsNumMessagesInput      = this.view.find('#num-outputs').first();
+	this.outputsRedrawLimitInput      = this.view.find('#redraw-limit').first();
 	this.outputsTable                 = this.view.find('table.WiseGuiExperimentViewOutputsTable tbody').first();
 	this.outputsClearButton           = this.view.find('.btn#clear-output').first();
 	this.outputsFollowCheckbox        = this.view.find('#auto-scroll').first();
@@ -2692,6 +2703,17 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			self.outputsNumMessagesInput.removeClass('error');
 			self.outputsNumMessages = fieldValue;
 			self.redrawOutput();
+		}
+	});
+	
+	this.outputsRedrawLimitInput.bind('change', self, function(e) {
+		var fieldValue = parseInt(self.outputsRedrawLimitInput[0].value);
+		if (isNaN(fieldValue)) {
+			self.outputsRedrawLimitInput.addClass('error');
+		} else {
+			self.outputsRedrawLimitInput.removeClass('error');
+			self.outputsRedrawLimit = fieldValue;
+			self.throttledRedraw = $.throttle(self.outputsRedrawLimit, function(){	self.redrawOutput();});
 		}
 	});
 
