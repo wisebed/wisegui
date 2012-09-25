@@ -2135,6 +2135,8 @@ var WiseGuiExperimentationView = function(testbedId, experimentId) {
 	this.outputsRedrawLimit      = 200;
 	this.outputs                 = [];
 	this.outputsFollow           = true;
+	this.outputsMakePrintable    = true;
+	this.outputsType             = 'ascii';
 	this.sendSelectedNodeUrns    = [];
 	this.resetSelectedNodeUrns   = [];
 	this.socket                  = null;
@@ -2218,37 +2220,33 @@ WiseGuiExperimentationView.prototype.generateRow = function(message) {
 };
 
 WiseGuiExperimentationView.prototype.formatBase64 = function(base64) {
-	
-	var wrapEach = function(str) {
+	var wrapEach = function(arr) {
 		var ret = '';
-		$.each(str.split(' '), function(i, val) {
-			ret += ' ' + $('<span class="WiseGuiNumber">').append(val).wrap('<div></div>').parent().html();
-		});
+		for (var i=0; i<arr.length; i++) {
+			ret += '<span class="WiseGuiNumber">' + arr[i] + '</span>';
+		}
 		return ret;
 	};
 	var res = null;
 	var msg = base64_decode(base64);
-	// TODO save type value somewhere instead of looking it up each time
-	var type = this.outputsViewDropdown.find('input[type="radio"]:checked"').attr('value');
-	switch (type) {
+	switch (this.outputsType) {
 		case 'ascii':
-			if (this.outputsMakePrintable.is(':checked')) {
+			if (this.outputsMakePrintable) {
 				res = StringUtils.makePrintable(msg);
 			} else {
-				res = atob(base64);
+				res = msg;
 			}
 			break;
 		case 'hex':
-			res = wrapEach(StringUtils.toHexString(msg));
+			res = wrapEach(StringUtils.toHexArray(msg));
 			break;
 		case 'decimal':
-			res = wrapEach(StringUtils.toDecimalString(msg));
+			res = wrapEach(StringUtils.toDecimalArray(msg));
 			break;
 		case 'binary':
-			res = wrapEach(StringUtils.toBinaryString(msg));
+			res = wrapEach(StringUtils.toBinaryArray(msg));
 			break;
 	}
-	
 	return res;
 };
 
@@ -2270,6 +2268,7 @@ WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
 					|| $.inArray(message.sourceNodeUrn, self.outputsFilterNodes) != -1 ) {
 				self.outputs[self.outputs.length] = message;
 				self.throttledRedraw();
+				//self.printMessage(message);
 		};
 		
 	} else if (message.type == 'notification') {
@@ -2553,7 +2552,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	this.outputsFilterButton          = this.view.find('.btn#filter-nodes').first();
 	this.outputsColumnDropdown        = this.view.find('#column-dropdown');
 	this.outputsViewDropdown          = this.view.find('#view-dropdown');
-	this.outputsMakePrintable         = this.view.find('#make-printable');
+	this.outputsMakePrintableCheckbox = this.view.find('#make-printable');
 	
 	// don't close popup when clicking on a form
 	this.view.find('.dropdown-menu').click(function(e) {
@@ -2718,11 +2717,21 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	});
 
 	this.outputsFollowCheckbox.bind('change', self, function(e) {
-		self.outputsFollow = self.outputsFollowCheckbox[0].checked;
+		self.outputsFollow = self.outputsFollowCheckbox.first().is(':checked');
+	});
+	
+	this.outputsMakePrintableCheckbox.bind('change', self, function(e) {
+		self.outputsMakePrintable = this.outputsMakePrintableCheckbox.is('checked');
+		self.redrawOutput();
 	});
 
 	this.outputsClearButton.bind('click', self, function(e) {
 		self.outputs.length = 0;
+		self.redrawOutput();
+	});
+	
+	this.outputsViewDropdown.find('input[type="radio"]').bind('change', self, function(e) {
+		self.outputsType = self.outputsViewDropdown.find('input[type="radio"]:checked"').attr('value');
 		self.redrawOutput();
 	});
 	
