@@ -2268,6 +2268,7 @@ WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
 					|| $.inArray(message.sourceNodeUrn, self.outputsFilterNodes) != -1 ) {
 				self.outputs[self.outputs.length] = message;
 				self.throttledRedraw();
+				//self.printMessage(message);
 		};
 		
 	} else if (message.type == 'notification') {
@@ -2716,11 +2717,12 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	});
 
 	this.outputsFollowCheckbox.bind('change', self, function(e) {
-		self.outputsFollow = self.outputsFollowCheckbox[0].checked;
+		self.outputsFollow = self.outputsFollowCheckbox.first().is(':checked');
 	});
 	
 	this.outputsMakePrintableCheckbox.bind('change', self, function(e) {
 		self.outputsMakePrintable = this.outputsMakePrintableCheckbox.is('checked');
+		self.redrawOutput();
 	});
 
 	this.outputsClearButton.bind('click', self, function(e) {
@@ -2730,6 +2732,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	
 	this.outputsViewDropdown.find('input[type="radio"]').bind('change', self, function(e) {
 		self.outputsType = self.outputsViewDropdown.find('input[type="radio"]:checked"').attr('value');
+		self.redrawOutput();
 	});
 	
 	this.outputsFilterButton.click(function(e) {
