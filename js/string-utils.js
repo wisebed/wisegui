@@ -77,7 +77,7 @@ var StringUtils = new function() {
 		return (Array(num+1).join(pad) + str).substring(str.length);
 	};
 	
-	var toXstring = function(str, radix) {
+	var toXArray = function(str, radix) {
 		var res = [];
 		for (var i=0; i< str.length; i++) {
 			var num = (str.charCodeAt(i)).toString(radix);
@@ -91,19 +91,31 @@ var StringUtils = new function() {
 			}
 			res.push(num);
 		}
-		return res.join(' ');
+		return res;
+	};
+	
+	this.toHexArray = function(str) {
+		return toXArray(str, 16);
+	};
+	
+	this.toDecimalArray = function(str) {
+		return toXArray(str, 10);
+	};
+	
+	this.toBinaryArray = function(str) {
+		return toXArray(str, 2);
 	};
 	
 	this.toHexString = function(str) {
-		return toXstring(str, 16);
+		return toXstring(str, 16).join(' ');
 	};
 	
 	this.toDecimalString = function(str) {
-		return toXstring(str, 10);
+		return toXstring(str, 10).join(' ');
 	};
 	
 	this.toBinaryString = function(str) {
-		return toXstring(str, 2);
+		return toXstring(str, 2).join(' ');
 	};
 	
 };
