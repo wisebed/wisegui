@@ -2267,7 +2267,8 @@ WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
 			if (   self.outputsFilterNodes.length == 0
 					|| $.inArray(message.sourceNodeUrn, self.outputsFilterNodes) != -1 ) {
 				self.outputs[self.outputs.length] = message;
-				self.throttledRedraw();
+				// queue throtteled redraw (keeps GUI responsive)
+				setTimeout(function(){self.throttledRedraw();}, 5);
 				//self.printMessage(message);
 		};
 		
