@@ -1214,11 +1214,10 @@ Table.prototype.generateFilter = function () {
 
 	img_help.popover({
 		placement:'left',
-		animate:true,
-		html: true,
+		animation:true,
 		trigger: 'manual',
 		content: helpText,
-		title: function() {return "Filter Help";}
+		title: "Filter Help"
 	});
 	div_help.append(filter_input);
 	this.html.append(this.filter);
@@ -2267,7 +2266,8 @@ WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
 			if (   self.outputsFilterNodes.length == 0
 					|| $.inArray(message.sourceNodeUrn, self.outputsFilterNodes) != -1 ) {
 				self.outputs[self.outputs.length] = message;
-				self.throttledRedraw();
+				// queue throtteled redraw (keeps GUI responsive)
+				setTimeout(function(){self.throttledRedraw();}, 5);
 				//self.printMessage(message);
 		};
 		
@@ -2528,7 +2528,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '			<div class="tab-pane WiseGuiExperimentsViewScriptingControl" id="'+this.scriptingEditorDivId+'">'
 			+ '				<div class="row" style="padding-bottom:10px;">'
 			+ '					<div class="span6">'
-			+ '						<button class="btn span2 WiseGuiExperimentsViewScriptingHelpButton">Help</button>'
+			+ '						<a class="btn span2 WiseGuiExperimentsViewScriptingHelpButton" href="#" data-toggle="modal" data-target="#scriptingHelpModal">Help</a>'
 			+ '					</div>'
 			+ '					<div class="span6" style="text-align:right;">'
 			+ '						<button class="btn btn-danger span2 WiseGuiExperimentsViewScriptingStopButton">Stop</button>'
@@ -2765,14 +2765,13 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 
 	this.sendMessageInput.bind('keyup', self, function(e) { self.updateSendControls(e.which); });
 	this.sendMessageInput.popover({
-		placement : 'below',
+		placement : 'bottom',
 		trigger   : 'manual',
-		animate   : true,
-		html      : true,
+		animation   : true,
 		content   : 'The message must consist of comma-separated bytes in base_10 (no prefix), base_2 (prefix 0b) or base_16 (prefix 0x).<br/>'
 				+ '<br/>'
-				+ 'Example: <code>0x0A,0x1B,0b11001001,40,40,0b11001001,0x1F</code>',
-		title     : function() { return "Message Format"; }
+				+ 'Example: <code>0x0A,0x1B,0b11001001,40,80</code>',
+		title     : "Message Format"
 	});
 	this.sendMessageInput.focusin(function() {
 		if (self.getSendMode() == 'binary') {
@@ -2786,12 +2785,12 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	});
 	this.updateSendControls();
 
-	this.scriptingEditorHelpButton.popover({
-		placement : 'right',
-		trigger   : 'manual',
-		animate   : true,
-		html      : true,
-		content   : '<div style="height:500px; overflow:auto;">'
+	this.scriptingEditorHelpModal = '<div id="scriptingHelpModal" class="modal hide">'
+				+ '<div class="modal-header">'
+				+ '  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>'
+				+ '	 <h1>How to use the scripting environment?</h1>'
+				+ '</div>'
+				+ '<div class="modal-body">'
 				+ 'The scripting environment allows the user to write arbitrary JavaScript code into the editor. This '
 				+ 'functionality can e.g., be used to connect to the currently running experiment via WebSockets and '
 				+ 'process the messages received from the sensor nodes to e.g., build visualizations or statistical '
@@ -2855,14 +2854,10 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 				+ '... that there\'s no way yet to really clean up after running a user-provided '
 				+ 'JavaScript script. Therefore, if your script doesn\'t cleanly shut down or breaks something the only '
 				+ 'thing that definitely helps is to reload the browser tab to set the application back to a clean state!'
-				+ '</div>',
-		title     : function() { return "How to use the scripting environment?"; }
-	});
-	this.scriptingEditorHelpPopoverVisible = false;
-	this.scriptingEditorHelpButton.bind('click', self, function(e) {
-		self.scriptingEditorHelpButton.popover(self.scriptingEditorHelpPopoverVisible ? 'hide' : 'show');
-		self.scriptingEditorHelpPopoverVisible = !self.scriptingEditorHelpPopoverVisible;
-	});
+				+ '</div>'
+				+ '</div>';
+	$(document.body).append(this.scriptingEditorHelpModal);
+	
 	this.scriptingEditorStopButton.attr('disabled', true);
 	this.scriptingEditorStartButton.bind('click', self, function(e) { self.startUserScript(); });
 	this.scriptingEditorStopButton.bind('click', self, function(e) { self.stopUserScript(); });
