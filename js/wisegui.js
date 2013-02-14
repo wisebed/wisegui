@@ -903,6 +903,7 @@ WiseGuiLoginDialog.prototype.doLogout = function() {
 	var callbackOK = function() {
 		delete loginDialogs[that.testbedId];
 		$(window).trigger('wisegui-logged-out', {testbedId : that.testbedId});
+		$('#WisebedLoginDialog-'+this.testbedId).remove();
 	};
 
 	var callbackError = function(jqXHR, textStatus, errorThrown) {
@@ -910,6 +911,7 @@ WiseGuiLoginDialog.prototype.doLogout = function() {
 	};
 
 	Wisebed.logout(this.testbedId, callbackOK, callbackError);
+	
 };
 
 WiseGuiLoginDialog.prototype.hide = function() {
@@ -1320,6 +1322,21 @@ Table.prototype.generateTable = function () {
 	this.table.append(thead);
 	this.table.append(tbody);
 	this.html.append(this.table);
+
+	// add link for json representation of selected nodes
+	var jsonLink = $('<a href="#" title="Opens a new window containing the selected NodeUrns as JSON">Get JSON representation</a>');
+	jsonLink.click(function(e) {
+		e.preventDefault();
+
+		var obj = {"nodeUrns": $.map(that.getSelectedRows(), function(val,i) {
+			return val.id;
+		})}
+
+		var json = JSON.stringify(obj);
+		var w = window.open();
+		$(w.document.body).html(json);
+	});
+	this.html.append(jsonLink);
 
 	if(this.showCheckBoxes) {
 		this.table.tablesorter({
