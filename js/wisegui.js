@@ -903,6 +903,7 @@ WiseGuiLoginDialog.prototype.doLogout = function() {
 	var callbackOK = function() {
 		delete loginDialogs[that.testbedId];
 		$(window).trigger('wisegui-logged-out', {testbedId : that.testbedId});
+		$('#WisebedLoginDialog-'+this.testbedId).remove();
 	};
 
 	var callbackError = function(jqXHR, textStatus, errorThrown) {
@@ -910,6 +911,7 @@ WiseGuiLoginDialog.prototype.doLogout = function() {
 	};
 
 	Wisebed.logout(this.testbedId, callbackOK, callbackError);
+	
 };
 
 WiseGuiLoginDialog.prototype.hide = function() {
