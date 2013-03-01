@@ -3148,7 +3148,7 @@ WiseGuiExperimentationView.prototype.loadFlashConfiguration = function(button) {
 
 		// Iterate all configurations
 		for(var i = 0; i < conf.length; i++) {
-			that.addFlashConfiguration(conf[i]);
+			this.addFlashConfiguration(conf[i]);
 		}
 	}
 
