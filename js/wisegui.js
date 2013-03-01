@@ -550,12 +550,21 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 	var showTable = function (wiseML) {
 		that.table = new WiseGuiNodeTable(wiseML, p_nodes, true, true);
 	};
+	
+	var createMap = function() {
+		Wisebed.getWiseMLAsJSON(that.testbedId, null, showMap,
+				function(jqXHR, textStatus, errorThrown) {
+					console.log('TODO handle error in WiseGuiReservationDialog');
+					WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
+				}
+		);
+	}
 
 	Wisebed.getWiseMLAsJSON(this.testbedId, null, showTable,
 			function(jqXHR, textStatus, errorThrown) {
 				console.log('TODO handle error in WiseGuiReservationDialog');
 				WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
-			}
+			}, createMap
 	);
 
 	 //Show specialized google map for reservation 
@@ -563,6 +572,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 		var wiseMlParser = new WiseMLParser(wiseML, tabs.find('#WisebedTestbedMakeReservationMap'));
 		wiseMlParser.map.enableKeyDragZoom();
 		wiseMlParser.map.selectedURNs = [];
+		that.wiseMlParser = wiseMlParser;
 		
 		$.each(wiseMlParser.markersArray, function (index, marker) {
 			
@@ -645,9 +655,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 		
 		var dz = wiseMlParser.map.getDragZoomObject();
 		
-		google.maps.event.addListener(dz, 'dragend', function(bounds) {
-            console.log('DragZoom DragEnd :' + bounds);
-           
+		google.maps.event.addListener(dz, 'dragend', function(bounds) {       
             var selectedURNs = [];
             var deselectedURNs = [];
             
@@ -679,24 +687,13 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 			};
             
            that.table.applySelected(selectedFun);
-        });
+    });
 		
-		tabs.find('li a[href=#WisebedTestbedMakeReservationMap]').bind('click', function(e) {
-				setTimeout(function() {
-					console.log("resizing Map");
-					google.maps.event.trigger(wiseMlParser.map, 'resize');
-					wiseMlParser.setBounds();
-				}, 100);
+		tabs.find('li a[href=#WisebedTestbedMakeReservationMap]').on('shown', function(e) {
+			google.maps.event.trigger(that.wiseMlParser.map, 'resize');
+			that.wiseMlParser.setBounds();
 		});
-		
 	};
-	
-	Wisebed.getWiseMLAsJSON(this.testbedId, null, showMap,
-			function(jqXHR, textStatus, errorThrown) {
-				console.log('TODO handle error in WiseGuiReservationDialog');
-				WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
-			}
-	);
 
 	tabs.find('#WisebedTestbedMakeReservationMap').append("<h4>Click on single nodes or Shift+Click for bounding box</h4>");
 
@@ -906,6 +903,7 @@ WiseGuiLoginDialog.prototype.doLogout = function() {
 	var callbackOK = function() {
 		delete loginDialogs[that.testbedId];
 		$(window).trigger('wisegui-logged-out', {testbedId : that.testbedId});
+		$('#WisebedLoginDialog-'+this.testbedId).remove();
 	};
 
 	var callbackError = function(jqXHR, textStatus, errorThrown) {
@@ -913,6 +911,7 @@ WiseGuiLoginDialog.prototype.doLogout = function() {
 	};
 
 	Wisebed.logout(this.testbedId, callbackOK, callbackError);
+	
 };
 
 WiseGuiLoginDialog.prototype.hide = function() {
@@ -1041,7 +1040,7 @@ WiseGuiLoginDialog.prototype.buildView = function(testbeds) {
 	}
 
 	
-	helpTextLocalStorage = 'Select this check box, log in and your credentials are stored <strong>unencrypted</strong> in your browser (HTML5 local storage). '
+	var helpTextLocalStorage = 'Select this check box, log in and your credentials are stored <strong>unencrypted</strong> in your browser (HTML5 local storage). '
 		+ '<br/><br/>'
 		+'Unselect the check box and log in to delete previously stored credentials.';
 
@@ -1055,25 +1054,24 @@ WiseGuiLoginDialog.prototype.buildView = function(testbeds) {
 	}
 
 	storeCredentials_checkbox.popover({
-		placement : 'below',
+		placement : 'bottom',
 		trigger   : 'manual',
-		animate   : true,
-		html      : true,
+		animation : true,
 		content   : helpTextLocalStorage,
-		title     : function() { return "Caution!"; }
-		});
-
-		storeCredentials_checkbox.mouseover(
+		title     : "Caution!"
+	});
+	
+	storeCredentials_checkbox.mouseover(
 		function() {
 			storeCredentials_checkbox.popover("show");
 		}
-		);
+	);
 
-		storeCredentials_checkbox.mouseout(
+	storeCredentials_checkbox.mouseout(
 		function() {
 			storeCredentials_checkbox.popover("hide");
 		}
-		);
+	);
 	
 	var tdStoreCredentials = $('<td colspan="4"/>');
 	tdStoreCredentials.append(storeCredentials_checkbox);
@@ -1218,11 +1216,10 @@ Table.prototype.generateFilter = function () {
 
 	img_help.popover({
 		placement:'left',
-		animate:true,
-		html: true,
+		animation:true,
 		trigger: 'manual',
 		content: helpText,
-		title: function() {return "Filter Help";}
+		title: "Filter Help"
 	});
 	div_help.append(filter_input);
 	this.html.append(this.filter);
@@ -1325,6 +1322,21 @@ Table.prototype.generateTable = function () {
 	this.table.append(thead);
 	this.table.append(tbody);
 	this.html.append(this.table);
+
+	// add link for json representation of selected nodes
+	var jsonLink = $('<a href="#" title="Opens a new window containing the selected NodeUrns as JSON">Get JSON representation</a>');
+	jsonLink.click(function(e) {
+		e.preventDefault();
+
+		var obj = {"nodeUrns": $.map(that.getSelectedRows(), function(val,i) {
+			return val.id;
+		})}
+
+		var json = JSON.stringify(obj);
+		var w = window.open();
+		$(w.document.body).html(json);
+	});
+	this.html.append(jsonLink);
 
 	if(this.showCheckBoxes) {
 		this.table.tablesorter({
@@ -2136,12 +2148,18 @@ var WiseGuiExperimentationView = function(testbedId, experimentId) {
 	this.flashConfigurations     = [];
 	this.outputsFilterNodes      = [];
 	this.outputsNumMessages      = 100;
+	this.outputsRedrawLimit      = 200;
 	this.outputs                 = [];
 	this.outputsFollow           = true;
+	this.outputsMakePrintable    = true;
+	this.outputsType             = 'ascii';
 	this.sendSelectedNodeUrns    = [];
 	this.resetSelectedNodeUrns   = [];
 	this.socket                  = null;
 	this.userScript      = {};
+	
+	var self = this;
+	this.throttledRedraw = $.throttle(self.outputsRedrawLimit, function(){	self.redrawOutput();});
 
 	this.buildView();
 	this.connectToExperiment();
@@ -2218,42 +2236,38 @@ WiseGuiExperimentationView.prototype.generateRow = function(message) {
 };
 
 WiseGuiExperimentationView.prototype.formatBase64 = function(base64) {
-	
-	var wrapEach = function(str) {
+	var wrapEach = function(arr) {
 		var ret = '';
-		$.each(str.split(' '), function(i, val) {
-			ret += ' ' + $('<span class="WiseGuiNumber">').append(val).wrap('<div></div>').parent().html();
-		});
+		for (var i=0; i<arr.length; i++) {
+			ret += '<span class="WiseGuiNumber">' + arr[i] + '</span>';
+		}
 		return ret;
 	};
 	var res = null;
 	var msg = base64_decode(base64);
-	// TODO save type value somewhere instead of looking it up each time
-	var type = this.outputsViewDropdown.find('input[type="radio"]:checked"').attr('value');
-	switch (type) {
+	switch (this.outputsType) {
 		case 'ascii':
-			if (this.outputsMakePrintable.is(':checked')) {
+			if (this.outputsMakePrintable) {
 				res = StringUtils.makePrintable(msg);
 			} else {
-				res = atob(base64);
+				res = msg;
 			}
 			break;
 		case 'hex':
-			res = wrapEach(StringUtils.toHexString(msg));
+			res = wrapEach(StringUtils.toHexArray(msg));
 			break;
 		case 'decimal':
-			res = wrapEach(StringUtils.toDecimalString(msg));
+			res = wrapEach(StringUtils.toDecimalArray(msg));
 			break;
 		case 'binary':
-			res = wrapEach(StringUtils.toBinaryString(msg));
+			res = wrapEach(StringUtils.toBinaryArray(msg));
 			break;
 	}
-	
 	return res;
 };
 
 WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
-
+	var self = this;
 	var message = JSON.parse(event.data);
 
 	if (!message.type) {
@@ -2266,12 +2280,14 @@ WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
 	if (message.type == 'upstream'  && !paused) {
 
 		// append new message if in whitelist or whitelist empty
-		if (   this.outputsFilterNodes.length == 0
-				|| $.inArray(message.sourceNodeUrn, this.outputsFilterNodes) != -1 ) {
-			this.outputs[this.outputs.length] = message;
-			this.printMessage(message);
-		}
-
+			if (   self.outputsFilterNodes.length == 0
+					|| $.inArray(message.sourceNodeUrn, self.outputsFilterNodes) != -1 ) {
+				self.outputs[self.outputs.length] = message;
+				// queue throtteled redraw (keeps GUI responsive)
+				setTimeout(function(){self.throttledRedraw();}, 5);
+				//self.printMessage(message);
+		};
+		
 	} else if (message.type == 'notification') {
 		var blockAlertActions = null;
 		var blockAlertMessage = $(
@@ -2433,6 +2449,13 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	    + '								</label>'
 	    + '							</form>'
 	    + '						</li>'
+	    + '						<li>'
+			+ '							<form class="form-inline">'
+			+ '								<label title="Incresing helps if your browser freezes due to too many messages. Press enter to save.">'
+	    + '									Redraw at most every <input type="text" value="'+this.outputsRedrawLimit+'" id="redraw-limit" style="width: 30px; height: 10px;"> ms'
+	    + '								</label>'
+	    + '							</form>'
+	    + '						</li>'
 			+ '					</ul>'
 			+ '				</div>'
 			+ '			</div>'
@@ -2522,7 +2545,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '			<div class="tab-pane WiseGuiExperimentsViewScriptingControl" id="'+this.scriptingEditorDivId+'">'
 			+ '				<div class="row" style="padding-bottom:10px;">'
 			+ '					<div class="span6">'
-			+ '						<button class="btn span2 WiseGuiExperimentsViewScriptingHelpButton">Help</button>'
+			+ '						<a class="btn span2 WiseGuiExperimentsViewScriptingHelpButton" href="#" data-toggle="modal" data-target="#scriptingHelpModal">Help</a>'
 			+ '					</div>'
 			+ '					<div class="span6" style="text-align:right;">'
 			+ '						<button class="btn btn-danger span2 WiseGuiExperimentsViewScriptingStopButton">Stop</button>'
@@ -2539,13 +2562,14 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '</div>');
 	
 	this.outputsNumMessagesInput      = this.view.find('#num-outputs').first();
+	this.outputsRedrawLimitInput      = this.view.find('#redraw-limit').first();
 	this.outputsTable                 = this.view.find('table.WiseGuiExperimentViewOutputsTable tbody').first();
 	this.outputsClearButton           = this.view.find('.btn#clear-output').first();
 	this.outputsFollowCheckbox        = this.view.find('#auto-scroll').first();
 	this.outputsFilterButton          = this.view.find('.btn#filter-nodes').first();
 	this.outputsColumnDropdown        = this.view.find('#column-dropdown');
 	this.outputsViewDropdown          = this.view.find('#view-dropdown');
-	this.outputsMakePrintable         = this.view.find('#make-printable');
+	this.outputsMakePrintableCheckbox = this.view.find('#make-printable');
 	
 	// don't close popup when clicking on a form
 	this.view.find('.dropdown-menu').click(function(e) {
@@ -2697,13 +2721,34 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			self.redrawOutput();
 		}
 	});
+	
+	this.outputsRedrawLimitInput.bind('change', self, function(e) {
+		var fieldValue = parseInt(self.outputsRedrawLimitInput[0].value);
+		if (isNaN(fieldValue)) {
+			self.outputsRedrawLimitInput.addClass('error');
+		} else {
+			self.outputsRedrawLimitInput.removeClass('error');
+			self.outputsRedrawLimit = fieldValue;
+			self.throttledRedraw = $.throttle(self.outputsRedrawLimit, function(){	self.redrawOutput();});
+		}
+	});
 
 	this.outputsFollowCheckbox.bind('change', self, function(e) {
-		self.outputsFollow = self.outputsFollowCheckbox[0].checked;
+		self.outputsFollow = self.outputsFollowCheckbox.first().is(':checked');
+	});
+	
+	this.outputsMakePrintableCheckbox.bind('change', self, function(e) {
+		self.outputsMakePrintable = this.outputsMakePrintableCheckbox.is('checked');
+		self.redrawOutput();
 	});
 
 	this.outputsClearButton.bind('click', self, function(e) {
 		self.outputs.length = 0;
+		self.redrawOutput();
+	});
+	
+	this.outputsViewDropdown.find('input[type="radio"]').bind('change', self, function(e) {
+		self.outputsType = self.outputsViewDropdown.find('input[type="radio"]:checked"').attr('value');
 		self.redrawOutput();
 	});
 	
@@ -2737,14 +2782,13 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 
 	this.sendMessageInput.bind('keyup', self, function(e) { self.updateSendControls(e.which); });
 	this.sendMessageInput.popover({
-		placement : 'below',
+		placement : 'bottom',
 		trigger   : 'manual',
-		animate   : true,
-		html      : true,
+		animation   : true,
 		content   : 'The message must consist of comma-separated bytes in base_10 (no prefix), base_2 (prefix 0b) or base_16 (prefix 0x).<br/>'
 				+ '<br/>'
-				+ 'Example: <code>0x0A,0x1B,0b11001001,40,40,0b11001001,0x1F</code>',
-		title     : function() { return "Message Format"; }
+				+ 'Example: <code>0x0A,0x1B,0b11001001,40,80</code>',
+		title     : "Message Format"
 	});
 	this.sendMessageInput.focusin(function() {
 		if (self.getSendMode() == 'binary') {
@@ -2758,12 +2802,12 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	});
 	this.updateSendControls();
 
-	this.scriptingEditorHelpButton.popover({
-		placement : 'right',
-		trigger   : 'manual',
-		animate   : true,
-		html      : true,
-		content   : '<div style="height:500px; overflow:auto;">'
+	this.scriptingEditorHelpModal = '<div id="scriptingHelpModal" class="modal hide">'
+				+ '<div class="modal-header">'
+				+ '  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>'
+				+ '	 <h1>How to use the scripting environment?</h1>'
+				+ '</div>'
+				+ '<div class="modal-body">'
 				+ 'The scripting environment allows the user to write arbitrary JavaScript code into the editor. This '
 				+ 'functionality can e.g., be used to connect to the currently running experiment via WebSockets and '
 				+ 'process the messages received from the sensor nodes to e.g., build visualizations or statistical '
@@ -2827,14 +2871,10 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 				+ '... that there\'s no way yet to really clean up after running a user-provided '
 				+ 'JavaScript script. Therefore, if your script doesn\'t cleanly shut down or breaks something the only '
 				+ 'thing that definitely helps is to reload the browser tab to set the application back to a clean state!'
-				+ '</div>',
-		title     : function() { return "How to use the scripting environment?"; }
-	});
-	this.scriptingEditorHelpPopoverVisible = false;
-	this.scriptingEditorHelpButton.bind('click', self, function(e) {
-		self.scriptingEditorHelpButton.popover(self.scriptingEditorHelpPopoverVisible ? 'hide' : 'show');
-		self.scriptingEditorHelpPopoverVisible = !self.scriptingEditorHelpPopoverVisible;
-	});
+				+ '</div>'
+				+ '</div>';
+	$(document.body).append(this.scriptingEditorHelpModal);
+	
 	this.scriptingEditorStopButton.attr('disabled', true);
 	this.scriptingEditorStartButton.bind('click', self, function(e) { self.startUserScript(); });
 	this.scriptingEditorStopButton.bind('click', self, function(e) { self.stopUserScript(); });

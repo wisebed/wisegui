@@ -9,13 +9,9 @@ body {
 
 .modal {
 	width: 800px;
-	margin: -250px 0 0 -400px;
-}
-
-.reservation {
-	margin: -360px 0 0 -491px;
-    width: 980px;
-    height: 795px;
+	margin: 0 0 0 -400px;
+	top: 50px;
+	position: absolute;
 }
 
 .reservation-body {
@@ -139,7 +135,7 @@ input.success {
 }
 
 #WiseGuiNotificationsButton {
-	width: 80px;
+	width: 120px;
 	margin-left: 0;
 }
 
