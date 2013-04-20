@@ -168,15 +168,13 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 		this.getUrl = function(reservation, callbackDone, callbackError) {
 
 			var secretReservationKeys = {
-				reservations : []
+				reservations: reservation.keys.map(function(elem) {
+					return {
+						urnPrefix: elem.urnPrefix,
+						key: elem.key
+					};
+				})
 			};
-
-			$(reservation.data).each(function(index, elem) {
-				secretReservationKeys.reservations[index] = {
-					urnPrefix : elem.urnPrefix,
-					secretReservationKey : elem.secretReservationKey
-				};
-			});
 
 			var succ = function(data, textStatus, jqXHR) {
 				// Headers are empty in Cross-Site-Environment
