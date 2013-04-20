@@ -68,7 +68,7 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 
 	this.reservations = new function() {
 
-		this.getPersonal = function(testbedId, from, to, callbackDone, callbackError) {
+		this.getPersonal = function(from, to, callbackDone, callbackError) {
 			var queryUrl = getBaseUri() + "/reservations?userOnly=true" +
 					(from ? ("&from=" + from.toISOString()) : "") +
 					(to ? ("&to="+to.toISOString()) : "");
@@ -82,7 +82,7 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 			});
 		};
 
-		this.getPublic = function(testbedId, from, to, callbackDone, callbackError) {
+		this.getPublic = function(from, to, callbackDone, callbackError) {
 			var queryUrl = getBaseUri() + "/reservations?" +
 					(from ? ("from=" + from.toISOString() + "&") : "") +
 					(to ? ("to="+to.toISOString() + "&") : "");
@@ -96,12 +96,12 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 			});
 		};
 
-		this.make = function(testbedId, from, to, userData, nodeURNs, callbackDone, callbackError) {
+		this.make = function(from, to, userData, nodeUrns, callbackDone, callbackError) {
 
 			// Generate JavaScript object
 			var content = {
 				"from"     : from.toISOString(),
-				"nodeURNs" : nodeURNs,
+				"nodeUrns" : nodeUrns,
 				"to"       : to.toISOString(),
 				"userData" : userData
 			};
@@ -164,7 +164,7 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 			});
 		};
 
-		this.getUrl = function(testbedId, reservation, callbackDone, callbackError) {
+		this.getUrl = function(reservation, callbackDone, callbackError) {
 
 			var secretReservationKeys = {
 				reservations : []
@@ -194,7 +194,7 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 			});
 		};
 
-		this.send = function(testbedId, experimentId, nodeUrns, messageBytesBase64, callbackDone, callbackError) {
+		this.send = function(experimentId, nodeUrns, messageBytesBase64, callbackDone, callbackError) {
 
 			$.ajax({
 				url         : getBaseUri() + "/experiments/" + experimentId + "/send",
@@ -212,7 +212,7 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 			});
 		};
 
-		this.resetNodes = function(testbedId, experimentId, nodeUrns, callbackDone, callbackError) {
+		this.resetNodes = function(experimentId, nodeUrns, callbackDone, callbackError) {
 
 			$.ajax({
 				url         : getBaseUri() + "/experiments/" + experimentId + "/resetNodes",
@@ -226,7 +226,7 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 			});
 		};
 
-		this.flashNodes = function(testbedId, experimentId, data, callbackDone, callbackProgress, callbackError) {
+		this.flashNodes = function(experimentId, data, callbackDone, callbackProgress, callbackError) {
 
 			function getAllNodeUrnsFromRequestData(data) {
 
@@ -302,10 +302,9 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 		};
 	};
 
-	this.getNodeUrnArray = function(testbedId, experimentId, callbackDone, callbackError) {
+	this.getNodeUrnArray = function(experimentId, callbackDone, callbackError) {
 
 		this.getWiseML(
-				testbedId,
 				experimentId,
 				function(wiseML, textStatus, jqXHR) {
 					callbackDone(this.getNodeUrnArrayFromWiseML(wiseML), textStatus, jqXHR);
@@ -314,7 +313,7 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 		);
 	};
 
-	this.getWiseML = function(testbedId, experimentId, callbackDone, callbackError, jsonOrXml, callbackComplete) {
+	this.getWiseML = function(experimentId, callbackDone, callbackError, jsonOrXml, callbackComplete) {
 
 		$.ajax({
 			url      : (experimentId ?
@@ -330,12 +329,12 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 		});
 	};
 
-	this.getWiseMLAsJSON = function(testbedId, experimentId, callbackDone, callbackError, callbackComplete) {
-		this.getWiseML(testbedId, experimentId, callbackDone, callbackError, "json", callbackComplete);
+	this.getWiseMLAsJSON = function(experimentId, callbackDone, callbackError, callbackComplete) {
+		this.getWiseML(experimentId, callbackDone, callbackError, "json", callbackComplete);
 	};
 
-	this.getWiseMLAsXML = function(testbedId, experimentId, callbackDone, callbackError, callbackComplete) {
-		this.getWiseML(testbedId, experimentId, callbackDone, callbackError, "xml", callbackComplete);
+	this.getWiseMLAsXML = function(experimentId, callbackDone, callbackError, callbackComplete) {
+		this.getWiseML(experimentId, callbackDone, callbackError, "xml", callbackComplete);
 	};
 
 	this.getNodeUrnArrayFromWiseML = function(wiseML) {
@@ -358,11 +357,11 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 		});
 	};
 
-	this.hasSecretAuthenticationKeyCookie = function(testbedId) {
-		return $.cookie('wisebed-secret-authentication-key-' + testbedId) != null;
+	this.hasSecretAuthenticationKeyCookie = function() {
+		return $.cookie('wisebed-secret-authentication-key') != null;
 	};
 
-	this.isLoggedIn = function(testbedId, callbackDone, callbackError) {
+	this.isLoggedIn = function(callbackDone, callbackError) {
 		$.ajax({
 			url      : getBaseUri() + "/auth/isLoggedIn",
 			context  : document.body,
@@ -379,7 +378,7 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 		});
 	};
 
-	this.login = function(testbedId, credentials, callbackDone, callbackError) {
+	this.login = function(credentials, callbackDone, callbackError) {
 		$.ajax({
 			url			: getBaseUri() + "/auth/login",
 			type		: "POST",
@@ -392,7 +391,7 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 		});
 	};
 
-	this.logout = function(testbedId, callbackDone, callbackError) {
+	this.logout = function(callbackDone, callbackError) {
 		$.ajax({
 			url       : getBaseUri() + "/auth/logout",
 			success   : callbackDone,

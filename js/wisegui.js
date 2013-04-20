@@ -220,8 +220,7 @@ WiseGuiLoginObserver.prototype.renewLogin = function(testbedId) {
 	console.log('WiseGuiLoginObserver trying to renew login for ' + testbedId);
 
 	var self = this;
-	Wisebed.login(
-			testbedId,
+	wisebed.login(
 			this.loginData[testbedId],
 			function(){
 				console.log('WiseGuiLoginObserver successfully renewed login for ' + testbedId);
@@ -362,7 +361,7 @@ WiseGuiLoadConfigurationDialog.prototype.buildView = function() {
 			callCallback(data);
 		};
 
-		Wisebed.experiments.getConfiguration($.trim(input_url.val()), callbackDone.bind(that), callbackError.bind(that));
+		wisebed.experiments.getConfiguration($.trim(input_url.val()), callbackDone.bind(that), callbackError.bind(that));
 	}
 
 	function loadFromFile() {
@@ -552,7 +551,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 	};
 	
 	var createMap = function() {
-		Wisebed.getWiseMLAsJSON(that.testbedId, null, showMap,
+		wisebed.getWiseMLAsJSON(null, showMap,
 				function(jqXHR, textStatus, errorThrown) {
 					console.log('TODO handle error in WiseGuiReservationDialog');
 					WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
@@ -560,7 +559,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 		);
 	}
 
-	Wisebed.getWiseMLAsJSON(this.testbedId, null, showTable,
+	wisebed.getWiseMLAsJSON(null, showTable,
 			function(jqXHR, textStatus, errorThrown) {
 				console.log('TODO handle error in WiseGuiReservationDialog');
 				WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
@@ -714,7 +713,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
     error.append(error_close, $('<p><strong>Error:</strong></p>'), error_msg);
     error.hide();
 
-    var showError = function (msg) {
+    var onError = function (msg) {
 		okButton.removeAttr("disabled");
 		cancelButton.removeAttr("disabled");
 
@@ -759,19 +758,19 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 
 		if(dateStart.length != 3) {
 			input_date_start.addClass("error");
-			showError("Start date incorrect.");
+			onError("Start date incorrect.");
 			return;
 		} else if (dateEnd.length != 3) {
 			input_date_end.addClass("error");
-			showError("End date incorrect.");
+			onError("End date incorrect.");
 			return;
 		} else if (timeStart.length != 2) {
 			input_time_start.addClass("error");
-			showError("Start time incorrect.");
+			onError("Start time incorrect.");
 			return;
 		} else if (timeEnd.length != 2){
 			input_time_end.addClass("error");
-			showError("End time incorrect.");
+			onError("End time incorrect.");
 			return;
 		}
 
@@ -783,15 +782,16 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 			input_date_end.addClass("error");
 			input_time_start.addClass("error");
 			input_time_end.addClass("error");
-			showError("End date must after the start date.");
+			onError("End date must after the start date.");
 			return;
 		} else if(nodes.length <= 0) {
-			showError("You must select at least one node");
+			onError("You must select at least one node");
 			return;
 		}
 
 		var callbackError = function(jqXHR, textStatus, errorThrown) {
-			showError(jqXHR.responseText);
+			onError(jqXHR.responseText);
+			WiseGui.showAjaxError(jqXHR, textStatus, errorThrown)
 		};
 
 		var callbackDone = function() {
@@ -807,13 +807,13 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 		};
 
 		wisebed.reservations.make(
-			that.testbedId,
 			from,
 			to,
 			input_desciption.val(),
 			nodes,
 			callbackDone,
-			callbackError);
+		    callbackError
+		);
 	});
 
 	cancelButton.bind('click', this, function(e) {
@@ -856,6 +856,8 @@ WiseGuiLoginDialog.prototype.doLogin = function() {
 		} else {
 			console.log(jqXHR);
 			WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
+			self.onLoginError();
+			window.setTimeout(function() {self.hide();}, 1000);
 		}
 	};
 
@@ -866,7 +868,7 @@ WiseGuiLoginDialog.prototype.doLogin = function() {
 		$(window).trigger('hashchange');
 	};
 
-	wisebed.login(self.testbedId, self.loginData, callbackDone, callbackError);
+	wisebed.login(self.loginData, callbackDone, callbackError);
 };
 
 WiseGuiLoginDialog.prototype.onLoginError = function() {
@@ -893,7 +895,7 @@ WiseGuiLoginDialog.prototype.onLoginSuccess = function() {
 };
 
 WiseGuiLoginDialog.prototype.isLoggedIn = function(callback) {
-	wisebed.isLoggedIn(this.testbedId, callback, WiseGui.showAjaxError);
+	wisebed.isLoggedIn(callback, WiseGui.showAjaxError);
 };
 
 WiseGuiLoginDialog.prototype.doLogout = function() {
@@ -910,7 +912,7 @@ WiseGuiLoginDialog.prototype.doLogout = function() {
 		WiseGui.showErrorAlert("Logout failed.");
 	};
 
-	wisebed.logout(this.testbedId, callbackOK, callbackError);
+	wisebed.logout(callbackOK, callbackError);
 	
 };
 
@@ -1614,7 +1616,6 @@ var WiseGuiReservationObserver = function() {
 WiseGuiReservationObserver.prototype.fetchReservationsAndProcess = function(testbedId) {
 	var self = this;
 	wisebed.reservations.getPersonal(
-			testbedId,
 			null,
 			null,
 			function(reservations) {self.processReservationsFetched(testbedId, reservations.reservations);},
@@ -1936,7 +1937,7 @@ var WiseGuiExperimentDropDown = function(testbedId) {
 
 WiseGuiExperimentDropDown.prototype.update = function() {
 	var self = this;
-	wisebed.reservations.getPersonal(this.testbedId, null, null, function(reservations) {
+	wisebed.reservations.getPersonal(null, null, function(reservations) {
 		self.onReservationsChangedEvent(reservations.reservations);
 	});
 };
@@ -2076,7 +2077,7 @@ WiseGuiNodeSelectionDialog.prototype.show = function(callbackOK, callbackCancel)
 		);
 	}
 
-	wisebed.getWiseMLAsJSON(this.testbedId, this.experimentId, showDialogInternal,
+	wisebed.getWiseMLAsJSON(this.experimentId, showDialogInternal,
 			function(jqXHR, textStatus, errorThrown) {
 				console.log('TODO handle error in WiseGuiNodeSelectionDialog');
 				WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
@@ -2997,7 +2998,6 @@ WiseGuiExperimentationView.prototype.onSendMessageButtonClicked = function(e) {
 	this.sendSendButton.attr('disabled', true);
 
 	wisebed.experiments.send(
-			this.testbedId,
 			this.experimentId,
 			this.sendSelectedNodeUrns,
 			this.parseSendMessagePayloadBase64(),
@@ -3246,7 +3246,7 @@ WiseGuiExperimentationView.prototype.addFlashConfiguration = function(conf) {
 				nodeSelectionButton.html(nodeSelectionButtonText);
 			};
 
-			wisebed.getWiseMLAsJSON(this.testbedId, this.experimentId, checkNodes,
+			wisebed.getWiseMLAsJSON(this.experimentId, checkNodes,
 					function(jqXHR, textStatus, errorThrown) {
 						console.log('TODO handle error in WiseGuiExperimentationView');
 						WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
@@ -3354,7 +3354,6 @@ WiseGuiExperimentationView.prototype.executeFlashNodes = function() {
 	var self = this;
 	var progressViewerShown = false;
 	wisebed.experiments.flashNodes(
-			this.testbedId,
 			this.experimentId,
 			flashFormData,
 			function(result) {
@@ -3392,7 +3391,6 @@ WiseGuiExperimentationView.prototype.showResetNodeSelectionDialog = function() {
 	this.setResetSelectNodesButtonDisabled(true);
 	var self = this;
 	wisebed.getWiseMLAsJSON(
-			this.testbedId,
 			this.experimentId,
 			function(wiseML) {
 
@@ -3440,7 +3438,6 @@ WiseGuiExperimentationView.prototype.executeResetNodes = function() {
 	this.setResetButtonDisabled(true);
 	var self = this;
 	wisebed.experiments.resetNodes(
-			this.testbedId,
 			this.experimentId,
 			this.resetSelectedNodeUrns,
 			function(result) {
@@ -3562,7 +3559,6 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 	parentDiv.append(tabs);
 
 	wisebed.getWiseMLAsJSON(
-			navigationData.testbedId,
 			null,
 			function(wiseML) {
 
@@ -3596,7 +3592,6 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 	);
 
 	wisebed.getWiseMLAsXML(
-			navigationData.testbedId,
 			null,
 			function(wiseML) {
 				var xmlTab = $('#WisebedTestbedDetailsWiseMLXML-'+navigationData.testbedId);
@@ -3626,7 +3621,6 @@ function buildReservationTable(reservationsTab, navigationData) {
 	tomorrowSameTime.setDate(now.getDate() + 7);
 
 	wisebed.reservations.getPublic(
-			navigationData.testbedId,
 			now,
 			tomorrowSameTime,
 			function(data) {
@@ -3641,7 +3635,7 @@ function buildReservationTable(reservationsTab, navigationData) {
 					tableRows[i][2] = reservations[i].userData;
 
 					var nodesContainer = $('<div>'
-							+ reservations[i].nodeURNs.length + ' nodes.<br/>'
+							+ reservations[i].nodeUrns.length + ' nodes.<br/>'
 							+ '<a href="#">Show URNs</a>'
 							+ '</div>');
 
@@ -3653,7 +3647,7 @@ function buildReservationTable(reservationsTab, navigationData) {
 								e.preventDefault();
 								e.data.link.remove();
 								e.data.container.append(
-										e.data.reservation.nodeURNs.join("<br/>")
+										e.data.reservation.nodeUrns.join("<br/>")
 								);
 							}
 					);
@@ -3753,7 +3747,6 @@ function getLoginDialog(testbedId) {
 function navigateToExperiment(testbedId, reservation) {
 
 	wisebed.experiments.getUrl(
-			testbedId,
 			reservation,
 			function(experimentUrl){
 
