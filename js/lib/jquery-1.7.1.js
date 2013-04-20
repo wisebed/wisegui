@@ -3363,7 +3363,7 @@ jQuery.event = {
 		},
 
 		load: {
-			// Prevent triggered imageBase64.load events from bubbling to window.load
+			// Prevent triggered image.load events from bubbling to window.load
 			noBubble: true
 		},
 

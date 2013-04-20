@@ -2331,7 +2331,7 @@ WiseGuiExperimentationView.prototype.connectToExperiment = function() {
 
 		var self = this;
 
-		this.socket = new WebSocket(wisebedWebSocketBaseUrl + '/ws/experiments/'+this.experimentId);
+		this.socket = new WebSocket(wisebedWebSocketBaseUrl + '/experiments/'+this.experimentId);
 		this.socket.onmessage = function(event) {self.onWebSocketMessageEvent(event);};
 		this.socket.onopen = function(event) {self.onWebSocketOpen(event);};
 		this.socket.onclose = function(event) {self.onWebSocketClose(event);};

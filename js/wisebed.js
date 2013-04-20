@@ -31,7 +31,7 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 
 		var self = this;
 
-		this.socket = new WebSocket(getWebSocketBaseUri() + '/ws/experiments/' + this.experimentId);
+		this.socket = new WebSocket(getWebSocketBaseUri() + '/experiments/' + this.experimentId);
 		this.socket.onmessage = function(event) { self.onmessage(JSON.parse(event.data)); };
 		this.socket.onopen    = function(event) { self.onopen(event); };
 		this.socket.onclose   = function(event) { self.onclosed(event); };
