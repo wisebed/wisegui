@@ -21,6 +21,11 @@ var WiseMLParser = function(wisemlParameter, parentDiv) {
 
 WiseMLParser.prototype.parse = function() {
 
+	if (!this.wiseml.setup || !this.wiseml.setup.origin) {
+		this.origin = new Coordinate(0,0,0,0,0);
+		return;
+	}
+
 	// Calculate origin
 	var wiseMLOrigin = new Coordinate(this.wiseml.setup.origin.x,
 			this.wiseml.setup.origin.y, this.wiseml.setup.origin.z,

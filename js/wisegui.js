@@ -806,7 +806,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 			$(window).trigger('wisegui-reservation-table-' + that.testbedId);
 		};
 
-		Wisebed.reservations.make(
+		wisebed.reservations.make(
 			that.testbedId,
 			from,
 			to,
@@ -843,7 +843,7 @@ var WiseGuiLoginDialog = function(testbedId) {
 	this.cancelButton = null;
 
 	var self = this;
-	Wisebed.getTestbeds(function(testbeds){self.buildView(testbeds);}, WiseGui.showAjaxError);
+	wisebed.getTestbeds(function(testbeds){self.buildView(testbeds);}, WiseGui.showAjaxError);
 };
 
 WiseGuiLoginDialog.prototype.doLogin = function() {
@@ -866,7 +866,7 @@ WiseGuiLoginDialog.prototype.doLogin = function() {
 		$(window).trigger('hashchange');
 	};
 
-	Wisebed.login(self.testbedId, self.loginData, callbackDone, callbackError);
+	wisebed.login(self.testbedId, self.loginData, callbackDone, callbackError);
 };
 
 WiseGuiLoginDialog.prototype.onLoginError = function() {
@@ -893,7 +893,7 @@ WiseGuiLoginDialog.prototype.onLoginSuccess = function() {
 };
 
 WiseGuiLoginDialog.prototype.isLoggedIn = function(callback) {
-	Wisebed.isLoggedIn(this.testbedId, callback, WiseGui.showAjaxError);
+	wisebed.isLoggedIn(this.testbedId, callback, WiseGui.showAjaxError);
 };
 
 WiseGuiLoginDialog.prototype.doLogout = function() {
@@ -910,7 +910,7 @@ WiseGuiLoginDialog.prototype.doLogout = function() {
 		WiseGui.showErrorAlert("Logout failed.");
 	};
 
-	Wisebed.logout(this.testbedId, callbackOK, callbackError);
+	wisebed.logout(this.testbedId, callbackOK, callbackError);
 	
 };
 
@@ -996,7 +996,7 @@ WiseGuiLoginDialog.prototype.buildView = function(testbeds) {
 
 	var that = this;
 
-	var dialogHeader = $('<div class="modal-header"><h3>Login to Testbed "' + testbeds.testbedMap[this.testbedId].name + '"</h3></div>');
+	var dialogHeader = $('<div class="modal-header"><h3>Login to Testbed "' + testbeds[this.testbedId].name + '"</h3></div>');
 
 	var dialogBody = $('<div class="modal-body WiseGuiLoginDialog"/>'
 			+ '		<form id="WisebedLoginDialogForm-'+this.testbedId+'">'
@@ -1031,7 +1031,7 @@ WiseGuiLoginDialog.prototype.buildView = function(testbeds) {
 	this.view.append(dialogHeader, dialogBody, dialogFooter);
 
 	var loginFormTableBody = this.view.find('#WisebedLoginDialogFormTable-'+this.testbedId+' tbody');
-	var urnPrefixes = testbeds.testbedMap[this.testbedId].urnPrefixes;
+	var urnPrefixes = testbeds[this.testbedId].urnPrefixes;
 
 	for (var i=0; i<urnPrefixes.length; i++) {
 		var user = (localStorage[urnPrefixes[i]+'_user'] != undefined) ? localStorage[urnPrefixes[i]+'_user'] : '';
@@ -1170,7 +1170,7 @@ Table.prototype.generateFilter = function () {
 	this.filter = $('<p style="margin-top:3px;"></p>');
 
 	var img_help = $('<img class="WiseGuiNodeTable" style="float:right;cursor:pointer;margin-top:5px;">');
-	img_help.attr("src", wisebedBaseUrl + "/img/famfamfam/help.png");
+	img_help.attr("src", "img/famfamfam/help.png");
 
 	var div_help = $('<div style="margin-right:95px;"></div>');
 	var div_adv = $('<div style="float:right;margin-top:3px;margin-right:2px;">Advanced</div>');
@@ -1521,12 +1521,12 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 		if(n.position != null) {
 			data.push('(' + n.position.x + ',' + n.position.y + ',' + n.position.z + ')');
 		} else {
-			data.push('null');
+			data.push('unknown');
 		}
 		if(cap.length > 0) {
 			data.push(implode(",", cap));
 		} else {
-			data.push("null");
+			data.push('unknown');
 		}
 		return data;
 	};
@@ -1613,7 +1613,7 @@ var WiseGuiReservationObserver = function() {
 
 WiseGuiReservationObserver.prototype.fetchReservationsAndProcess = function(testbedId) {
 	var self = this;
-	Wisebed.reservations.getPersonal(
+	wisebed.reservations.getPersonal(
 			testbedId,
 			null,
 			null,
@@ -1635,7 +1635,7 @@ WiseGuiReservationObserver.prototype.processReservationsFetched = function(testb
 		}
 
 		for (var j=0; j<this.lastKnownReservations[testbedId].length; j++) {
-			if (Wisebed.reservations.equals(reservations[i], this.lastKnownReservations[testbedId][j])) {
+			if (wisebed.reservations.equals(reservations[i], this.lastKnownReservations[testbedId][j])) {
 				knownReservation = true;
 				break;
 			}
@@ -1936,7 +1936,7 @@ var WiseGuiExperimentDropDown = function(testbedId) {
 
 WiseGuiExperimentDropDown.prototype.update = function() {
 	var self = this;
-	Wisebed.reservations.getPersonal(this.testbedId, null, null, function(reservations) {
+	wisebed.reservations.getPersonal(this.testbedId, null, null, function(reservations) {
 		self.onReservationsChangedEvent(reservations.reservations);
 	});
 };
@@ -2017,7 +2017,7 @@ var WiseGuiNodeSelectionDialog = function(testbedId, experimentId, headerHtml, b
 			+ '	</div>');
 
 	var imgAjaxLoader = $('<img class="ajax-loader" width="32" height="32"/>');
-	imgAjaxLoader.attr("src", wisebedBaseUrl + "/img/ajax-loader-big.gif");
+	imgAjaxLoader.attr("src", "img/ajax-loader-big.gif");
 	body.append(imgAjaxLoader);
 
 	var bodyFooter = $(' <div class="modal-footer">'
@@ -2076,7 +2076,7 @@ WiseGuiNodeSelectionDialog.prototype.show = function(callbackOK, callbackCancel)
 		);
 	}
 
-	Wisebed.getWiseMLAsJSON(this.testbedId, this.experimentId, showDialogInternal,
+	wisebed.getWiseMLAsJSON(this.testbedId, this.experimentId, showDialogInternal,
 			function(jqXHR, textStatus, errorThrown) {
 				console.log('TODO handle error in WiseGuiNodeSelectionDialog');
 				WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
@@ -2109,11 +2109,11 @@ var WiseGuiTestbedsView = function(testbeds) {
 
 WiseGuiTestbedsView.prototype.buildView = function() {
 	var self = this;
-	$.each(testbeds.testbedMap, function(key, value) {
+	$.each(testbeds, function(index, testbed) {
 		var tr = $('<tr/>');
-		var tdName = $('<td><a href="#nav=testbed&testbedId='+key+'">'+value.name+'</a></td>');
-		var tdUrnPrefixes = $('<td>'+value.urnPrefixes+'</td>');
-		var tdSessionManagementEndpointUrl = $('<td>'+value.sessionManagementEndpointUrl+'</td>');
+		var tdName = $('<td><a href="#nav=testbed&testbedId='+index+'">'+testbed.name+'</a></td>');
+		var tdUrnPrefixes = $('<td>'+testbed.urnPrefixes+'</td>');
+		var tdSessionManagementEndpointUrl = $('<td>'+testbed.sessionManagementEndpointUrl+'</td>');
 		tr.append(tdName, tdUrnPrefixes, tdSessionManagementEndpointUrl);
 		self.view.find('tbody').append(tr);
 	});
@@ -2631,7 +2631,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '  this.outputDiv.append(this.outputTextArea);\n'
 			+ '  \n'
 			+ '  var self = this;\n'
-			+ '  this.webSocket = new Wisebed.WebSocket(\n'
+			+ '  this.webSocket = new wisebed.WebSocket(\n'
 			+ '      this.testbedId,\n'
 			+ '      this.experimentId,\n'
 			+ '      function() {self.onmessage(arguments);},\n'
@@ -2996,7 +2996,7 @@ WiseGuiExperimentationView.prototype.onSendMessageButtonClicked = function(e) {
 	var self = this;
 	this.sendSendButton.attr('disabled', true);
 
-	Wisebed.experiments.send(
+	wisebed.experiments.send(
 			this.testbedId,
 			this.experimentId,
 			this.sendSelectedNodeUrns,
@@ -3246,7 +3246,7 @@ WiseGuiExperimentationView.prototype.addFlashConfiguration = function(conf) {
 				nodeSelectionButton.html(nodeSelectionButtonText);
 			};
 
-			Wisebed.getWiseMLAsJSON(this.testbedId, this.experimentId, checkNodes,
+			wisebed.getWiseMLAsJSON(this.testbedId, this.experimentId, checkNodes,
 					function(jqXHR, textStatus, errorThrown) {
 						console.log('TODO handle error in WiseGuiExperimentationView');
 						WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
@@ -3353,7 +3353,7 @@ WiseGuiExperimentationView.prototype.executeFlashNodes = function() {
 	this.setFlashButtonDisabled(true);
 	var self = this;
 	var progressViewerShown = false;
-	Wisebed.experiments.flashNodes(
+	wisebed.experiments.flashNodes(
 			this.testbedId,
 			this.experimentId,
 			flashFormData,
@@ -3391,7 +3391,7 @@ WiseGuiExperimentationView.prototype.showResetNodeSelectionDialog = function() {
 
 	this.setResetSelectNodesButtonDisabled(true);
 	var self = this;
-	Wisebed.getWiseMLAsJSON(
+	wisebed.getWiseMLAsJSON(
 			this.testbedId,
 			this.experimentId,
 			function(wiseML) {
@@ -3439,7 +3439,7 @@ WiseGuiExperimentationView.prototype.executeResetNodes = function() {
 
 	this.setResetButtonDisabled(true);
 	var self = this;
-	Wisebed.experiments.resetNodes(
+	wisebed.experiments.resetNodes(
 			this.testbedId,
 			this.experimentId,
 			this.resetSelectedNodeUrns,
@@ -3542,10 +3542,10 @@ WiseGuiOperationProgressView.prototype.update = function(operationStatus) {
 
 function loadTestbedDetailsContainer(navigationData, parentDiv) {
 
-	parentDiv.append($('<h1>Testbed Details "'+testbeds.testbedMap[navigationData.testbedId].name+'"</h1>'));
+	parentDiv.append($('<h1>Testbed Details "'+testbeds[navigationData.testbedId].name+'"</h1>'));
 
 	var tabs = $('<ul class="nav nav-tabs">'
-			+ '	<li class="active"><a href="#WisebedTestbedDetailsOverview-'+navigationData.testbedId+'">Description</a></li>'
+			+ '	<li class="active"><a href="#WisebedTestbedDetailsOverview-'+navigationData.testbedId+'">Overview</a></li>'
 			+ '	<li><a href="#WisebedTestbedDetailsNodes-'+navigationData.testbedId+'">Nodes</a></li>'
 			+ '	<li><a href="#WisebedTestbedDetailsReservations-'+navigationData.testbedId+'">Reservations</a></li>'
 			+ '	<li><a href="#WisebedTestbedDetailsWiseMLJSON-'+navigationData.testbedId+'">WiseML (JSON)</a></li>'
@@ -3561,16 +3561,18 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 
 	parentDiv.append(tabs);
 
-	Wisebed.getWiseMLAsJSON(
+	wisebed.getWiseMLAsJSON(
 			navigationData.testbedId,
 			null,
 			function(wiseML) {
 
 				var overviewTab = $('#WisebedTestbedDetailsOverview-'+navigationData.testbedId);
+				if (wiseML.setup && wiseML.setup.description) {
+					overviewTab.append('<div class="row">'
+							+ '	<div class="span12">' + wiseML.setup.description + '</div>'
+							+ '</div>');
+				}
 				overviewTab.append('<div class="row">'
-						+ '	<div class="span12">' + wiseML.setup.description + '</div>'
-						+ '</div>'
-						+ '<div class="row">'
 						+ '	<div class="span12 WisebedTestbedDetailsOverviewMap gMap"></div>'
 						+ '</div>');
 				var overviewTabMapRow = overviewTab.find('.WisebedTestbedDetailsOverviewMap');
@@ -3593,7 +3595,7 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 			WiseGui.showAjaxError
 	);
 
-	Wisebed.getWiseMLAsXML(
+	wisebed.getWiseMLAsXML(
 			navigationData.testbedId,
 			null,
 			function(wiseML) {
@@ -3623,7 +3625,7 @@ function buildReservationTable(reservationsTab, navigationData) {
 	var tomorrowSameTime = new Date();
 	tomorrowSameTime.setDate(now.getDate() + 7);
 
-	Wisebed.reservations.getPublic(
+	wisebed.reservations.getPublic(
 			navigationData.testbedId,
 			now,
 			tomorrowSameTime,
@@ -3750,7 +3752,7 @@ function getLoginDialog(testbedId) {
 
 function navigateToExperiment(testbedId, reservation) {
 
-	Wisebed.experiments.getUrl(
+	wisebed.experiments.getUrl(
 			testbedId,
 			reservation,
 			function(experimentUrl){
@@ -3854,6 +3856,8 @@ function onHashChange(e) {
 	$(window).trigger('wisegui-navigation-event', navigationData);
 }
 
+var wisebed              = new Wisebed(wisebedBaseUrl, wisebedWebSocketBaseUrl);
+
 var navigationContainers = {};
 var contentContainers    = {};
 var loginDialogs         = {};
@@ -3872,9 +3876,8 @@ $(function () {
 		keyboard: true
 	});
 
-	Wisebed.getTestbeds(
+	wisebed.getTestbeds(
 			function(testbedsLoaded) {
-
 
 				testbeds = testbedsLoaded;
 
@@ -3891,7 +3894,7 @@ $(function () {
 							+ 'Please enable them or you will not be able to login. '
 							+ 'Otherwise you can go to <a href="' + wisebedBaseUrl + '">' + wisebedBaseUrl + '</a>');
 				};
-				Wisebed.testCookie(function() {}, cookieCallbackError);
+				wisebed.testCookie(function() {}, cookieCallbackError);
 			},
 			WiseGui.showAjaxError
 	);

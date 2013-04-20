@@ -1,16 +1,3 @@
-
-if( typeof wisebedBaseUrl === 'undefined' )
-	var wisebedBaseUrl = "";
-
-if( typeof wisebedWebSocketBaseUrl === 'undefined' ) {
-	hostname = document.location.hostname;
-	port     = document.location.port;
-	if(port == "") {
-		port = 80;
-	}
-	var wisebedWebSocketBaseUrl = 'ws://' + hostname + ':' + port;
-}
-
 Array.prototype.compareArrays = function(arr) {
 	if (this.length != arr.length) return false;
 	for (var i = 0; i < arr.length; i++) {
@@ -23,11 +10,18 @@ Array.prototype.compareArrays = function(arr) {
 	return true;
 };
 
-var Wisebed = new function() {
+var Wisebed = function(baseUri, webSocketBaseUri) {
 
-	this.WebSocket = function(testbedId, experimentId, onmessage, onopen, onclosed) {
+	function getBaseUri() {
+		return baseUri;
+	}
 
-		this.testbedId    = testbedId;
+	function getWebSocketBaseUri() {
+		return webSocketBaseUri;
+	}
+
+	this.WebSocket = function(experimentId, onmessage, onopen, onclosed) {
+
 		this.experimentId = experimentId;
 		this.onmessage    = onmessage;
 		this.onopen       = onopen;
@@ -37,7 +31,7 @@ var Wisebed = new function() {
 
 		var self = this;
 
-		this.socket = new WebSocket(wisebedWebSocketBaseUrl + '/ws/experiments/' + this.experimentId);
+		this.socket = new WebSocket(getWebSocketBaseUri() + '/ws/experiments/' + this.experimentId);
 		this.socket.onmessage = function(event) { self.onmessage(JSON.parse(event.data)); };
 		this.socket.onopen    = function(event) { self.onopen(event); };
 		this.socket.onclose   = function(event) { self.onclosed(event); };
@@ -52,10 +46,11 @@ var Wisebed = new function() {
 	};
 
 	this.testCookie = function (callbackOK, callbackError) {
+
 		// Check cookie
 		var getCookieCallbackDone = function() {
 			$.ajax({
-				url       : wisebedBaseUrl + "/rest/2.3/cookies/check",
+				url       : getBaseUri() + "/cookies/check",
 				success   : callbackOK,
 				error     : callbackError,
 				xhrFields : { withCredentials: true }
@@ -64,7 +59,7 @@ var Wisebed = new function() {
 
 		// Get cookie
 		$.ajax({
-			url       : wisebedBaseUrl + "/rest/2.3/cookies/get",
+			url       : getBaseUri() + "/cookies/get",
 			success   : getCookieCallbackDone,
 			error     : callbackError,
 			xhrFields : { withCredentials: true }
@@ -74,7 +69,7 @@ var Wisebed = new function() {
 	this.reservations = new function() {
 
 		this.getPersonal = function(testbedId, from, to, callbackDone, callbackError) {
-			var queryUrl = wisebedBaseUrl + "/rest/2.3/" + testbedId + "/reservations?userOnly=true" +
+			var queryUrl = getBaseUri() + "/reservations?userOnly=true" +
 					(from ? ("&from=" + from.toISOString()) : "") +
 					(to ? ("&to="+to.toISOString()) : "");
 			$.ajax({
@@ -88,7 +83,7 @@ var Wisebed = new function() {
 		};
 
 		this.getPublic = function(testbedId, from, to, callbackDone, callbackError) {
-			var queryUrl = wisebedBaseUrl + "/rest/2.3/" + testbedId + "/reservations?" +
+			var queryUrl = getBaseUri() + "/reservations?" +
 					(from ? ("from=" + from.toISOString() + "&") : "") +
 					(to ? ("to="+to.toISOString() + "&") : "");
 			$.ajax({
@@ -112,7 +107,7 @@ var Wisebed = new function() {
 			};
 
 			$.ajax({
-				url			:	wisebedBaseUrl + "/rest/2.3/" + testbedId + "/reservations/create",
+				url			:	getBaseUri() + "/reservations/create",
 				type		:	"POST",
 				data		:	JSON.stringify(content, null, '  '),
 				contentType	:	"application/json; charset=utf-8",
@@ -155,9 +150,11 @@ var Wisebed = new function() {
 
 	this.experiments = new function() {
 
+		var self = this;
+
 		this.getConfiguration = function (url, callbackDone, callbackError) {
 			$.ajax({
-				url       : wisebedBaseUrl + "/rest/2.3/experimentconfiguration",
+				url       : getBaseUri() + "/experimentconfiguration",
 				type      : "GET",
 				data      : {url: url},
 				success   : callbackDone,
@@ -187,7 +184,7 @@ var Wisebed = new function() {
 			};
 
 			$.ajax({
-				url         : wisebedBaseUrl + "/rest/2.3/" + testbedId + "/experiments",
+				url         : getBaseUri() + "/experiments",
 				type        : "POST",
 				data        : JSON.stringify(secretReservationKeys, null, '  '),
 				contentType : "application/json; charset=utf-8",
@@ -200,7 +197,7 @@ var Wisebed = new function() {
 		this.send = function(testbedId, experimentId, nodeUrns, messageBytesBase64, callbackDone, callbackError) {
 
 			$.ajax({
-				url         : wisebedBaseUrl + "/rest/2.3/" + testbedId + "/experiments/" + experimentId + "/send",
+				url         : getBaseUri() + "/experiments/" + experimentId + "/send",
 				type        : "POST",
 				data        : JSON.stringify({
 					sourceNodeUrn  : 'user',
@@ -218,7 +215,7 @@ var Wisebed = new function() {
 		this.resetNodes = function(testbedId, experimentId, nodeUrns, callbackDone, callbackError) {
 
 			$.ajax({
-				url         : wisebedBaseUrl + "/rest/2.3/" + testbedId + "/experiments/" + experimentId + "/resetNodes",
+				url         : getBaseUri() + "/experiments/" + experimentId + "/resetNodes",
 				type        : "POST",
 				data        : JSON.stringify({nodeUrns:nodeUrns}, null, '  '),
 				contentType : "application/json; charset=utf-8",
@@ -294,7 +291,7 @@ var Wisebed = new function() {
 			};
 
 			$.ajax({
-				url         : wisebedBaseUrl + "/rest/2.3/" + testbedId + "/experiments/" + experimentId + "/flash",
+				url         : getBaseUri() + "/experiments/" + experimentId + "/flash",
 				type        : "POST",
 				data        : JSON.stringify(data, null, '  '),
 				contentType : "application/json; charset=utf-8",
@@ -321,8 +318,9 @@ var Wisebed = new function() {
 
 		$.ajax({
 			url      : (experimentId ?
-						wisebedBaseUrl + "/rest/2.3/" + testbedId + "/experiments/" + experimentId + "/network" :
-						wisebedBaseUrl + "/rest/2.3/" + testbedId + "/experiments/network"),
+					getBaseUri() + "/experiments/" + experimentId + "/network" :
+					getBaseUri() + "/experiments/network"),
+			cache    : false,
 			context  : document.body,
 			success  : callbackDone,
 			error    : callbackError,
@@ -351,7 +349,7 @@ var Wisebed = new function() {
 
 	this.getTestbeds = function(callbackDone, callbackError) {
 		$.ajax({
-			url       : wisebedBaseUrl + "/rest/2.3/testbeds",
+			url       : getBaseUri() + "/testbeds",
 			success   : callbackDone,
 			error     : callbackError,
 			context   : document.body,
@@ -366,7 +364,7 @@ var Wisebed = new function() {
 
 	this.isLoggedIn = function(testbedId, callbackDone, callbackError) {
 		$.ajax({
-			url      : wisebedBaseUrl + "/rest/2.3/" + testbedId + "/isLoggedIn",
+			url      : getBaseUri() + "/auth/isLoggedIn",
 			context  : document.body,
 			dataType : "json",
 			success  : function() {callbackDone(true);},
@@ -383,7 +381,7 @@ var Wisebed = new function() {
 
 	this.login = function(testbedId, credentials, callbackDone, callbackError) {
 		$.ajax({
-			url			: wisebedBaseUrl + "/rest/2.3/" + testbedId + "/login",
+			url			: getBaseUri() + "/auth/login",
 			type		: "POST",
 			data		: JSON.stringify(credentials, null, '  '),
 			contentType	: "application/json; charset=utf-8",
@@ -396,7 +394,7 @@ var Wisebed = new function() {
 
 	this.logout = function(testbedId, callbackDone, callbackError) {
 		$.ajax({
-			url       : wisebedBaseUrl + "/rest/2.3/" + testbedId + "/logout",
+			url       : getBaseUri() + "/auth/logout",
 			success   : callbackDone,
 			error     : callbackError,
 			xhrFields : { withCredentials: true }
