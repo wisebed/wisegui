@@ -806,11 +806,13 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 			$(window).trigger('wisegui-reservation-table-' + that.testbedId);
 		};
 
+		// TODO support key-value pairs in "options" field
 		wisebed.reservations.make(
 			from,
 			to,
-			input_desciption.val(),
 			nodes,
+			input_desciption.val(),
+			[],
 			callbackDone,
 		    callbackError
 		);
@@ -1962,7 +1964,7 @@ WiseGuiExperimentDropDown.prototype.onReservationsChangedEvent = function(reserv
 		// Skip old reservations
 		if(dateTo < dateNow) continue;
 
-		var li = $('<li><a href="#">' + fromStr + ' - ' + toStr + ' | ' + reservation.userData + '</a></li>');
+		var li = $('<li><a href="#">' + fromStr + ' - ' + toStr + ' | ' + reservation.description + '</a></li>');
 		var self = this;
 		li.find('a').bind('click', reservation, function(e) {
 			e.preventDefault();
@@ -3626,13 +3628,12 @@ function buildReservationTable(reservationsTab, navigationData) {
 			function(data) {
 
 				var reservations = data.reservations;
-				var tableHead = ["From", "Until", "User Data", "Node URNs"];
+				var tableHead = ["From", "Until", "Node URNs"];
 				var tableRows = [];
 				for (var i=0; i<reservations.length; i++) {
 					tableRows[i] = [];
 					tableRows[i][0] = new Date(reservations[i].from).toString();
 					tableRows[i][1] = new Date(reservations[i].to).toString();
-					tableRows[i][2] = reservations[i].userData;
 
 					var nodesContainer = $('<div>'
 							+ reservations[i].nodeUrns.length + ' nodes.<br/>'
@@ -3647,11 +3648,11 @@ function buildReservationTable(reservationsTab, navigationData) {
 								e.preventDefault();
 								e.data.link.remove();
 								e.data.container.append(
-										e.data.reservation.nodeUrns.join("<br/>")
+										e.data.reservation.nodeUrns.map(function(node) { return node.nodeUrn; }).join("<br/>")
 								);
 							}
 					);
-					tableRows[i][3] = nodesContainer;
+					tableRows[i][2] = nodesContainer;
 				}
 
 				var noEntriesMessage = 'There are no reservations for the next week yet!';

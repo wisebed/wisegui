@@ -96,14 +96,15 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 			});
 		};
 
-		this.make = function(from, to, userData, nodeUrns, callbackDone, callbackError) {
+		this.make = function(from, to, nodeUrns, description, options, callbackDone, callbackError) {
 
 			// Generate JavaScript object
 			var content = {
-				"from"     : from.toISOString(),
-				"nodeUrns" : nodeUrns,
-				"to"       : to.toISOString(),
-				"userData" : userData
+				"from"        : from.toISOString(),
+				"nodeUrns"    : nodeUrns,
+				"to"          : to.toISOString(),
+				"description" : description,
+				"options"     : options
 			};
 
 			$.ajax({
