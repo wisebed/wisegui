@@ -2031,7 +2031,24 @@ var WiseGuiNodeSelectionDialog = function(testbedId, experimentId, headerHtml, b
 			+ '	</div>');
 
 	this.dialogDiv.append(bodyHeader, body, bodyFooter);
-	this.constructed = false;
+
+	this.nodeUrns = undefined;
+	this.callbackCancel = undefined;
+	this.callbackOK = undefined;
+	this.callbacksReady = [];
+
+	var self = this;
+	wisebed.getWiseMLAsJSON(
+			this.experimentId,
+			function(wiseML) {
+				self.constructDialogInternal(wiseML);
+				self.callbacksReady.forEach(function(callback) { callback(); });
+			},
+			function(jqXHR, status, error) {
+				self.hide();
+				WiseGui.showAjaxError(jqXHR, status, error);
+			}
+	);
 };
 
 WiseGuiNodeSelectionDialog.prototype.setSelection = function(nodeUrns) {
@@ -2049,11 +2066,21 @@ WiseGuiNodeSelectionDialog.prototype.getSelection = function() {
 	return nodeUrnsString == null ? [] : nodeUrnsString.split(",");
 };
 
-WiseGuiNodeSelectionDialog.prototype.constructDialogInternal = function(wiseML, callbackOK, callbackCancel) {
+WiseGuiNodeSelectionDialog.prototype.areSomeSelected = function() {
+	return this.getSelection().length > 0;
+};
+
+WiseGuiNodeSelectionDialog.prototype.areAllSelected = function() {
+	return this.getSelection().length == this.nodeUrns.length;
+};
+
+WiseGuiNodeSelectionDialog.prototype.constructDialogInternal = function(wiseML) {
+
+	this.nodeUrns = wiseML.setup.node.map(function(node) { return node.id; });
 
 	this.dialogDiv.on('hide', function() {
-		if (callbackCancel) {
-			callbackCancel();
+		if (this.callbackCancel) {
+			this.callbackCancel();
 		}
 	});
 
@@ -2075,8 +2102,8 @@ WiseGuiNodeSelectionDialog.prototype.constructDialogInternal = function(wiseML, 
 				// reset to last selection set
 				event.data.dialog.setSelection(event.data.dialog.getSelection());
 				event.data.dialog.dialogDiv.modal('hide');
-				if (callbackCancel) {
-					callbackCancel();
+				if (event.data.dialog.callbackCancel) {
+					event.data.dialog.callbackCancel();
 				}
 			}
 	);
@@ -2092,36 +2119,30 @@ WiseGuiNodeSelectionDialog.prototype.constructDialogInternal = function(wiseML, 
 				if (dialog.storageKeyPrefix) {
 					dialog.setSelection(selectedNodes);
 				}
-				callbackOK(selectedNodes);
+				if (event.data.dialog.callbackOK) {
+					event.data.dialog.callbackOK(selectedNodes);
+				}
 			}
 	);
 
 	if (!document.body.contains(this.dialogDiv)) {
 		$(document.body).append(this.dialogDiv);
 	}
+};
 
-	this.constructed = true;
-}
+WiseGuiNodeSelectionDialog.prototype.hide = function() {
+	this.dialogDiv.modal('hide');
+};
 
 WiseGuiNodeSelectionDialog.prototype.show = function(callbackOK, callbackCancel) {
-
-	var self = this;
-
-	if (!this.constructed) {
-		wisebed.getWiseMLAsJSON(this.experimentId,
-				function(wiseML) {
-					self.constructDialogInternal(wiseML, callbackOK, callbackCancel);
-					self.dialogDiv.modal('show');
-				},
-				function(jqXHR, textStatus, errorThrown) {
-					console.log('TODO handle error in WiseGuiNodeSelectionDialog');
-					WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
-				}
-		);
-	} else {
-		self.dialogDiv.modal('show');
-	}
+	this.callbackOK = callbackOK;
+	this.callbackCancel = callbackCancel;
+	this.dialogDiv.modal('show');
 };
+
+WiseGuiNodeSelectionDialog.prototype.onReady = function(callback) {
+	this.callbacksReady.push(callback);
+}
 
 /**
  * #################################################################
@@ -2185,7 +2206,6 @@ var WiseGuiExperimentationView = function(testbedId, experimentId) {
 	this.view = $('<div class="WiseGuiExperimentationView"/>');
 
 	this.flashConfigurations     = [];
-	this.outputsFilterNodes      = [];
 	this.outputsNumMessages      = 100;
 	this.outputsRedrawLimit      = 200;
 	this.outputs                 = [];
@@ -2204,6 +2224,7 @@ var WiseGuiExperimentationView = function(testbedId, experimentId) {
 };
 
 WiseGuiExperimentationView.prototype.redrawOutput = function() {
+
 	// remove messages that are too much
 	if (this.outputs.length > this.outputsNumMessages) {
 		var elementsToRemove = this.outputs.length - this.outputsNumMessages;
@@ -2227,35 +2248,8 @@ WiseGuiExperimentationView.prototype.redrawOutput = function() {
 	}
 };
 
-WiseGuiExperimentationView.prototype.printMessage = function(message) {
-
-	// remove messages that are too much
-	if (this.outputs.length > this.outputsNumMessages) {
-		var elementsToRemove = this.outputs.length - this.outputsNumMessages-1;
-		this.outputs.splice(0, elementsToRemove);
-	}
-	while (this.outputsTable.children().length > this.outputsNumMessages-1) {
-        this.outputsTable.children().first().remove();
-    }
-
-	// add row
-	this.outputsTable.append(this.generateRow(message));
-
-	// scroll down if active
-	if (this.outputsFollow) {
-		var scrollArea = this.outputsTable.parent().parent();
-		scrollArea.scrollTop(scrollArea[0].scrollHeight);
-	}
-};
-
 WiseGuiExperimentationView.prototype.generateRow = function(message) {
-	//no ouput if message source in not in whitelist
-	if (   this.outputsFilterNodes.length != 0
-			&& $.inArray(message.sourceNodeUrn, this.outputsFilterNodes) == -1 ) {
-		return '';
-	}
-	
-	var self = this;
+
 	var col = function(text) {
 		return $('<td>').append(text);
 	};
@@ -2263,8 +2257,10 @@ WiseGuiExperimentationView.prototype.generateRow = function(message) {
 	var cols = {
 			'time' : message.timestamp,
 			'urn' : message.sourceNodeUrn,
-			'message' : self.formatBase64(message.payloadBase64)
+			'message' : this.formatBase64(message.payloadBase64)
 	};
+
+	var self = this;
 	$.each(cols, function(key, val) {
 		if (self.columns[key])
 			row.append(col(val));
@@ -2318,13 +2314,12 @@ WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
 	if (message.type == 'upstream'  && !paused) {
 
 		// append new message if in whitelist or whitelist empty
-			if (   self.outputsFilterNodes.length == 0
-					|| $.inArray(message.sourceNodeUrn, self.outputsFilterNodes) != -1 ) {
-				self.outputs[self.outputs.length] = message;
-				// queue throtteled redraw (keeps GUI responsive)
-				setTimeout(function(){self.throttledRedraw();}, 5);
-				//self.printMessage(message);
-		};
+		var outputsFilterNodes = self.getOutputsFilterNodes();
+		if (outputsFilterNodes.length == 0 || outputsFilterNodes.indexOf(message.sourceNodeUrn) > -1) {
+			self.outputs[self.outputs.length] = message;
+			// queue throttled redraw (keeps GUI responsive)
+			setTimeout(function(){ self.throttledRedraw(); }, 5);
+		}
 		
 	} else if (message.type == 'notification') {
 		var blockAlertActions = null;
@@ -2783,7 +2778,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	});
 	
 	this.outputsMakePrintableCheckbox.bind('change', self, function(e) {
-		self.outputsMakePrintable = this.outputsMakePrintableCheckbox.is('checked');
+		self.outputsMakePrintable = self.outputsMakePrintableCheckbox.is('checked');
 		self.redrawOutput();
 	});
 
@@ -2796,32 +2791,31 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 		self.outputsType = self.outputsViewDropdown.find('input[type="radio"]:checked"').attr('value');
 		self.redrawOutput();
 	});
-	
-	this.outputsFilterButton.click(function(e) {
-		
-		var nodeSelectionDialog = new WiseGuiNodeSelectionDialog(
-				self.testbedId,
-				self.experimentId,
-				'Select Nodes',
-				'Please select the nodes you want to see output from. If no nodes are selected, every output will be shown.',
-				self.outputsFilterNodes,
-				'nodeselection.output.'
-		);
 
+	this.outputsFilterNodeSelectionDialog = new WiseGuiNodeSelectionDialog(
+			self.testbedId,
+			self.experimentId,
+			'Select Nodes',
+			'Please select the nodes you want to see output from. If no nodes are selected, every output will be shown.',
+			[],
+			'nodeselection.output.'
+	);
+	this.outputsFilterButton.click(function(e) {
 		self.outputsFilterButton.attr('disabled', true);
-		nodeSelectionDialog.show(
-			function(nodeUrns) {
-				// TODO filterActive should also be false if all nodes are selected
-				var filterActive = nodeUrns.length > 0;
+		self.outputsFilterNodeSelectionDialog.show(
+			function() {
 				self.outputsFilterButton.attr('disabled', false);
-				self.outputsFilterNodes = nodeUrns;
+				self.updateOutputsFilterNodesButton();
 				self.redrawOutput();
-				self.outputsFilterButton.toggleClass('btn-info', filterActive);
-			}, function() {
+			},
+			function() {
 				self.outputsFilterButton.attr('disabled', false);
+				self.updateOutputsFilterNodesButton();
 			}
 		);
 	});
+
+	this.outputsFilterNodeSelectionDialog.onReady(function() {self.updateOutputsFilterNodesButton()});
 
 	this.sendNodeSelectionDialog = new WiseGuiNodeSelectionDialog(
 			this.testbedId,
@@ -2943,6 +2937,17 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	this.scriptingEditorStopButton.attr('disabled', true);
 	this.scriptingEditorStartButton.bind('click', self, function(e) { self.startUserScript(); });
 	this.scriptingEditorStopButton.bind('click', self, function(e) { self.stopUserScript(); });
+};
+
+WiseGuiExperimentationView.prototype.updateOutputsFilterNodesButton = function() {
+	var filtered =
+			this.outputsFilterNodeSelectionDialog.areSomeSelected() &&
+			!this.outputsFilterNodeSelectionDialog.areAllSelected();
+	this.outputsFilterButton.toggleClass('btn-info', filtered);
+};
+
+WiseGuiExperimentationView.prototype.getOutputsFilterNodes = function() {
+	return this.outputsFilterNodeSelectionDialog.getSelection();
 };
 
 /**********************************************************************************************************************/
