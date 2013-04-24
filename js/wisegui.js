@@ -3354,23 +3354,14 @@ WiseGuiExperimentationView.prototype.executeFlashNodes = function() {
 
 	this.setFlashButtonDisabled(true);
 	var self = this;
-	var progressViewerShown = false;
 	wisebed.experiments.flashNodes(
 			this.experimentId,
 			flashFormData,
 			function(result) {
-				if (!progressViewerShown) {
-					WiseGui.showInfoBlockAlert(progressViewer.view);
-					progressViewerShown = true;
-				}
 				self.setFlashButtonDisabled(false);
 				progressViewer.update(result);
 			},
 			function(progress) {
-				if (!progressViewerShown) {
-					WiseGui.showInfoBlockAlert(progressViewer.view);
-					progressViewerShown = true;
-				}
 				progressViewer.update(progress);
 			},
 			function(jqXHR, textStatus, errorThrown) {
@@ -3481,6 +3472,7 @@ var WiseGuiOperationProgressView = function(nodeUrns, operationMaxValue, success
 
 	this.view = $('<div class="WiseGuiOperationProgressView"/>');
 	this.successMessage = successMessage;
+	this.visible = false;
 
 	this.contents = {};
 
@@ -3509,6 +3501,8 @@ var WiseGuiOperationProgressView = function(nodeUrns, operationMaxValue, success
 WiseGuiOperationProgressView.prototype.update = function(operationStatus) {
 
 	var self = this;
+	var allSuccessful = true;
+
 	$.each(operationStatus, function(nodeUrn, nodeStatus) {
 		var content = self.contents[nodeUrn];
 		if (content) {
@@ -3519,24 +3513,26 @@ WiseGuiOperationProgressView.prototype.update = function(operationStatus) {
 				content.progressBar[0].value = nodeStatus.statusCode;
 				content.statusTd.html(nodeStatus.status);
 				content.messageTd.html(nodeStatus.message);
+				allSuccessful = false;
 			}
 		}
 	});
 
-	var contentsEmpty = true;
-	$.each(this.contents, function(nodeUrn, nodeStatus) {
-		contentsEmpty = false;
-	});
-
-	if (contentsEmpty && this.successMessage) {
+	if (allSuccessful && this.successMessage) {
 		self.view.parent().remove();
 		WiseGui.showSuccessAlert(this.successMessage);
+	}
+
+	if (!allSuccessful && !this.visible) {
+		WiseGui.showInfoBlockAlert(this.view);
+		this.visible = true;
 	}
 };
 
 /**
- * ################################################################# Global
- * Functions #################################################################
+ * #################################################################
+ * Global Functions
+ * #################################################################
  */
 
 function loadTestbedDetailsContainer(navigationData, parentDiv) {
