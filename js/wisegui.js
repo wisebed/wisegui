@@ -1128,9 +1128,10 @@ var TableElem = function (data) {
 /**
  * Model: Object[] headers: String[] rowProducer: fun(obj) -> String[]
  * preFilterFun: fun(obj) -> true | false preSelectFun: fun(obj) -> true | false
- * showCheckBoxes: true | false showFiterBox: true | false
+ * showCheckBoxes: true | false showFilterBox: true | false
  */
-var Table = function (model, headers, rowProducer, preFilterFun, preSelectFun, showCheckBoxes, showFiterBox) {
+var Table = function (model, headers, rowProducer, preFilterFun, preSelectFun, showCheckBoxes, showFilterBox) {
+
 	this.model = model;
 	this.headers = headers;
 	this.rowProducer = rowProducer;
@@ -1144,16 +1145,16 @@ var Table = function (model, headers, rowProducer, preFilterFun, preSelectFun, s
 	this.data = [];
 	this.selectionListeners = [];
 	this.filterListeners = [];
-	this.dataArray = [];
 
 	this.filter_input = null;
 	this.input_checkbox_th = null;
 
-	if(showFiterBox) {
+	if(showFilterBox) {
 		this.lastWorkingFilterExpr = null;
 		this.filter_checkbox = null;
 		this.generateFilter();
 	}
+
 	this.generateTable();
 
 	if(this.preFilterFun) {
@@ -1999,13 +2000,14 @@ WiseGuiExperimentDropDown.prototype.buildView = function() {
  * #################################################################
  */
 
-var WiseGuiNodeSelectionDialog = function(testbedId, experimentId, headerHtml, bodyHtml, preSelected) {
+var WiseGuiNodeSelectionDialog = function(testbedId, experimentId, headerHtml, bodyHtml, preSelected, storageKeyPrefix) {
 
 	this.testbedId = testbedId;
 	this.experimentId = experimentId;
 	this.table = null;
 
 	this.preSelected = preSelected;
+	this.storageKeyPrefix = storageKeyPrefix;
 
 	this.dialogDivId = 'WiseGuiNodeSelectionDialog-' + Math.random();
 
@@ -2031,6 +2033,15 @@ var WiseGuiNodeSelectionDialog = function(testbedId, experimentId, headerHtml, b
 	this.dialogDiv.append(bodyHeader, body, bodyFooter);
 };
 
+WiseGuiNodeSelectionDialog.prototype.storeSelection = function(nodeUrns) {
+	window.localStorage.setItem(self.storageKeyPrefix + self.experimentId, nodeUrns.join(","));
+}
+
+WiseGuiNodeSelectionDialog.prototype.loadSelection = function() {
+	var nodeUrnsString = window.localStorage.getItem(self.storageKeyPrefix + self.experimentId);
+	return nodeUrnsString == null ? null : nodeUrnsString.split(",");
+}
+
 WiseGuiNodeSelectionDialog.prototype.show = function(callbackOK, callbackCancel) {
 
 	$(document.body).append(this.dialogDiv);
@@ -2052,6 +2063,13 @@ WiseGuiNodeSelectionDialog.prototype.show = function(callbackOK, callbackCancel)
 		// Apply preselected
 		if(typeof(self.preSelected) == "function") {
 			self.table.applySelected(self.preSelected);
+		} else if (self.storageKeyPrefix) {
+			var nodeUrns = self.loadSelection();
+			if (nodeUrns != null) {
+				self.table.applySelected(function(data) {
+					return nodeUrns.indexOf(data.id) > -1;
+				});
+			}
 		}
 
 		// Cancel clicked
@@ -2072,9 +2090,13 @@ WiseGuiNodeSelectionDialog.prototype.show = function(callbackOK, callbackCancel)
 				'click',
 				self,
 				function(event) {
+					var selectedNodes = event.data.table.getSelectedNodes();
 					event.data.dialogDiv.modal('hide');
 					event.data.dialogDiv.remove();
-					callbackOK(event.data.table.getSelectedNodes());
+					if (self.storageKeyPrefix) {
+						self.storeSelection(selectedNodes);
+					}
+					callbackOK(selectedNodes);
 				}
 		);
 	}
@@ -3405,7 +3427,8 @@ WiseGuiExperimentationView.prototype.showResetNodeSelectionDialog = function() {
 						self.experimentId,
 						'Reset Nodes',
 						'Please select the nodes you want to reset.',
-						self.preselectNodes(self.resetSelectedNodeUrns)
+						self.preselectNodes(self.resetSelectedNodeUrns),
+						'nodeselection.reset.'
 				);
 
 				selectionDialog.show(function(selectedNodeUrns) {
