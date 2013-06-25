@@ -168,12 +168,7 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 		this.getUrl = function(reservation, callbackDone, callbackError) {
 
 			var secretReservationKeys = {
-				reservations: reservation.keys.map(function(elem) {
-					return {
-						urnPrefix: elem.urnPrefix,
-						key: elem.key
-					};
-				})
+				reservations: reservation.secretReservationKey
 			};
 
 			var succ = function(data, textStatus, jqXHR) {
