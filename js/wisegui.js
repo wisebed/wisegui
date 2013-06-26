@@ -2515,7 +2515,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '		</div>'
 			+ '	</div>'
 			+ '	<div class="row">'
-			+ '		<div class="span12"><div class="well" style="height:300px; overflow:auto;">'
+			+ '		<div class="span12"><div class="well WiseGuiExperimentViewOutputsWell" style="height:300px; overflow:auto;">'
 			+ '			<table class="table WiseGuiExperimentViewOutputsTable">'
 			+ '				<tbody></tbody>'
 			+'			</table>'
