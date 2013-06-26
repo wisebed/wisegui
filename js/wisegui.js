@@ -1346,10 +1346,10 @@ Table.prototype.generateTable = function () {
 	if(this.showCheckBoxes) {
 		this.table.tablesorter({
 			headers:{0:{sorter:false}},
-			sortList: [[1,0]]
+			sortList: [[2,0]]
 		});
 	} else {
-		this.table.tablesorter({sortList: [[0,0]]});
+		this.table.tablesorter({sortList: [[1,0]]});
 	}
 };
 
@@ -1508,28 +1508,48 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 	var that = this;
 
 	// The header
-	var header = ['Node URN','Type','Position','Sensors'];
+	var header = [' ', 'Node URN','Type','Position','Sensors'];
 
-	// The row producer gived something like
-	// ["id", "type", "(x,y,z)", "a,b,c"]
-	var rowProducer = function (n) {
-		var cap = [];
-		if(n.capability != null) {
-			for(var j = 0; j < n.capability.length; j++) {
-				parts = explode(":", n.capability[j].name);
-				cap[j] = parts[parts.length-1];
+	var nodeUrns = this.wiseML.setup.node.map(function (node) { return node.id;	});
+	var connectionStatus = {};
+	nodeUrns.forEach(function(nodeUrn) {
+		connectionStatus[nodeUrn] = $('<div class="connectionStatus">?</div>');
+	});
+
+	wisebed.experiments.areNodesConnected(nodeUrns, function(result) {
+		console.log(result);
+		nodeUrns.forEach(function(nodeUrn) {
+			var img = result[nodeUrn].statusCode == 1 ?
+					$('<img src="img/famfamfam/tick.png" alt="'+result[nodeUrn].message+'" title="'+result[nodeUrn].message+'"/>') :
+					$('<img src="img/famfamfam/cross.png" alt="'+result[nodeUrn].message+'" title="'+result[nodeUrn].message+'"/>');
+			connectionStatus[nodeUrn].empty();
+			connectionStatus[nodeUrn].append(img);
+		});
+	}, function(jqXHR, textStatus, errorThrown) {
+		WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
+	});
+
+	// The row producer gives something like
+	// ["", "id", "type", "(x,y,z)", "a,b,c"]
+	var rowProducer = function (node) {
+		var capabilities = [];
+		if(node.capability != null) {
+			for(var j = 0; j < node.capability.length; j++) {
+				parts = explode(":", node.capability[j].name);
+				capabilities[j] = parts[parts.length-1];
 			}
 		}
 		data = [];
-		data.push(n.id);
-		data.push(n.nodeType);
-		if(n.position != null) {
-			data.push('(' + n.position.x + ',' + n.position.y + ',' + n.position.z + ')');
+		data.push(connectionStatus[node.id]);
+		data.push(node.id);
+		data.push(node.nodeType);
+		if(node.position != null) {
+			data.push('(' + node.position.x + ',' + node.position.y + ',' + node.position.z + ')');
 		} else {
 			data.push('unknown');
 		}
-		if(cap.length > 0) {
-			data.push(implode(",", cap));
+		if(capabilities.length > 0) {
+			data.push(implode(",", capabilities));
 		} else {
 			data.push('unknown');
 		}
@@ -1540,21 +1560,21 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 	var t = new Table (this.wiseML.setup.node, header, rowProducer, null, null, this.showCheckboxes, this.showFilter);
 	this.table = t;
 
-	// This vars stores the predefined filters
-	var predefinied_filter_types = [];
-	var predefinied_filter_functions = [];
+	// This vars store the predefined filters
+	var predefined_filter_types = [];
+	var predefined_filter_functions = [];
 
 	// Add type filters
 	$(this.wiseML.setup.node).each(
 		function() {
 			var t = this.nodeType;
 			var text = "Only nodes of type " + t;
-			if($.inArray(text, predefinied_filter_types) < 0) {
-				predefinied_filter_types.push(text);
+			if($.inArray(text, predefined_filter_types) < 0) {
+				predefined_filter_types.push(text);
 				var fn = function(e) {
 					return e.nodeType == t;
 				};
-				predefinied_filter_functions.push(fn);
+				predefined_filter_functions.push(fn);
 			}
 		}
 	);
@@ -1566,7 +1586,7 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 	select.change(
 		function () {
 			var idx = parseInt($(this).val());
-			var fn = predefinied_filter_functions[idx];
+			var fn = predefined_filter_functions[idx];
 			that.table.setFilterFun(fn);
 		}
 	);
@@ -1575,7 +1595,7 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 	select.append(option);
 
 	var index = 0;
-	$(predefinied_filter_types).each(
+	$(predefined_filter_types).each(
 		function() {
 			var option = $('<option value="' + (index++) + '">' + this + '</option>');
 			select.append(option);

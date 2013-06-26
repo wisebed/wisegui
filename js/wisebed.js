@@ -188,6 +188,34 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 			});
 		};
 
+		this.areNodesConnected = function(nodeUrns, callbackDone, callbackError) {
+
+			$.ajax({
+				url         : getBaseUri() + "/experiments/areNodesConnected",
+				type        : "POST",
+				data        : JSON.stringify({nodeUrns:nodeUrns}, null, '  '),
+				contentType : "application/json; charset=utf-8",
+				dataType    : "json",
+				success     : function(data) {callbackDone(data.operationStatus);},
+				error       : callbackError,
+				xhrFields   : { withCredentials: true }
+			});
+		};
+
+		this.areNodesAlive = function(experimentId, nodeUrns, callbackDone, callbackError) {
+
+			$.ajax({
+				url         : getBaseUri() + "/experiments/" + experimentId + "/areNodesAlive",
+				type        : "POST",
+				data        : JSON.stringify({nodeUrns:nodeUrns}, null, '  '),
+				contentType : "application/json; charset=utf-8",
+				dataType    : "json",
+				success     : function(data) {callbackDone(data.operationStatus);},
+				error       : callbackError,
+				xhrFields   : { withCredentials: true }
+			});
+		};
+
 		this.send = function(experimentId, nodeUrns, messageBytesBase64, callbackDone, callbackError) {
 
 			$.ajax({
