@@ -85,6 +85,9 @@ var StringUtils = new function() {
 				case 16:
 					num = padl(num,'0',2);
 					break;
+				case 10:
+					num = padl(num,'0',2);
+					break;
 				case 2:
 					num = padl(num,'0',8);
 					break;
