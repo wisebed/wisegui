@@ -1,3 +1,4 @@
+<%@ page import="de.uniluebeck.itm.tr.iwsn.portal.PortalServerConfig" %>
 <!DOCTYPE html >
 <html>
 <head>
@@ -45,8 +46,8 @@
 	<script type="text/javascript">
 
 		var l = window.location;
-		var wisebedWebSocketBaseUrl = 'ws://' + l.host + '/ws/v1.0';
-		var wisebedBaseUrl = l.protocol + '//' + l.host + '/rest/v1.0';
+		var wisebedWebSocketBaseUrl = 'ws://' + l.host + '<%= getServletConfig().getInitParameter(PortalServerConfig.WEBSOCKET_CONTEXT_PATH) %>';
+		var wisebedBaseUrl = l.protocol + '//' + l.host + '<%= getServletConfig().getInitParameter(PortalServerConfig.REST_API_CONTEXT_PATH) %>';
 
 	</script>
 
@@ -58,7 +59,7 @@
 </head>
 
 <body>
-	<div id="WisebedContainer" class="container"></div>
+<div id="WisebedContainer" class="container"></div>
 </body>
 
 </html>
