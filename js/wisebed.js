@@ -142,7 +142,7 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 				return subsetOf(set1, set2, compare) && subsetOf(set2, set1, compare);
 			}
 
-			return setEquals(res1.data, res2.data, function(dataElem1, dataElem2) {
+			return setEquals(res1, res2, function(dataElem1, dataElem2) {
 				return  dataElem1.secretReservationKey == dataElem2.secretReservationKey &&
 						dataElem1.urnPrefix            == dataElem2.urnPrefix;
 			});
