@@ -2320,8 +2320,11 @@ WiseGuiExperimentationView.prototype.formatBase64 = function(base64) {
 };
 
 WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
+
 	var self = this;
 	var message = JSON.parse(event.data);
+
+	console.log(message);
 
 	if (!message.type) {
 		console.log('Received message with unknown content: ' + event.data);
@@ -2353,8 +2356,6 @@ WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
 
 			var goToExperimentButton = $('<button class="btn btn-primary">Go to experiment</button>');
 			blockAlertActions = [goToExperimentButton];
-
-			var self = this;
 			goToExperimentButton.bind('click', this, function(e, data) {
 				navigateTo(self.testbedId, self.experimentId);
 			});
@@ -2910,9 +2911,20 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 				+ 'WiseGuiUserScript = function() {\n'
 				+ '  console.log("WiseGuiUserScript instantiated...");\n'
 				+ '};\n'
+				+ '\n'
 				+ 'WiseGuiUserScript.prototype.start = function(env) {\n'
-				+ '  console.log("WiseGuiUserScript started...");\n'
+				+ '  console.log("WiseGuiUserScript started, connecting to reservation...");\n'
+			    + '  this.onmessage = function(message) { console.log(message); }\n'
+				+ '  this.onopen = function(event) { console.log(event); }\n'
+				+ '  this.onclose = function(event) { console.log(event); }\n'
+				+ '  this.webSocket = new wisebed.WebSocket(\n'
+				+ '    env.experimentId,\n'
+				+ '    this.onmessage,\n'
+				+ '    this.onopen,\n'
+				+ '    this.onclose\n'
+				+ '  );\n'
 				+ '};\n'
+				+ '\n'
 				+ 'WiseGuiUserScript.prototype.stop = function() {\n'
 				+ '  console.log("WiseGuiUserScript stopped...");\n'
 				+ '};\n'
@@ -2925,6 +2937,58 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 				+ 'When the user stops the script the environment will call <code>userScript.stop()</code>, remove '
 				+ 'the <code>&lt;script></code> tag from the DOM, and clean up by calling <code>delete userScript;</code> '
 				+ 'and <code>delete WiseGuiUserScript;</code>.<br/>'
+				+ ''
+				+ '<h3>What type of events are received over the WebSocket connection?</h3>'
+				+ 'The testbed back end produces several types of events, an example of each listed below:<br/>'
+				+ '<ul>'
+				+ '  <li>'
+				+ '    <emph>Devices attached/detached</emph>: produced whenever one or more devices are attached or detached from '
+				+ '    the back end. This can either be the case if a wired device gets physically or logically '
+				+ '    attached/detached. A logical detach can e.g., happen if a mobile device moves out of communication'
+				+ '    range of a gateway or if the back end software on the gateway crashes or is shut down. Example:'
+				+ '<pre>'
+				+ '{\n'
+				+ '  "type":"devicesDetached",\n'
+				+ '  "nodeUrns":["urn:wisebed:uzl1:0x2069"],\n'
+				+ '  "timestamp":"2013-07-11T09:39:02.226+02:00"\n'
+				+ '}\n'
+				+ '</pre>'
+				+ '<pre>'
+				+ '{\n'
+				+ '  "type":"devicesAttached",\n'
+				+ '  "nodeUrns":["urn:wisebed:uzl1:0x2069"],\n'
+				+ '  "timestamp":"2013-07-11T09:39:07.558+02:00"\n'
+				+ '}\n'
+				+ '</pre>'
+				+ '  </li>'
+				+ '  <li>'
+				+ '    <emph>Device outputs</emph>: produced whenever a device outputs data on e.g., its serial port which'
+				+ '    is then forwarded as an event to the user. Example:<br/>'
+				+ '<pre>'
+				+ '{\n'
+				+ '  "type":"upstream",\n'
+				+ '  "payloadBase64":"EAJoAGlTZXJBZXJpYWxBcHAgQm9vdGluZywgaWQ9MHgyMDY5EAM=",\n'
+				+ '  "sourceNodeUrn":"urn:wisebed:uzl1:0x2069",\n'
+				+ '  "timestamp":"2013-07-11T09:39:07.589+02:00"\n'
+				+ '}'
+				+ '</pre>'
+				+ '  </li>'
+				+ '  <li>'
+				+ '    <emph>Reservation started/ended</emph>: produced when a reservation time stamp starts or ends. Example:<br/>'
+				+ '<pre>'
+				+ '{\n'
+				+ '  "type":"reservationEnded",\n'
+				+ '  "timestamp":"2013-07-11T08:42:00.000+02:00"\n'
+				+ '}\n'
+				+ '</pre>'
+				+ '<pre>'
+				+ '{\n'
+				+ '  "type":"reservationStarted",\n'
+				+ '  "timestamp":"2013-07-11T09:45:00.000+02:00"\n'
+				+ '}\n'
+				+ '</pre>'
+				+ '  </li>'
+				+ '</ul>'
 				+ ''
 				+ '<h3>How does the scripting environment look like?</h3>'
 				+ 'The <code>env</code> variable that is passed to the <code>start()</code> function of the users script '
