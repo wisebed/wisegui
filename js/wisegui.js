@@ -1517,7 +1517,6 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 	});
 
 	wisebed.experiments.areNodesConnected(nodeUrns, function(result) {
-		console.log(result);
 		nodeUrns.forEach(function(nodeUrn) {
 			var img = result[nodeUrn].statusCode == 1 ?
 					$('<img src="img/famfamfam/tick.png" alt="'+result[nodeUrn].message+'" title="'+result[nodeUrn].message+'"/>') :
@@ -2342,6 +2341,7 @@ WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
 		}
 		
 	} else if (message.type == 'notification') {
+
 		var blockAlertActions = null;
 		var blockAlertMessage = $(
 				  '<div>'
@@ -2362,6 +2362,15 @@ WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
 		}
 
 		WiseGui.showInfoBlockAlert(blockAlertMessage, blockAlertActions);
+
+	} else if (message.type == 'devicesAttached') {
+		WiseGui.showInfoBlockAlert('Devices [' + message.nodeUrns.join(', ') + '] were attached at ' + message.timestamp);
+	} else if (message.type == 'devicesDetached') {
+		WiseGui.showInfoBlockAlert('Devices [' + message.nodeUrns.join(', ') + '] were detached at ' + message.timestamp);
+	} else if (message.type == 'reservationStarted') {
+		WiseGui.showInfoBlockAlert('Reservation started at ' + message.timestamp);
+	} else if (message.type == 'reservationEnded') {
+		WiseGui.showInfoBlockAlert('Reservation ended at ' + message.timestamp);
 	}
 };
 
