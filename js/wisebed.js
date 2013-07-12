@@ -151,8 +151,6 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 
 	this.experiments = new function() {
 
-		var self = this;
-
 		this.getConfiguration = function (url, callbackDone, callbackError) {
 			$.ajax({
 				url       : getBaseUri() + "/experimentconfiguration",
@@ -243,6 +241,33 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 				contentType : "application/json; charset=utf-8",
 				dataType    : "json",
 				success     : function(data) {callbackDone(data.operationStatus);},
+				error       : callbackError,
+				xhrFields   : { withCredentials: true }
+			});
+		};
+
+		this.getNodeUrns = function(experimentId, callbackDone, callbackError) {
+
+			$.ajax({
+				url         : getBaseUri() + "/experiments/" + experimentId + "/nodeUrns",
+				type        : "GET",
+				contentType : "application/json; charset=utf-8",
+				dataType    : "json",
+				success     : function(data) {callbackDone(data.nodeUrns);},
+				error       : callbackError,
+				xhrFields   : { withCredentials: true }
+			});
+		};
+
+		this.getChannelPipelines = function(experimentId, nodeUrns, callbackDone, callbackError) {
+
+			$.ajax({
+				url         : getBaseUri() + "/experiments/" + experimentId + "/getChannelPipelines",
+				type        : "POST",
+				data        : JSON.stringify({nodeUrns:nodeUrns}, null, '  '),
+				contentType : "application/json; charset=utf-8",
+				dataType    : "json",
+				success     : function(data) {callbackDone(data);},
 				error       : callbackError,
 				xhrFields   : { withCredentials: true }
 			});

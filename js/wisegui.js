@@ -2196,6 +2196,7 @@ var WiseGuiExperimentationView = function(testbedId, experimentId) {
 	this.experimentationDivId    = 'WisebedExperimentationDiv-'+testbedId+'-'+experimentId.replace(/=/g, '');
 	this.outputsTextAreaId       = this.experimentationDivId+'-outputs-textarea';
 	this.sendDivId               = this.experimentationDivId+'-send';
+	this.channelPipelinesDivId   = this.experimentationDivId+'-channel-pipelines';
 	this.flashDivId              = this.experimentationDivId+'-flash';
 	this.resetDivId              = this.experimentationDivId+'-reset';
 	this.scriptingEditorDivId    = this.experimentationDivId+'-scripting-editor';
@@ -2401,10 +2402,10 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '		<div class="span6">'
 			+ '			<div class="btn-toolbar btn-toolbar2  pull-right">'
 			+ '				<div class="btn-group">'
-			+ '					<button id="pause-output" class="btn" data-toggle="button" title="Pause receiving messages."><i class="icon-pause"></i></button>'
+			+ '					<button id="pause-output" class="btn" data-toggle="button" title="Pause receiving messages"><i class="icon-pause"></i></button>'
 			+ '				</div>'
 			+ '				<div class="btn-group">'
-			+ '					<button id="clear-output" class="btn" title="Clear output."><i class="icon-remove"></i></button>'
+			+ '					<button id="clear-output" class="btn" title="Clear output"><i class="icon-remove"></i></button>'
 			+ '				</div>'
 			+ '				<div class="btn-group">'			
 			+ '					<button id="output-view" data-toggle="dropdown" class="btn dropdown-toggle" title="Change shown columns">'
@@ -2517,6 +2518,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '			<li class="active"><a href="#'+this.flashDivId+'">Flash</a></li>'
 			+ '			<li><a href="#'+this.resetDivId+'">Reset</a></li>'
 			+ '			<li><a href="#'+this.sendDivId+'">Send Message</a></li>'
+			+ '			<li><a href="#'+this.channelPipelinesDivId+'">Pipelines</a></li>'
 			+ '			<li><a href="#'+this.scriptingEditorDivId+'">Scripting Editor</a></li>'
 			+ '			<li><a href="#'+this.scriptingOutputDivId+'">Scripting Output</a></li>'
 			+ '		</ul>'
@@ -2560,8 +2562,8 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '					</div>'
 		  	+ '				</div>'
 			+ '			</div>'
-		 	+ '			<div class="tab-pane WiseGuiExperimentsViewSendControl" id="'+this.sendDivId+'">'
-		  	+ '				<div class="row">'
+			+ '			<div class="tab-pane WiseGuiExperimentsViewSendControl" id="'+this.sendDivId+'">'
+			+ '				<div class="row">'
 			+ '					<button class="btn WiseGuiExperimentsViewSendControlSelectNodeUrns span2">Select Nodes</button>'
 			+ '					<div class="span2">'
 			+ '						<select class="WiseGuiExperimentsViewSendControlSelectMode span2">'
@@ -2570,20 +2572,23 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '						</select>'
 			+ '					</div>'
 			+ '					<div class="span4">'
-		  	+ '						<input type="text" class="WiseGuiExperimentsViewSendControlSendMessageInput span4"/>'
+			+ '						<input type="text" class="WiseGuiExperimentsViewSendControlSendMessageInput span4"/>'
 			+ '					</div>'
 			+ '					<div class="span2">'
-		  	+ '						<button class="btn btn-primary WiseGuiExperimentsViewSendControlSendMessage span2">Send message</button><br/>'
-		  	+ '					</div>'
-		  	+ '				</div>'
-		  	+ '				<div class="row">'
+			+ '						<button class="btn btn-primary WiseGuiExperimentsViewSendControlSendMessage span2">Send message</button><br/>'
+			+ '					</div>'
+			+ '				</div>'
+			+ '				<div class="row">'
 			+ '					<div class="offset4 span8">'
 			+ '						<div class="inputs-list">'
 			+ '							<label class="checkbox inline"><input class="WiseGuiExperimentsViewSendControlLineFeed" type="checkbox"> always append line feed</label>'
 			+ '						</div>'
 			+ '					</div>'
-		  	+ '				</div>'
-		  	+ '			</div>'
+			+ '				</div>'
+			+ '			</div>'
+			+ '			<div class="tab-pane WiseGuiExperimentsViewChannelPipelinesControl" id="'+this.channelPipelinesDivId+'">'
+			+ '				<button class="btn span2 WiseGuiExperimentsViewGetChannelPipelinesButton">Get Channel Pipelines</a>'
+			+ '			</div>'
 			+ '			<div class="tab-pane WiseGuiExperimentsViewScriptingControl" id="'+this.scriptingEditorDivId+'">'
 			+ '				<div class="row" style="padding-bottom:10px;">'
 			+ '					<div class="span6">'
@@ -2643,6 +2648,8 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	this.sendMessageInput             = this.view.find('input.WiseGuiExperimentsViewSendControlSendMessageInput').first();
 	this.sendSendButton               = this.view.find('button.WiseGuiExperimentsViewSendControlSendMessage').first();
 	this.sendLineFeedCheckbox         = this.view.find('input.WiseGuiExperimentsViewSendControlLineFeed').first()[0];
+
+	this.getChannelPipelinesButton    = this.view.find('button.WiseGuiExperimentsViewGetChannelPipelinesButton').first();
 
 	// ******* start ACE displaying error workaround ********
 	// ace editor is not correctly displayed if parent tab is hidden when creating it. therefore we need to workaround
@@ -2869,6 +2876,23 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 		}
 	});
 	this.updateSendControls();
+
+	this.getChannelPipelinesButton.bind('click', function() {
+		wisebed.experiments.getNodeUrns(
+				self.experimentId,
+				function(nodeUrns) {
+					wisebed.experiments.getChannelPipelines(
+							self.experimentId,
+							nodeUrns,
+							function(channelPipelines) {
+								console.log(channelPipelines);
+							},
+							WiseGui.showAjaxError
+					);
+				},
+				WiseGui.showAjaxError
+		);
+	});
 
 	this.scriptingEditorHelpModal = '<div id="scriptingHelpModal" class="modal hide">'
 				+ '<div class="modal-header">'
