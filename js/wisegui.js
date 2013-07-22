@@ -34,7 +34,9 @@ var WiseGui = new function() {
 	this.showAjaxError = function(jqXHR, textStatus, errorThrown) {
 		var message = $('<h2>Error while loading data!</h2>'
 				+ '<h3>jqXHR</h3>'
-				+ '<pre>'+JSON.stringify(jqXHR, null, '  ')+'</pre>'
+				+ (jqXHR.readState ? ('readyState = ' + jqXHR.readyState + '<br/>') : '')
+				+ (jqXHR.status ? ('status = ' + jqXHR.status + '<br/>') : '')
+				+ (jqXHR.responseText ? ('responseText = <pre>' + jqXHR.responseText + '</pre><br/>') : '')
 				+ '<h3>textStatus</h3>'
 				+ '<pre>'+textStatus+'</pre>'
 				+ '<h3>errorThrown</h3>'
@@ -228,7 +230,7 @@ WiseGuiLoginObserver.prototype.renewLogin = function(testbedId) {
 			function(jqXHR, textStatus, errorThrown) {
 				console.log('WiseGuiLoginObserver failed renewing login for ' + testbedId);
 				self.stopObservationOf(testbedId);
-				WiseGui.showAjaxError();
+				WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
 			}
 	);
 };
