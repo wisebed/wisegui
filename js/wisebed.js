@@ -20,6 +20,31 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 		return webSocketBaseUri;
 	}
 
+	this.EventWebSocket = function(onDevicesAttached, onDevicesDetached, onOpen, onClose) {
+
+		this.onDevicesAttached = onDevicesAttached;
+		this.onDevicesDetached = onDevicesDetached;
+		this.onOpen = onOpen;
+		this.onClose = onClose;
+
+		window.WebSocket = window.MozWebSocket || window.WebSocket;
+
+		var self = this;
+		this.socket = new WebSocket(getWebSocketBaseUri() + '/events');
+		this.socket.onmessage = function(event) {
+			var deviceEvent = JSON.parse(event.data);
+			if (deviceEvent.type == 'devicesAttached') {
+				self.onDevicesAttached(deviceEvent);
+			} else if (deviceEvent.type == 'devicesDetached') {
+				self.onDevicesDetached(deviceEvent);
+			} else {
+				console.log("Received unknown event over event bus: " + deviceEvent);
+			}
+		};
+		this.socket.onopen  = function(event) { self.onOpen(event);  };
+		this.socket.onclose = function(event) { self.onClose(event); };
+	};
+
 	this.WebSocket = function(experimentId, onmessage, onopen, onclosed) {
 
 		this.experimentId = experimentId;

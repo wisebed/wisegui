@@ -1472,6 +1472,27 @@ Table.prototype.getSelectFun = function () {
 
 /**
  * #################################################################
+ * WiseGuiNodeStatusIcon
+ * #################################################################
+ */
+var WiseGuiNodeStatusIcon = function(nodeUrn) {
+	this.nodeUrn = nodeUrn;
+	this.view = $('<img src="img/famfamfam/help.png" alt="'+nodeUrn+'" title="'+nodeUrn+'"/>');
+	var self = this;
+	$(window).bind('wisegui-devices-attached-event', function(e, devicesAttachedEvent) {
+		if (devicesAttachedEvent.nodeUrns.indexOf(nodeUrn) >= 0) {
+			self.view.attr('src', 'img/famfamfam/tick.png');
+		}
+	});
+	$(window).bind('wisegui-devices-detached-event', function(e, devicesDetachedEvent) {
+		if (devicesDetachedEvent.nodeUrns.indexOf(nodeUrn) >= 0) {
+			self.view.attr('src', 'img/famfamfam/cross.png');
+		}
+	});
+};
+
+/**
+ * #################################################################
  * WiseGuiNodeTable
  * #################################################################
  */
@@ -1494,17 +1515,38 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 	var nodeUrns = this.wiseML.setup.node.map(function (node) { return node.id;	});
 	var connectionStatus = {};
 	nodeUrns.forEach(function(nodeUrn) {
-		connectionStatus[nodeUrn] = $('<div class="connectionStatus">?</div>');
+		connectionStatus[nodeUrn] = $('<div class="connectionStatus" />');
+		connectionStatus[nodeUrn].append(new WiseGuiNodeStatusIcon(nodeUrn).view);
 	});
 
 	wisebed.experiments.areNodesConnected(nodeUrns, function(result) {
-		nodeUrns.forEach(function(nodeUrn) {
-			var img = result[nodeUrn].statusCode == 1 ?
-					$('<img src="img/famfamfam/tick.png" alt="'+result[nodeUrn].message+'" title="'+result[nodeUrn].message+'"/>') :
-					$('<img src="img/famfamfam/cross.png" alt="'+result[nodeUrn].message+'" title="'+result[nodeUrn].message+'"/>');
-			connectionStatus[nodeUrn].empty();
-			connectionStatus[nodeUrn].append(img);
+
+		var attached = [];
+		var detached = [];
+
+		for (var node in result) {
+			if (result.hasOwnProperty(node) && result[node].statusCode == 1) {
+				attached.push(node);
+			}
+			else {
+				detached.push(node);
+			}
+		}
+
+		// emulate devicesAttachedEvent
+		$(window).trigger('wisegui-devices-attached-event', {
+			type : 'devicesAttached',
+			timestamp : new Date().toISOString(),
+			nodeUrns : attached
 		});
+
+		// emulate devicesDetachedEvent
+		$(window).trigger('wisegui-devices-detached-event', {
+			type : 'devicesAttached',
+			timestamp : new Date().toISOString(),
+			nodeUrns : detached
+		});
+
 	}, function(jqXHR, textStatus, errorThrown) {
 		WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
 	});
@@ -3974,7 +4016,7 @@ function createContentContainer(navigationData) {
 	$('.nav-tabs a').click(function (e) {
 	    e.preventDefault();
 	    $(this).tab('show');
-	    });
+	});
 
 	return container;
 }
@@ -4002,6 +4044,7 @@ var reservationObserver  = new WiseGuiReservationObserver();
 var notificationsViewer  = new WiseGuiNotificationsViewer();
 
 var testbeds             = null;
+var eventWebSockets      = [];
 
 $(function () {
 
@@ -4009,6 +4052,28 @@ $(function () {
 	
 	$('.modal').modal({
 		keyboard: true
+	});
+
+	$(window).bind('wisegui-navigation-event', function(e, navigationData) {
+		if (navigationData.testbedId) {
+			var eventWebSocket = eventWebSockets[navigationData.testbedId];
+			if (eventWebSocket === undefined || eventWebSocket == null) {
+				eventWebSocket = new wisebed.EventWebSocket(
+						function(devicesAttachedEvent) {
+							$(window).trigger('wisegui-devices-attached-event', devicesAttachedEvent);
+						},
+						function(devicesDetachedEvent) {
+							$(window).trigger('wisegui-devices-detached-event', devicesDetachedEvent);
+						},
+						function() {
+							eventWebSockets[navigationData.testbedId] = eventWebSocket;
+						},
+						function() {
+							eventWebSockets[navigationData.testbedId] = null;
+						}
+				);
+			}
+		}
 	});
 
 	wisebed.getTestbeds(
