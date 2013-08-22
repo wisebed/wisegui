@@ -168,14 +168,12 @@ WiseGuiNavigationViewer.prototype.buildView = function() {
 			+ '	</div>'
 			+ '	<div id="aboutModal" class="modal hide">'
 			+ '		<div class="modal-header">'
-			+ ' 		<h1>About</h1>'
+			+ ' 		<h1>About WiseGui</h1>'
 			+ '		</div>'
 			+ '		<div class="modal-body">'
 			+ '			This is an open-source project published under the terms of the BSD license.<br/>'
 			+ ' 		The sources are freely available from'
-			+ '			<a href="https://github.com/wisebed/rest-ws" target="_blank">github.com/wisebed/rest-ws</a>'
-			+ ' 		and'
-			+ '			<a href="https://github.com/wisebed/wisegui" target="_blank">github.com/wisebed/wisegui</a>'			
+			+ '			<a href="https://github.com/wisebed/wisegui" target="_blank">github.com/wisebed/wisegui</a>.'
 			+ ' 		<br/>'
 			+ ' 		<br/>'
 			+ '			&copy; <a href="http://www.itm.uni-luebeck.de/people/bimschas/" target="_blank">Daniel Bimschas</a>,'
@@ -1868,8 +1866,18 @@ WiseGuiNotificationsViewer.prototype.showBlockAlert = function(alert) {
 			actionsDiv.append(' ');
 		}
 	}
-	var flashDiv = $('<div class="alert alert-'+alert.severity+'">New Block Alert. Click there &#8594;</div>');
-	this.flash(flashDiv);
+
+	var flashMessages = [];
+	if (alert.message instanceof Array) {
+		alert.message.forEach(function(message) {
+			flashMessages.push(typeof message == 'string' ? message : "New alert. Please click there &#8594;");
+		});
+	} else {
+		flashMessages.push(typeof alert.message == 'string' ? alert.message : "New alert. Please click there &#8594;");
+	}
+	flashMessages.forEach(function(message) {
+		this.flash($('<div class="alert alert-'+alert.severity+'">' + message + '</div>'));
+	}, this);
 	this.blink(alert.severity);
 	this.history.append(blockAlertDiv);
 };
@@ -2015,7 +2023,7 @@ WiseGuiExperimentDropDown.prototype.onReservationsChangedEvent = function(reserv
 	}
 
 	if(menu.children().length == 0) {
-		var li = $('<li style="padding:4px 15px">No reservations available</li>');
+		var li = $('<li style="padding:4px 15px">No active reservations currently</li>');
 		this.view.find('.dropdown-menu').append(li);
 		return;
 	}
@@ -2024,12 +2032,12 @@ WiseGuiExperimentDropDown.prototype.onReservationsChangedEvent = function(reserv
 
 WiseGuiExperimentDropDown.prototype.buildView = function() {
 	this.view = $('<li class="dropdown">'
-			+ '	<a href="#" class="dropdown-toggle" data-toggle="dropdown">My Reservations</a>'
+			+ '	<a href="#" class="dropdown-toggle" data-toggle="dropdown">Currently Active Reservations</a>'
 			+ '	<ul class="dropdown-menu">'
 			+ '	</ul>'
 			+ '</li>');
 
-	var li = $('<li style="padding:4px 15px">No reservations available</li>');
+	var li = $('<li style="padding:4px 15px">No active reservations currently</li>');
 	this.view.find('.dropdown-menu').append(li);
 };
 
@@ -3721,7 +3729,7 @@ WiseGuiOperationProgressView.prototype.update = function(operationStatus) {
 
 function loadTestbedDetailsContainer(navigationData, parentDiv) {
 
-	parentDiv.append($('<h1>'+testbeds[navigationData.testbedId].name+'</h1>'));
+	parentDiv.append($('<h3 class="WiseGuiTestbedTitle">'+testbeds[navigationData.testbedId].name+'</h3>'));
 
 	var tabs = $('<ul class="nav nav-tabs">'
 			+ '	<li class="active"><a href="#WisebedTestbedDetailsOverview-'+navigationData.testbedId+'">Overview</a></li>'
