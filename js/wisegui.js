@@ -3724,7 +3724,7 @@ WiseGuiOperationProgressView.prototype.update = function(operationStatus) {
 
 function loadTestbedDetailsContainer(navigationData, parentDiv) {
 
-	parentDiv.append($('<h1>Testbed Details "'+testbeds[navigationData.testbedId].name+'"</h1>'));
+	parentDiv.append($('<h1>'+testbeds[navigationData.testbedId].name+'</h1>'));
 
 	var tabs = $('<ul class="nav nav-tabs">'
 			+ '	<li class="active"><a href="#WisebedTestbedDetailsOverview-'+navigationData.testbedId+'">Overview</a></li>'
@@ -3830,9 +3830,7 @@ function buildReservationTable(reservationsTab, navigationData) {
 							function(e) {
 								e.preventDefault();
 								e.data.link.remove();
-								e.data.container.append(
-										e.data.reservation.nodeUrns.map(function(node) { return node.nodeUrn; }).join("<br/>")
-								);
+								e.data.container.append(e.data.reservation.nodeUrns.join("<br/>"));
 							}
 					);
 					tableRows[i][2] = nodesContainer;
