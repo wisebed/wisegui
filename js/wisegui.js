@@ -512,7 +512,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 	var input_time_start = $('<input type="text" value="' + time_start + '" id="input_time_start_'+this.testbedId+'" style="width:40px"/>');
 	var input_date_end =   $('<input type="text" value="' + date_end + '" id="input_date_end__'+this.testbedId+'" style="width:75px"/>');
 	var input_time_end =   $('<input type="text" value="' + time_end + '" id="input_time_end_'+this.testbedId+'" style="width:40px"/>');
-	var input_desciption = $('<input type="text" id="description_'+this.testbedId+'" style="width:330px"/>');
+	var input_desciption = $('<input type="text" id="description_'+this.testbedId+'" style="width:280px"/>');
 
 	var p_nodes = $("<p></p>");
 
@@ -555,26 +555,23 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 		that.wiseMlParser = wiseMlParser;
 		
 		$.each(wiseMlParser.markersArray, function (index, marker) {
-			
-		google.maps.event.clearListeners(marker, 'click');
-		google.maps.event.addListener(marker, 'click', function (){
-			 if(marker.getIcon().url == 'img/node.png'){
-				 wiseMlParser.map.selectURNs([marker.urn]);
-			 }else{
-				 wiseMlParser.map.selectURNs([marker.urn], true);
-			 }
-		     var selectedFun =function(data) {
-					var nodeids = wiseMlParser.map.selectedURNs;
-					for(var i = 0; i < nodeids.length; i++) {
-						if(data.id == nodeids[i]) return true;
-					}
-					return false;
-				};
-	            
-	           that.table.applySelected(selectedFun);
-		});
-		
+			google.maps.event.clearListeners(marker, 'click');
+			google.maps.event.addListener(marker, 'click', function (){
+				 if(marker.getIcon().url == 'img/node.png'){
+					 wiseMlParser.map.selectURNs([marker.urn]);
+				 }else{
+					 wiseMlParser.map.selectURNs([marker.urn], true);
+				 }
+				 var selectedFun =function(data) {
+						var nodeids = wiseMlParser.map.selectedURNs;
+						for(var i = 0; i < nodeids.length; i++) {
+							if(data.id == nodeids[i]) return true;
+						}
+						return false;
+					};
 
+				   that.table.applySelected(selectedFun);
+			});
         });
 		
 		wiseMlParser.map.selectURNs = function(urns, deselect){

@@ -4,13 +4,13 @@
  */
 var WiseMLParser = function(wisemlParameter, parentDiv) {
 	this.wiseml = wisemlParameter;
-	this.origin;
+	this.origin = null;
 	this.predLat = "http://www.w3.org/2003/01/geo/wgs84_pos#lat";
 	this.predLong = "http://www.w3.org/2003/01/geo/wgs84_pos#long";
-	this.nodes = new Array();
-	this.markersArray;
-	this.map;
-	this.infoWindow = new google.maps.InfoWindow();
+	this.nodes = [];
+	this.markersArray = [];
+	this.map = null;
+	this.infoWindows = {};
 
 	this.view = null;
 
@@ -119,11 +119,15 @@ WiseMLParser.prototype.addMarker = function(n) {
 		urn : n.id
 	});
 
-	this.infoWindow.setContent("<h5>Sensor: " + n.id + "</h5><p style=\"width:200px;\">" + n.desc + "</p>");
+	this.infoWindows[n.id] = new google.maps.InfoWindow();
+	this.infoWindows[n.id].setContent("<h5>Sensor: " + n.id + "</h5><p style=\"width:200px;\">" + n.desc + "</p>");
 
 	var self = this;
 	google.maps.event.addListener(marker, 'click', function() {
-		self.infoWindow.open(self.map, marker);
+		for (var nodeUrn in self.infoWindows) {
+			self.infoWindows[nodeUrn].close();
+		}
+		self.infoWindows[n.id].open(self.map, marker);
 	});
 
 	this.markersArray.push(marker);
