@@ -1514,6 +1514,11 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 		connectionStatus[nodeUrn].append(new WiseGuiNodeStatusIcon(nodeUrn).view);
 	});
 
+	if(nodeUrns.length == 0){
+		console.warn("No sensor nodes found");
+		return;
+	}
+
 	wisebed.experiments.areNodesConnected(nodeUrns, function(result) {
 
 		var attached = [];
