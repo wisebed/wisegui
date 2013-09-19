@@ -1554,27 +1554,46 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 	// The row producer gives something like
 	// ["", "id", "type", "(x,y,z)", "a,b,c"]
 	var rowProducer = function (node) {
+		var data = [];
 		var capabilities = [];
+
 		if(node.capability != null) {
 			for(var j = 0; j < node.capability.length; j++) {
 				parts = explode(":", node.capability[j].name);
 				capabilities[j] = parts[parts.length-1];
 			}
 		}
-		data = [];
+
 		data.push(connectionStatus[node.id]);
 		data.push(node.id);
 		data.push(node.nodeType);
-		if(node.position != null) {
-			data.push('(' + node.position.x + ',' + node.position.y + ',' + node.position.z + ')');
+
+		if (node.position != null && node.position.outdoorCoordinates) {
+
+			var c = node.position.outdoorCoordinates;
+
+			if (c.latitude && c.longitude) {
+				data.push('(' + c.latitude + ',' + c.longitude+ ')')
+			} else if (c.x && c.y && c.z) {
+				data.push('[' + c.x + ',' + c.y + ',' + c.z + ']');
+			} else if (c.x && c.y) {
+				data.push('[' + c.x + ',' + c.y + ',0]');
+			} else {
+				data.push(JSON.stringify({rho: c.rho, phi: c.phi, theta: c.theta}));
+			}
+
+		} else if (node.position != null && node.position.indoorCoordinates) {
+			data.push(JSON.stringify(node.position.indoorCoordinates));
 		} else {
-			data.push('unknown');
+			data.push('');
 		}
+
 		if(capabilities.length > 0) {
 			data.push(implode(",", capabilities));
 		} else {
-			data.push('unknown');
+			data.push('');
 		}
+
 		return data;
 	};
 
