@@ -1,6 +1,6 @@
 /**
  * Parses WiseML
- * 
+ *
  */
 var WiseMLParser = function(wisemlParameter, parentDiv) {
 	this.wiseml = wisemlParameter;
@@ -21,44 +21,44 @@ var WiseMLParser = function(wisemlParameter, parentDiv) {
 
 WiseMLParser.prototype.parse = function() {
 
-	if (!this.wiseml.setup || !this.wiseml.setup.origin) {
-		this.origin = new Coordinate(0,0,0,0,0);
+	if (!this.wiseml.setup || !this.wiseml.setup.origin || !this.wiseml.setup.origin.outdoorCoordinates) {
+		this.origin = new Coordinate(0, 0, 0, 0, 0, 0, 0, 0);
 		return;
 	}
 
-	// Calculate origin
-	var wiseMLOrigin = new Coordinate(this.wiseml.setup.origin.x,
-			this.wiseml.setup.origin.y, this.wiseml.setup.origin.z,
-			this.wiseml.setup.origin.phi, this.wiseml.setup.origin.theta);
+	this.origin = new Coordinate(
+			this.wiseml.setup.origin.outdoorCoordinates.latitude,
+			this.wiseml.setup.origin.outdoorCoordinates.longitude,
+			this.wiseml.setup.origin.outdoorCoordinates.x,
+			this.wiseml.setup.origin.outdoorCoordinates.y,
+			this.wiseml.setup.origin.outdoorCoordinates.z,
+			this.wiseml.setup.origin.outdoorCoordinates.phi,
+			this.wiseml.setup.origin.outdoorCoordinates.theta,
+			this.wiseml.setup.origin.outdoorCoordinates.rho
+	);
 
-	this.origin = coordinates.blh2xyz(wiseMLOrigin);
+	this.wiseml.setup.node.forEach(this.addNodeIfHasPosition, this);
+};
 
-	// Parse every node
-	for (key in this.wiseml.setup.node) {
-		var node = this.wiseml.setup.node[key];
-		if (node.position)
-			this.parseNode(node);
+WiseMLParser.prototype.addNodeIfHasPosition = function(node) {
+	if (!node.position) {
+		console.log("Not adding node \"%s\" to map as position data is missing", node.id);
+	} else if (node.position.indoorCoordinates) {
+		console.log("Not adding node \"%s\" to map as indoor coordinates are not supported", node.id);
+	} else if (node.position.outdoorCoordinates) {
+		var id = node.id;
+		var coordinate = new Coordinate(
+				node.position.outdoorCoordinates.latitude,
+				node.position.outdoorCoordinates.longitude,
+				node.position.outdoorCoordinates.x,
+				node.position.outdoorCoordinates.y,
+				node.position.outdoorCoordinates.z,
+				node.position.outdoorCoordinates.phi,
+				node.position.outdoorCoordinates.theta,
+				node.position.outdoorCoordinates.rho
+		);
+		this.nodes.push(new Node(id, node.description, coordinate));
 	}
-
-};
-
-WiseMLParser.prototype.parseNode = function(node) {
-	var id = this.convertIdToIp(node.id);
-
-	var rotCo = coordinates.rotate(new Coordinate(node.position.x,
-			node.position.y, node.position.z, this.origin.phi,
-			this.origin.theta), this.origin.phi);
-
-	var absCo = coordinates.absolute(this.origin, rotCo);
-	var finalCo = coordinates.xyz2blh(absCo);
-	var n = new Node(id, node.description, finalCo);
-
-	this.nodes.push(n);
-};
-
-WiseMLParser.prototype.convertIdToIp = function(id) {
-	// id = id.substring(id.lastIndexOf(":")+3);
-	return id;
 };
 
 WiseMLParser.prototype.buildView = function(parentDiv) {
@@ -69,11 +69,7 @@ WiseMLParser.prototype.buildView = function(parentDiv) {
 
 	// Delete old overlays
 	this.deleteOverlays();
-
-	var self = this;
-	$.each(this.nodes, function(index, node) {
-		self.addMarker(node);
-	});
+	this.nodes.forEach(this.addMarker, this);
 
 	// Adjust map
 	this.setBounds();
@@ -81,53 +77,61 @@ WiseMLParser.prototype.buildView = function(parentDiv) {
 
 /**
  * Adds a Marker to the map
- * 
+ *
  */
-WiseMLParser.prototype.addMarker = function(n) {
-	var markerLatLng = new google.maps.LatLng(n.c.x, n.c.y);
+WiseMLParser.prototype.addMarker = function(node) {
 
-	
+	var markerLatLng = new google.maps.LatLng(node.c.latitude, node.c.longitude);
+
 	// Sample custom marker code created with Google Map Custom Marker Maker
 	// http://powerhut.co.uk/googlemaps/custom_markers.php
 
 	var image = new google.maps.MarkerImage(
-			  'img/node.png',
-			  new google.maps.Size(25,19),
-			  new google.maps.Point(0,0),
-			  new google.maps.Point(13,19)
-			);
+			'img/node.png',
+			new google.maps.Size(25, 19),
+			new google.maps.Point(0, 0),
+			new google.maps.Point(13, 19)
+	);
 
-			var shadow = new google.maps.MarkerImage(
-			  'img/node_shadow.png',
-			  new google.maps.Size(39,19),
-			  new google.maps.Point(0,0),
-			  new google.maps.Point(13,19)
-			);
-	
+	var shadow = new google.maps.MarkerImage(
+			'img/node_shadow.png',
+			new google.maps.Size(39, 19),
+			new google.maps.Point(0, 0),
+			new google.maps.Point(13, 19)
+	);
+
 	var shape = {
-			  coord: [18,2,20,3,22,4,23,5,23,6,22,7,21,8,20,9,19,10,18,11,16,12,16,13,14,14,14,15,14,16,11,16,11,15,11,14,9,13,9,12,7,11,7,10,5,9,4,8,2,7,2,6,2,5,3,4,5,3,7,2,18,2],
-			  type: 'poly'
-			};
-			
+		coord : [
+			18, 2, 20, 3, 22, 4, 23, 5, 23, 6, 22, 7, 21, 8, 20, 9, 19, 10, 18, 11, 16, 12, 16, 13, 14, 14, 14, 15, 14,
+			16, 11, 16, 11, 15, 11, 14, 9, 13, 9, 12, 7, 11, 7, 10, 5, 9, 4, 8, 2, 7, 2, 6, 2, 5, 3, 4, 5, 3, 7, 2, 18,
+			2
+		],
+		type : 'poly'
+	};
+
 	var marker = new google.maps.Marker({
 		position : markerLatLng,
 		map : this.map,
-		title : "Sensor: " + n.id,
-		icon: image,
-		shadow: shadow,
-		shape: shape,
-		urn : n.id
+		title : "Sensor: " + node.id,
+		icon : image,
+		shadow : shadow,
+		shape : shape,
+		urn : node.id
 	});
 
-	this.infoWindows[n.id] = new google.maps.InfoWindow();
-	this.infoWindows[n.id].setContent("<h5>Sensor: " + n.id + "</h5><p style=\"width:200px;\">" + n.desc + "</p>");
+	this.infoWindows[node.id] = new google.maps.InfoWindow();
+	this.infoWindows[node.id].setContent(
+			'<h5>' + node.id + '</h5>'
+			+ (JSON.stringify(node.c) + '</br>')
+			+ (node.desc ? node.desc + '</br>' : '')
+	);
 
 	var self = this;
 	google.maps.event.addListener(marker, 'click', function() {
 		for (var nodeUrn in self.infoWindows) {
 			self.infoWindows[nodeUrn].close();
 		}
-		self.infoWindows[n.id].open(self.map, marker);
+		self.infoWindows[node.id].open(self.map, marker);
 	});
 
 	this.markersArray.push(marker);
@@ -135,11 +139,11 @@ WiseMLParser.prototype.addMarker = function(n) {
 
 /**
  * Initializes the google map
- * 
+ *
  */
 WiseMLParser.prototype.initMap = function() {
 	// House 64
-	var latlng = new google.maps.LatLng(53.8340, 10.7043);
+	var latlng = new google.maps.LatLng(0, 0);
 
 	var myOptions = {
 		zoom : 17,
@@ -147,14 +151,13 @@ WiseMLParser.prototype.initMap = function() {
 		mapTypeId : google.maps.MapTypeId.HYBRID
 	};
 
-	this.markersArray = new Array();
-
+	this.markersArray = [];
 	this.map = new google.maps.Map(this.view.get()[0], myOptions);
 };
 
 /**
  * Deletes all markers in the array by removing references to them
- * 
+ *
  */
 WiseMLParser.prototype.deleteOverlays = function() {
 
@@ -162,24 +165,24 @@ WiseMLParser.prototype.deleteOverlays = function() {
 		marker.setMap(null);
 	});
 
-	this.markersArray = new Array();
+	this.markersArray = [];
 };
 
 /**
  * Centers, pans and zooms the map such that all markers are visible
- * 
+ *
  */
 WiseMLParser.prototype.setBounds = function() {
 
 	if (this.markersArray.length > 1) {
 		var bounds = new google.maps.LatLngBounds();
-		
+
 		$.each(this.markersArray, function(index, marker) {
 			bounds.extend(marker.getPosition());
 		});
-		
+
 		this.map.fitBounds(bounds);
-		
+
 	} else if (this.markersArray.length == 1) {
 		this.map.setCenter(this.markersArray[0].getPosition());
 	}
@@ -187,12 +190,12 @@ WiseMLParser.prototype.setBounds = function() {
 
 /**
  * Produces rdf from the nodes
- * 
+ *
  */
 WiseMLParser.prototype.rdf = function() {
 	var rdf = "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n";
 
-	for ( var j = 0; j < nodes.length; j++) {
+	for (var j = 0; j < nodes.length; j++) {
 		rdf += "<" + nodes[j].id + "> ";
 		rdf += "<" + predLat + "> ";
 		rdf += "\"" + nodes[j].c.x + "\"^^xsd:double .\n";
@@ -205,29 +208,32 @@ WiseMLParser.prototype.rdf = function() {
 
 /**
  * Represents a location
- * 
+ *
  */
-function Coordinate(x, y, z, phi, theta) {
+function Coordinate(latitude, longitude, x, y, z, phi, theta, rho) {
+	this.latitude = latitude;
+	this.longitude = longitude;
 	this.x = x;
 	this.y = y;
 	this.z = z;
 	this.phi = phi;
 	this.theta = theta;
+	this.rho = rho;
 }
 
 /**
  * Represents a node and its location
- * 
+ *
  */
 function Node(id, desc, c) {
-	this.desc = desc;
 	this.id = id;
+	this.desc = desc;
 	this.c = c;
 }
 
 /**
  * Helper class with functions for location-calculations
- * 
+ *
  */
 var coordinates = {
 	WGS84_CONST : 298.257222101,
@@ -277,7 +283,7 @@ var coordinates = {
 				.atan((z + (e2 * e2 * this.WGS84_B * Math.pow(Math.sin(theta),
 						3)))
 						/ (p - (e1 * e1 * this.WGS84_A * Math.pow(Math
-								.cos(theta), 3))));
+						.cos(theta), 3))));
 
 		var eta2 = e2 * e2 * Math.pow(Math.cos(b), 2);
 		var v = Math.sqrt(1.0 + eta2);
