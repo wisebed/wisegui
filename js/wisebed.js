@@ -31,14 +31,16 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 
 		var self = this;
 		this.socket = new WebSocket(getWebSocketBaseUri() + '/events');
-		this.socket.onmessage = function(event) {
-			var deviceEvent = JSON.parse(event.data);
-			if (deviceEvent.type == 'devicesAttached') {
-				self.onDevicesAttached(deviceEvent);
-			} else if (deviceEvent.type == 'devicesDetached') {
-				self.onDevicesDetached(deviceEvent);
+		this.socket.onmessage = function(evt) {
+			var event = JSON.parse(evt.data);
+			if (event.type == 'keepAlive') {
+				// ignore
+			} else if (event.type == 'devicesAttached') {
+				self.onDevicesAttached(event);
+			} else if (event.type == 'devicesDetached') {
+				self.onDevicesDetached(event);
 			} else {
-				console.log("Received unknown event over event bus: " + deviceEvent);
+				console.log("Received unknown event over event bus: " + event);
 			}
 		};
 		this.socket.onopen  = function(event) { self.onOpen(event);  };
