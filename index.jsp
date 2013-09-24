@@ -1,4 +1,5 @@
 <%@ page import="de.uniluebeck.itm.tr.iwsn.portal.PortalServerConfig" %>
+<%@ page import="de.uniluebeck.itm.tr.iwsn.portal.WiseGuiServiceConfig" %>
 <!DOCTYPE html >
 <html>
 <head>
@@ -45,9 +46,8 @@
 
 	<script type="text/javascript">
 
-		var l = window.location;
-		var wisebedWebSocketBaseUrl = 'ws://' + l.host + '<%= getServletConfig().getInitParameter(PortalServerConfig.WEBSOCKET_CONTEXT_PATH) %>';
-		var wisebedBaseUrl = l.protocol + '//' + l.host + '<%= getServletConfig().getInitParameter(PortalServerConfig.REST_API_CONTEXT_PATH) %>';
+		var wisebedWebSocketBaseUrl = '<%= getServletConfig().getInitParameter(WiseGuiServiceConfig.WISEGUI_WEBSOCKET_URI) %>';
+		var wisebedBaseUrl = '<%= getServletConfig().getInitParameter(WiseGuiServiceConfig.WISEGUI_REST_API_BASE_URI) %>';
 
 	</script>
 
