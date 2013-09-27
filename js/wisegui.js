@@ -3956,17 +3956,9 @@ function getLoginDialog(testbedId) {
 }
 
 function navigateToExperiment(testbedId, reservation) {
-
-	wisebed.experiments.getUrl(
-			reservation,
-			function(experimentUrl){
-
-				var experimentId = experimentUrl.substr(experimentUrl.lastIndexOf('/') + 1);
-				navigateTo(testbedId, experimentId);
-
-			},
-			WiseGui.showAjaxError
-	);
+	var experimentUrl = wisebed.experiments.getUrl(reservation);
+	var experimentId = experimentUrl.substr(experimentUrl.lastIndexOf('/') + 1);
+	navigateTo(testbedId, experimentId);
 }
 
 function navigateTo(testbedId, experimentId) {

@@ -190,27 +190,11 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 			});
 		};
 
-		this.getUrl = function(reservation, callbackDone, callbackError) {
-
+		this.getUrl = function(reservation) {
 			var secretReservationKeys = {
 				reservations: [reservation.secretReservationKey]
 			};
-
-			var succ = function(data, textStatus, jqXHR) {
-				// Headers are empty in Cross-Site-Environment
-				// callbackDone(jqXHR.getResponseHeader("Location"))
-				callbackDone(jqXHR.responseText);
-			};
-
-			$.ajax({
-				url         : getBaseUri() + "/experiments",
-				type        : "POST",
-				data        : JSON.stringify(secretReservationKeys, null, '  '),
-				contentType : "application/json; charset=utf-8",
-				success     : succ,
-				error       : callbackError,
-				xhrFields   : { withCredentials: true }
-			});
+			return getBaseUri() + "/experiments/" + btoa(JSON.stringify(secretReservationKeys));
 		};
 
 		this.areNodesConnected = function(nodeUrns, callbackDone, callbackError) {
