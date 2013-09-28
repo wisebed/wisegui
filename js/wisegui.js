@@ -553,8 +553,8 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 		that.wiseMlParser = wiseMlParser;
 		
 		$.each(wiseMlParser.markersArray, function (index, marker) {
-			google.maps.event.clearListeners(marker, 'click');
-			google.maps.event.addListener(marker, 'click', function (){
+			wiseMlParser.mapSpiderfier.clearListeners('click');
+			wiseMlParser.mapSpiderfier.addListener('click', function(marker, event) {
 				 if(marker.getIcon().url == 'img/node.png'){
 					 wiseMlParser.map.selectURNs([marker.urn]);
 				 }else{

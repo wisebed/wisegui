@@ -29,6 +29,8 @@
 	<script type="text/javascript" src="js/lib/jquery-ui.min.1.8.17.js"></script>
 
 	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+	<script type="text/javascript" src="js/lib/oms.min.js"></script>
+	<script type="text/javascript" src="js/lib/markerclusterer_packed.js"></script>
 
 	<script type="text/javascript" src="js/lib/bootstrap.min.js"></script>
 
