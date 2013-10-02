@@ -32,9 +32,10 @@ var WiseGui = new function() {
 
 	var self = this;
 	this.showAjaxError = function(jqXHR, textStatus, errorThrown) {
+		console.log(jqXHR);
 		var message = $('<h2>Error while loading data!</h2>'
 				+ '<h3>jqXHR</h3>'
-				+ (jqXHR.readState ? ('readyState = ' + jqXHR.readyState + '<br/>') : '')
+				+ (jqXHR.readyState ? ('readyState = ' + jqXHR.readyState + '<br/>') : '')
 				+ (jqXHR.status ? ('status = ' + jqXHR.status + '<br/>') : '')
 				+ (jqXHR.responseText ? ('responseText = <pre>' + jqXHR.responseText + '</pre><br/>') : '')
 				+ '<h3>textStatus</h3>'
@@ -1679,11 +1680,12 @@ var WiseGuiReservationObserver = function() {
 
 WiseGuiReservationObserver.prototype.fetchReservationsAndProcess = function(testbedId) {
 	var self = this;
+	console.log("WiseGuiReservationObserver fetching personal reservations...");
 	wisebed.reservations.getPersonal(
 			null,
 			null,
 			function(reservations) {self.processReservationsFetched(testbedId, reservations.reservations);},
-			null
+			WiseGui.showAjaxError
 	);
 };
 

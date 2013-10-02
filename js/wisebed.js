@@ -99,6 +99,7 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 			var queryUrl = getBaseUri() + "/reservations?userOnly=true" +
 					(from ? ("&from=" + from.toISOString()) : "") +
 					(to ? ("&to="+to.toISOString()) : "");
+			console.log("Calling " + queryUrl);
 			$.ajax({
 				url       : queryUrl,
 				success   : callbackDone,
