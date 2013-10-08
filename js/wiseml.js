@@ -165,7 +165,7 @@ WiseMLParser.prototype.addMarker = function(node) {
 	);
 
 	var self = this;
-	google.maps.event.addListener(marker, 'click', function() {
+	this.mapSpiderfier.addListener('click', function(marker, event) {
 		for (var nodeUrn in self.infoWindows) {
 			self.infoWindows[nodeUrn].close();
 		}
@@ -173,6 +173,8 @@ WiseMLParser.prototype.addMarker = function(node) {
 	});
 
 	this.markersArray.push(marker);
+	this.mapSpiderfier.addMarker(marker);
+	this.markerCluster.addMarker(marker);
 };
 
 /**
@@ -180,7 +182,7 @@ WiseMLParser.prototype.addMarker = function(node) {
  *
  */
 WiseMLParser.prototype.initMap = function() {
-	// House 64
+	var self = this;
 	var latlng = new google.maps.LatLng(0, 0);
 
 	var myOptions = {
@@ -191,6 +193,45 @@ WiseMLParser.prototype.initMap = function() {
 
 	this.markersArray = [];
 	this.map = new google.maps.Map(this.view.get()[0], myOptions);
+
+	var spiderfierOptions = {
+		markersWontMove: false,
+		markersWontHide: true,
+		keepSpiderfied:  true,
+		nearByDistance:  10
+	};
+	this.mapSpiderfier = new OverlappingMarkerSpiderfier(this.map, spiderfierOptions);
+
+	var clusterOptions = {
+		//maxZoom:     19,
+		gridSize:    10,
+		zoomOnClick: false
+    };
+	this.markerCluster = new MarkerClusterer(this.map, [], clusterOptions);
+
+	// handle clicks on clusters: zoom to cluster or spiderfy if near enough
+	google.maps.event.addListener(this.markerCluster, "click", function (c) {
+
+		var hideAndSpiderfy = function() {
+			var clustered = c.getMarkers();
+			$.each(clustered, function(index, marker) {
+				marker.setMap(self.map);
+			});
+			c.clusterIcon_.hide();
+			google.maps.event.trigger(clustered[0], 'click');
+		};
+
+		if ( self.map.getZoom() > 19 ) {
+			hideAndSpiderfy();
+		} else {
+			self.map.fitBounds(c.getBounds());
+		}
+		
+	});
+
+	this.mapSpiderfier.addListener('unspiderfy', function(markers) {
+		self.markerCluster.repaint();
+	});
 };
 
 /**
@@ -204,6 +245,8 @@ WiseMLParser.prototype.deleteOverlays = function() {
 	});
 
 	this.markersArray = [];
+	this.mapSpiderfier.clearMarkers();
+	this.markerCluster.clearMarkers();
 };
 
 /**
