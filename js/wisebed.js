@@ -405,9 +405,9 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 		return nodeUrns;
 	};
 
-	this.getTestbeds = function(callbackDone, callbackError) {
+	this.getTestbedDescription = function(callbackDone, callbackError) {
 		$.ajax({
-			url       : getBaseUri() + "/testbeds",
+			url       : getBaseUri() + "/testbedDescription",
 			success   : callbackDone,
 			error     : callbackError,
 			context   : document.body,

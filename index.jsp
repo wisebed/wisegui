@@ -61,7 +61,7 @@
 </head>
 
 <body>
-<div id="WisebedContainer" class="container"></div>
+<div id="WiseGuiContainer" class="container"></div>
 </body>
 
 </html>
