@@ -503,7 +503,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 
 	 //Show specialized google map for reservation 
 	var showMap = function(wiseML){
-		var wiseMlParser = new WiseMLParser(wiseML, tabs.find('#WiseGuiTestbedMakeReservationMap'));
+		var wiseMlParser = new WiseGuiGoogleMapsView(wiseML, tabs.find('#WiseGuiTestbedMakeReservationMap'));
 		wiseMlParser.map.enableKeyDragZoom();
 		wiseMlParser.map.selectedURNs = [];
 		that.wiseMlParser = wiseMlParser;
@@ -3679,7 +3679,7 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 						+ '</div>');
 			}
 			overviewTab.append('<div class="row">'
-					+ '	<div class="span12 WiseGuiTestbedDetailsOverviewMap gMap"></div>'
+					+ '	<div class="span12 WiseGuiTestbedDetailsOverviewMap"></div>'
 					+ '</div>');
 			var overviewTabMapRow = overviewTab.find('.WiseGuiTestbedDetailsOverviewMap');
 
@@ -3692,13 +3692,7 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 			new WiseGuiNodeTable(wiseML, nodesTabDiv, false, true);
 
 			// Show google map
-			var wiseMlParser = new WiseMLParser(wiseML, overviewTabMapRow);
-
-			/*
-			tabs.find('li a[href=#WiseGuiTestbedDetailsOverview').bind('change', function(e) {
-				google.maps.event.trigger(wiseMlParser.map, 'resize');
-			});
-			*/
+			var wiseMlParser = new WiseGuiGoogleMapsView(wiseML, overviewTabMapRow);
 		},
 		WiseGui.showAjaxError
 	);

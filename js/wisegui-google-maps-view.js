@@ -33,7 +33,7 @@ function Node(id, desc, c) {
 /**
  * Parses WiseML
  */
-var WiseMLParser = function(wisemlParameter, parentDiv) {
+var WiseGuiGoogleMapsView = function(wisemlParameter, parentDiv) {
 	this.wiseml = wisemlParameter;
 	this.origin = null;
 	this.nodes = [];
@@ -46,32 +46,31 @@ var WiseMLParser = function(wisemlParameter, parentDiv) {
 
 };
 
-WiseMLParser.prototype.hasOrigin = function() {
+WiseGuiGoogleMapsView.prototype.hasOrigin = function() {
 	return this.origin.latitude != 0 && this.origin.longitude != 0;
 };
 
-WiseMLParser.prototype.parse = function() {
+WiseGuiGoogleMapsView.prototype.parse = function() {
 
 	if (!this.wiseml.setup || !this.wiseml.setup.origin || !this.wiseml.setup.origin.outdoorCoordinates) {
 		this.origin = new Coordinate(0, 0, 0, 0, 0, 0, 0, 0);
-		return;
+	} else {
+		this.origin = new Coordinate(
+				this.wiseml.setup.origin.outdoorCoordinates.latitude,
+				this.wiseml.setup.origin.outdoorCoordinates.longitude,
+				this.wiseml.setup.origin.outdoorCoordinates.x,
+				this.wiseml.setup.origin.outdoorCoordinates.y,
+				this.wiseml.setup.origin.outdoorCoordinates.z,
+				this.wiseml.setup.origin.outdoorCoordinates.phi,
+				this.wiseml.setup.origin.outdoorCoordinates.theta,
+				this.wiseml.setup.origin.outdoorCoordinates.rho
+		);
 	}
-
-	this.origin = new Coordinate(
-			this.wiseml.setup.origin.outdoorCoordinates.latitude,
-			this.wiseml.setup.origin.outdoorCoordinates.longitude,
-			this.wiseml.setup.origin.outdoorCoordinates.x,
-			this.wiseml.setup.origin.outdoorCoordinates.y,
-			this.wiseml.setup.origin.outdoorCoordinates.z,
-			this.wiseml.setup.origin.outdoorCoordinates.phi,
-			this.wiseml.setup.origin.outdoorCoordinates.theta,
-			this.wiseml.setup.origin.outdoorCoordinates.rho
-	);
 
 	this.wiseml.setup.node.forEach(this.addNodeIfHasPosition, this);
 };
 
-WiseMLParser.prototype.addNodeIfHasPosition = function(node) {
+WiseGuiGoogleMapsView.prototype.addNodeIfHasPosition = function(node) {
 	if (!node.position) {
 		console.log("Not adding node \"%s\" to map as position data is missing", node.id);
 	} else if (node.position.indoorCoordinates) {
@@ -92,21 +91,24 @@ WiseMLParser.prototype.addNodeIfHasPosition = function(node) {
 	}
 };
 
-WiseMLParser.prototype.hasNodePositions = function() {
-	var hasAnyPosition = false;
-	this.nodes.forEach(function(node) { if (node.hasLatLng()) { hasAnyPosition = true; }});
-	return hasAnyPosition;
+WiseGuiGoogleMapsView.prototype.hasNodePositions = function() {
+	for (var i=0; i<this.nodes.length; i++) {
+		if (this.nodes[i].hasLatLng()) {
+			return true;
+		}
+	}
+	return false;
 };
 
-WiseMLParser.prototype.buildView = function(parentDiv) {
+WiseGuiGoogleMapsView.prototype.buildView = function(parentDiv) {
 	
-	this.view = $('<div class="gMap" style="height:500px;"/>');
-	parentDiv.append(this.view);
-
 	var hasNodePositions = this.hasNodePositions();
 	var hasOrigin = this.hasOrigin();
 
 	if (hasNodePositions || hasOrigin) {
+
+		this.view = $('<div class="gMap" style="height:500px;"/>');
+		parentDiv.append(this.view);
 
 		this.initMap();
 
@@ -127,7 +129,7 @@ WiseMLParser.prototype.buildView = function(parentDiv) {
  *
  * @param node a google.maps.LatLng instance
  */
-WiseMLParser.prototype.getLatLng = function(node) {
+WiseGuiGoogleMapsView.prototype.getLatLng = function(node) {
 	if (node.c.latitude && node.c.longitude) {
 		return new google.maps.LatLng(node.c.latitude, node.c.longitude);
 	} else if (node.c.x && node.c.y && node.c.z) {
@@ -144,7 +146,7 @@ WiseMLParser.prototype.getLatLng = function(node) {
  * Adds a Marker to the map
  *
  */
-WiseMLParser.prototype.addMarker = function(node) {
+WiseGuiGoogleMapsView.prototype.addMarker = function(node) {
 
 	var markerLatLng = this.getLatLng(node);
 
@@ -183,7 +185,7 @@ WiseMLParser.prototype.addMarker = function(node) {
  * Initializes the google map
  *
  */
-WiseMLParser.prototype.initMap = function() {
+WiseGuiGoogleMapsView.prototype.initMap = function() {
 
 	var self = this;
 	var latlng = this.hasOrigin() ?
@@ -243,7 +245,7 @@ WiseMLParser.prototype.initMap = function() {
  * Deletes all markers in the array by removing references to them
  *
  */
-WiseMLParser.prototype.deleteOverlays = function() {
+WiseGuiGoogleMapsView.prototype.deleteOverlays = function() {
 
 	$.each(this.markersArray, function(index, marker) {
 		marker.setMap(null);
@@ -258,7 +260,7 @@ WiseMLParser.prototype.deleteOverlays = function() {
  * Centers, pans and zooms the map such that all markers are visible
  *
  */
-WiseMLParser.prototype.setBounds = function() {
+WiseGuiGoogleMapsView.prototype.setBounds = function() {
 
 	if (this.markersArray.length > 1) {
 		var bounds = new google.maps.LatLngBounds();
@@ -278,7 +280,7 @@ WiseMLParser.prototype.setBounds = function() {
  * Produces rdf from the nodes
  *
  */
-WiseMLParser.prototype.rdf = function() {
+WiseGuiGoogleMapsView.prototype.rdf = function() {
 	var rdf = "@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n";
 
 	for (var j = 0; j < nodes.length; j++) {
