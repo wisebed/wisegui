@@ -26,7 +26,7 @@ function Node(id, desc, c) {
 	this.desc = desc;
 	this.c = c;
 	this.hasLatLng = function() {
-		return c.latitude && c.longitude;
+		return c.latitude !== undefined && c.longitude !== undefined;
 	};
 }
 
@@ -47,23 +47,24 @@ var WiseGuiGoogleMapsView = function(wisemlParameter, parentDiv) {
 };
 
 WiseGuiGoogleMapsView.prototype.hasOrigin = function() {
-	return this.origin.latitude != 0 && this.origin.longitude != 0;
+	return this.origin.latitude !== undefined && this.origin.longitude !== undefined;
 };
 
 WiseGuiGoogleMapsView.prototype.parse = function() {
 
 	if (!this.wiseml.setup || !this.wiseml.setup.origin || !this.wiseml.setup.origin.outdoorCoordinates) {
-		this.origin = new Coordinate(0, 0, 0, 0, 0, 0, 0, 0);
+		this.origin = new Coordinate(undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
 	} else {
+		var c = this.wiseml.setup.origin.outdoorCoordinates;
 		this.origin = new Coordinate(
-				this.wiseml.setup.origin.outdoorCoordinates.latitude,
-				this.wiseml.setup.origin.outdoorCoordinates.longitude,
-				this.wiseml.setup.origin.outdoorCoordinates.x,
-				this.wiseml.setup.origin.outdoorCoordinates.y,
-				this.wiseml.setup.origin.outdoorCoordinates.z,
-				this.wiseml.setup.origin.outdoorCoordinates.phi,
-				this.wiseml.setup.origin.outdoorCoordinates.theta,
-				this.wiseml.setup.origin.outdoorCoordinates.rho
+				(c.latitude == null ? undefined : c.latitude),
+				(c.longitude == null ? undefined : c.longitude),
+				(c.x == null ? undefined : c.x),
+				(c.y == null ? undefined : c.y),
+				(c.z == null ? undefined : c.z),
+				(c.phi == null ? undefined : c.phi),
+				(c.theta == null ? undefined : c.theta),
+				(c.rho == null ? undefined : c.rho)
 		);
 	}
 
@@ -121,6 +122,15 @@ WiseGuiGoogleMapsView.prototype.buildView = function(parentDiv) {
 
 		// Adjust map
 		this.setBounds();
+	} else {
+		this.view = $('<div class="gMap" style="height:500px;">'
+			+ '<span class="label label-warning">Map View Not Available</span>'
+			+ '<p>'
+			+ 'The testbed meta data does not contain any information about the testbeds location or the location '
+			+ 'of the nodes therein. Therefore the map can not be rendered.'
+			+ '</p>'
+			+ '</div>');
+		parentDiv.append(this.view);
 	}
 };
 

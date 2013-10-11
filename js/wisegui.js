@@ -3666,9 +3666,9 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 
 	parentDiv.append($('<h2 class="WiseGuiTestbedTitle">'+testbedDescription.name+'</h2>'));
 
-	var tabs = $(	
+	var tabs = $(
 			  '<ul class="nav nav-tabs">'
-			+ '	<li class="active"><a href="#WiseGuiTestbedDetailsOverview">Overview</a></li>'
+			+ '	<li class="active"><a href="#WiseGuiTestbedDetailsOverview">Map View</a></li>'
 			+ '	<li><a href="#WiseGuiTestbedDetailsNodes">Nodes</a></li>'
 			+ '	<li><a href="#WiseGuiTestbedDetailsReservations">Reservations</a></li>'
 			+ '	<li class="pull-right"><a href="#WiseGuiTestbedDetailsWiseMLXML">WiseML (XML)</a></li>'
