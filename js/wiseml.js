@@ -25,6 +25,9 @@ function Node(id, desc, c) {
 	this.id = id;
 	this.desc = desc;
 	this.c = c;
+	this.hasLatLng = function() {
+		return c.latitude && c.longitude;
+	};
 }
 
 /**
@@ -41,6 +44,10 @@ var WiseMLParser = function(wisemlParameter, parentDiv) {
 	this.parse();
 	this.buildView(parentDiv);
 
+};
+
+WiseMLParser.prototype.hasOrigin = function() {
+	return this.origin.latitude != 0 && this.origin.longitude != 0;
 };
 
 WiseMLParser.prototype.parse = function() {
@@ -85,18 +92,34 @@ WiseMLParser.prototype.addNodeIfHasPosition = function(node) {
 	}
 };
 
+WiseMLParser.prototype.hasNodePositions = function() {
+	var hasAnyPosition = false;
+	this.nodes.forEach(function(node) { if (node.hasLatLng()) { hasAnyPosition = true; }});
+	return hasAnyPosition;
+};
+
 WiseMLParser.prototype.buildView = function(parentDiv) {
+	
 	this.view = $('<div class="gMap" style="height:500px;"/>');
 	parentDiv.append(this.view);
 
-	this.initMap();
+	var hasNodePositions = this.hasNodePositions();
+	var hasOrigin = this.hasOrigin();
 
-	// Delete old overlays
-	this.deleteOverlays();
-	this.nodes.forEach(this.addMarker, this);
+	if (hasNodePositions || hasOrigin) {
 
-	// Adjust map
-	this.setBounds();
+		this.initMap();
+
+		// Delete old overlays
+		this.deleteOverlays();
+
+		if (hasNodePositions) {
+			this.nodes.forEach(this.addMarker, this);
+		}
+
+		// Adjust map
+		this.setBounds();
+	}
 };
 
 /**
@@ -161,8 +184,11 @@ WiseMLParser.prototype.addMarker = function(node) {
  *
  */
 WiseMLParser.prototype.initMap = function() {
+
 	var self = this;
-	var latlng = new google.maps.LatLng(0, 0);
+	var latlng = this.hasOrigin() ?
+			new google.maps.LatLng(this.origin.latitude, this.origin.longitude) :
+			new google.maps.LatLng(0, 0);
 
 	var myOptions = {
 		zoom : 17,
