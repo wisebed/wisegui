@@ -152,7 +152,6 @@ WiseMLParser.prototype.addMarker = function(node) {
 		position : markerLatLng,
 		map : this.map,
 		title : "Sensor: " + node.id,
-		icon : image,
 		shape : shape,
 		urn : node.id
 	});

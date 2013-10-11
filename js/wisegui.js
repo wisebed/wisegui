@@ -107,7 +107,7 @@ WiseGuiNavigationViewer.prototype.buildView = function() {
 	this.overviewButtonLi         = this.primaryMenu.find('li.WiseGuiNavOverviewButton').first();
 	this.overviewButton           = this.overviewButtonLi.find('a').first();
 
-	this.experimentDropDown = new WiseGuiExperimentDropDown();
+	this.experimentDropDown = new WiseGuiReservationsDropDown();
 	this.primaryMenu.append(this.experimentDropDown.view);
 
 	this.secondaryMenu.append('<li class="WiseGuiNavReservationsButton"><a href="#">Make Reservation</a></li>'
@@ -158,11 +158,11 @@ WiseGuiNavigationViewer.prototype.buildView = function() {
 	$(window).bind('wisegui-logged-out', function() { self.onLoggedOutEvent(); });
 	$(window).bind('wisegui-navigation-event', function(e, navigationData) {
 		if (navigationData.nav == 'experiment') {
-			self.experimentDropDown.setActive(true);
+			self.experimentDropDown.view.toggleClass('active', true);
 			self.overviewButtonLi.removeClass('active');
 		} else {
 			self.overviewButtonLi.addClass('active');
-			self.experimentDropDown.setActive(false);
+			self.experimentDropDown.view.toggleClass('active', false);
 		}
 	});
 };
@@ -469,7 +469,8 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 
 	var p_nodes = $("<p></p>");
 
-	var tabs = $('<ul class="nav nav-tabs">'
+	var tabs = $(
+			  '<ul class="nav nav-tabs">'
 			+ '	<li class="active"><a href="#WiseGuiTestbedMakeReservationList" data-toggle="tab">List</a></li>'
 			+ '	<li><a href="#WiseGuiTestbedMakeReservationMap" data-toggle="tab">Map</a></li>'
 			+ '</ul>'
@@ -1888,14 +1889,13 @@ WiseGuiNotificationsViewer.prototype.buildView = function() {
 
 /**
  * #################################################################
- * WiseGuiExperimentDropDown
+ * WiseGuiReservationsDropDown
  * #################################################################
  * 
  * Consumes wisegui events of type 'wisegui-reservation-ended', 'wisegui-reservation-started', 'wisegui-reservation-added'.
- * 
  */
 
-var WiseGuiExperimentDropDown = function() {
+var WiseGuiReservationsDropDown = function() {
 
 	this.view = null;
 
@@ -1916,21 +1916,15 @@ var WiseGuiExperimentDropDown = function() {
 	this.buildView();
 };
 
-WiseGuiExperimentDropDown.prototype.setActive = function(active) {
-	if (active) { this.view.addClass('active');    }
-	else        { this.view.removeClass('active'); }
-};
-
-WiseGuiExperimentDropDown.prototype.update = function() {
+WiseGuiReservationsDropDown.prototype.update = function() {
 	var self = this;
 	wisebed.reservations.getPersonal(null, null, function(reservations) {
 		self.onReservationsChangedEvent(reservations.reservations);
 	});
 };
 
-WiseGuiExperimentDropDown.prototype.onReservationsChangedEvent = function(reservations) {
+WiseGuiReservationsDropDown.prototype.onReservationsChangedEvent = function(reservations) {
 
-	// this.view.find('.dropdown-menu li').remove();
 	var menu = this.view.find('.dropdown-menu');
 	menu.empty();
 
@@ -1966,7 +1960,7 @@ WiseGuiExperimentDropDown.prototype.onReservationsChangedEvent = function(reserv
 
 };
 
-WiseGuiExperimentDropDown.prototype.buildView = function() {
+WiseGuiReservationsDropDown.prototype.buildView = function() {
 	this.view = $('<li class="dropdown">'
 			+ '	<a href="#" class="dropdown-toggle" data-toggle="dropdown">Reservations</a>'
 			+ '	<ul class="dropdown-menu">'
@@ -1975,6 +1969,7 @@ WiseGuiExperimentDropDown.prototype.buildView = function() {
 
 	var li = $('<li style="padding:4px 15px">No active reservations currently</li>');
 	this.view.find('.dropdown-menu').append(li);
+	this.view.find('.dropdown-menu').append($('<li class="divider"/>'));
 };
 
 /**
@@ -2359,22 +2354,22 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '						<li><strong>Show Columns:</strong></li>'
 			+ '						<li>'
 			+ '							<label class="radio">'
-		  + '								<input type="checkbox" data-col="time" checked>'
-		  + '									Timestamp'
-		  + '							</label>'
-	    + '						</li>'	
+			+ '								<input type="checkbox" data-col="time" checked>'
+			+ '									Timestamp'
+			+ '							</label>'
+	    	+ '						</li>'	
 			+ '						<li>'
 			+ '							<label class="radio">'
-		  + '								<input type="checkbox" data-col="urn" checked>'
-		  + '									Node URN'
-		  + '							</label>'
-	    + '						</li>'
+			+ '								<input type="checkbox" data-col="urn" checked>'
+			+ '									Node URN'
+			+ '							</label>'
+	    	+ '						</li>'
 			+ '						<li>'
 			+ '							<label class="radio">'
-		  + '								<input type="checkbox" data-col="message" checked>'
-		  + '									Message'
-		  + '							</label>'
-	    + '						</li>'
+			+ '								<input type="checkbox" data-col="message" checked>'
+			+ '									Message'
+			+ '							</label>'
+			+ '						</li>'
 			+ '					</ul>'
 			+ '				</div>'
 			+ '				<div class="btn-group">'			
@@ -2385,33 +2380,33 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '						<li><strong>Format ouput as:</strong></li>'
 			+ '						<li>'
 			+ '							<label class="radio">'
-		  + '								<input type="radio" name="viewRadio" id="optionsRadios1" value="ascii" checked>'
-		  + '									ASCII'
-		  + '							</label>'
-	    + '						</li>'	
+			+ '								<input type="radio" name="viewRadio" id="optionsRadios1" value="ascii" checked>'
+			+ '									ASCII'
+			+ '							</label>'
+			+ '						</li>'	
 			+ '						<li>'
 			+ '							<label class="radio">'
-		  + '								<input type="radio" name="viewRadio" id="optionsRadios1" value="hex">'
-		  + '									Hex'
-		  + '							</label>'
-	    + '						</li>'
+			+ '								<input type="radio" name="viewRadio" id="optionsRadios1" value="hex">'
+			+ '									Hex'
+			+ '							</label>'
+			+ '						</li>'
 			+ '						<li>'
 			+ '							<label class="radio">'
-		  + '								<input type="radio" name="viewRadio" id="optionsRadios1" value="decimal">'
-		  + '									Decimal'
-		  + '							</label>'
-	    + '						</li>'
+			+ '								<input type="radio" name="viewRadio" id="optionsRadios1" value="decimal">'
+			+ '									Decimal'
+			+ '							</label>'
+			+ '						</li>'
 			+ '						<li>'
 			+ '							<label class="radio">'
-		  + '								<input type="radio" name="viewRadio" id="optionsRadios1" value="binary">'
-		  + '									Binary'
-		  + '							</label>'
-	    + '						</li>'
+			+ '								<input type="radio" name="viewRadio" id="optionsRadios1" value="binary">'
+			+ '									Binary'
+			+ '							</label>'
+			+ '						</li>'
 			+ '						<li>'
-	    + '							<label class="checkbox" title="Show non-printable chars in ASCII mode: e.g. 0x00 gets [NUL]">'
-	    + '								<input id="make-printable" checked type="checkbox">non-printables</input>'
-	    + '							</label>'
-	    + '						</li>'
+			+ '							<label class="checkbox" title="Show non-printable chars in ASCII mode: e.g. 0x00 gets [NUL]">'
+			+ '								<input id="make-printable" checked type="checkbox">non-printables</input>'
+			+ '							</label>'
+			+ '						</li>'
 			+ '					</ul>'
 			+ '				</div>'
 			+ '				<div class="btn-group">'
@@ -2425,24 +2420,24 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '						<li>'
 			+ '							<form class="form-inline">'
 			+ '								<label class="checkbox">'
-	    + '									<input id="auto-scroll" checked="checked" type="checkbox">auto scroll</input>'
-	    + '								</label>'
-	    + '							</form>'
-	    + '						</li>'	
+			+ '									<input id="auto-scroll" checked="checked" type="checkbox">auto scroll</input>'
+			+ '								</label>'
+			+ '							</form>'
+			+ '						</li>'	
 			+ '						<li>'
 			+ '							<form class="form-inline">'
 			+ '								<label title="press enter to save">'
-	    + '									Show <input type="text" value="'+this.outputsNumMessages+'" id="num-outputs" style="width: 30px; height: 10px;"> messages'
-	    + '								</label>'
-	    + '							</form>'
-	    + '						</li>'
-	    + '						<li>'
+			+ '									Show <input type="text" value="'+this.outputsNumMessages+'" id="num-outputs" style="width: 30px; height: 10px;"> messages'
+			+ '								</label>'
+			+ '							</form>'
+			+ '						</li>'
+			+ '						<li>'
 			+ '							<form class="form-inline">'
 			+ '								<label title="Incresing helps if your browser freezes due to too many messages. Press enter to save.">'
-	    + '									Redraw at most every <input type="text" value="'+this.outputsRedrawLimit+'" id="redraw-limit" style="width: 30px; height: 10px;"> ms'
-	    + '								</label>'
-	    + '							</form>'
-	    + '						</li>'
+			+ '									Redraw at most every <input type="text" value="'+this.outputsRedrawLimit+'" id="redraw-limit" style="width: 30px; height: 10px;"> ms'
+			+ '								</label>'
+			+ '							</form>'
+			+ '						</li>'
 			+ '					</ul>'
 			+ '				</div>'
 			+ '			</div>'
@@ -3655,7 +3650,8 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 
 	parentDiv.append($('<h2 class="WiseGuiTestbedTitle">'+testbedDescription.name+'</h2>'));
 
-	var tabs = $('<ul class="nav nav-tabs">'
+	var tabs = $(	
+			  '<ul class="nav nav-tabs">'
 			+ '	<li class="active"><a href="#WiseGuiTestbedDetailsOverview">Overview</a></li>'
 			+ '	<li><a href="#WiseGuiTestbedDetailsNodes">Nodes</a></li>'
 			+ '	<li><a href="#WiseGuiTestbedDetailsReservations">Reservations</a></li>'
@@ -3667,7 +3663,7 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 			+ '	<div class="tab-pane" id="WiseGuiTestbedDetailsNodes"/>'
 			+ '	<div class="tab-pane" id="WiseGuiTestbedDetailsReservations"/>'
 			+ '	<div class="tab-pane" id="WiseGuiTestbedDetailsWiseMLJSON"/>'
-			+ '	<div class="tab-pane" id="WiseGuiTestbedDetailsWiseMLXML"/>'
+			+ ' <div class="tab-pane" id="WiseGuiTestbedDetailsWiseMLXML"/>'
 			+ '</div>');
 
 	parentDiv.append(tabs);
