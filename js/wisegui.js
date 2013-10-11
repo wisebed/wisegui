@@ -3655,8 +3655,8 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 			+ '	<li class="active"><a href="#WiseGuiTestbedDetailsOverview">Overview</a></li>'
 			+ '	<li><a href="#WiseGuiTestbedDetailsNodes">Nodes</a></li>'
 			+ '	<li><a href="#WiseGuiTestbedDetailsReservations">Reservations</a></li>'
-			+ '	<li><a href="#WiseGuiTestbedDetailsWiseMLJSON">WiseML (JSON)</a></li>'
-			+ '	<li><a href="#WiseGuiTestbedDetailsWiseMLXML">WiseML (XML)</a></li>'
+			+ '	<li class="pull-right"><a href="#WiseGuiTestbedDetailsWiseMLJSON">WiseML (JSON)</a></li>'
+			+ '	<li class="pull-right"><a href="#WiseGuiTestbedDetailsWiseMLXML">WiseML (XML)</a></li>'
 			+ '</ul>'
 			+ '<div class="tab-content">'
 			+ '	<div class="tab-pane active" id="WiseGuiTestbedDetailsOverview"/>'
@@ -3674,17 +3674,20 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 			
 			var overviewTab = $('#WiseGuiTestbedDetailsOverview');
 			if (wiseML.setup && wiseML.setup.description) {
-				overviewTab.append('<div class="row">'
+				overviewTab.append(
+						  '<div class="row">'
 						+ '	<div class="span12">' + wiseML.setup.description + '</div>'
 						+ '</div>');
 			}
-			overviewTab.append('<div class="row">'
+			overviewTab.append(
+					  '<div class="row">'
 					+ '	<div class="span12 WiseGuiTestbedDetailsOverviewMap"></div>'
 					+ '</div>');
 			var overviewTabMapRow = overviewTab.find('.WiseGuiTestbedDetailsOverviewMap');
 
 			var jsonTab = $('#WiseGuiTestbedDetailsWiseMLJSON');
 			jsonTab.append($('<pre class="WiseGuiTestbedDetailsWiseMLJSON">'+JSON.stringify(wiseML, null, '  ')+'</pre>'));
+			jsonTab.append($('<a href="'+wisebedBaseUrl + '/experiments/network.json" target="_blank" class="btn btn-primary pull-right">Download</a>'));
 
 			var nodesTab = $('#WiseGuiTestbedDetailsNodes');
 			var nodesTabDiv = $('<div class="WiseGuiTestbedDetailsNodesTable"/>');
@@ -3702,6 +3705,7 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 			function(wiseML) {
 				var xmlTab = $('#WiseGuiTestbedDetailsWiseMLXML');
 				xmlTab.append($('<pre class="WiseGuiTestbedDetailsWiseMLXML">'+new XMLSerializer().serializeToString(wiseML).replace(/</g,"&lt;")+'</pre>'));
+				xmlTab.append($('<a href="'+wisebedBaseUrl + '/experiments/network.xml" target="_blank" class="btn btn-primary pull-right">Download</a>'));
 			},
 			WiseGui.showAjaxError
 	);
