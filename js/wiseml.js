@@ -129,30 +129,10 @@ WiseMLParser.prototype.addMarker = function(node) {
 		return;
 	}
 
-	// Sample custom marker code created with Google Map Custom Marker Maker
-	// http://powerhut.co.uk/googlemaps/custom_markers.php
-
-	var image = new google.maps.MarkerImage(
-			'img/node.png',
-			new google.maps.Size(25, 19),
-			new google.maps.Point(0, 0),
-			new google.maps.Point(13, 19)
-	);
-
-	var shape = {
-		coord : [
-			18, 2, 20, 3, 22, 4, 23, 5, 23, 6, 22, 7, 21, 8, 20, 9, 19, 10, 18, 11, 16, 12, 16, 13, 14, 14, 14, 15, 14,
-			16, 11, 16, 11, 15, 11, 14, 9, 13, 9, 12, 7, 11, 7, 10, 5, 9, 4, 8, 2, 7, 2, 6, 2, 5, 3, 4, 5, 3, 7, 2, 18,
-			2
-		],
-		type : 'poly'
-	};
-
 	var marker = new google.maps.Marker({
 		position : markerLatLng,
 		map : this.map,
 		title : "Sensor: " + node.id,
-		shape : shape,
 		urn : node.id
 	});
 
