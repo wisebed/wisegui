@@ -2144,6 +2144,8 @@ var WiseGuiExperimentationView = function(experimentId) {
 	this.resetDivId              = this.experimentationDivId+'-reset';
 	this.scriptingEditorDivId    = this.experimentationDivId+'-scripting-editor';
 	this.scriptingOutputDivId    = this.experimentationDivId+'-scripting-output';
+	this.wisemlJsonDivId         = this.experimentationDivId+'-wiseml-json';
+	this.wisemlXmlDivId          = this.experimentationDivId+'-wiseml-xml';
 
 	this.view = $('<div class="WiseGuiExperimentationView"/>');
 
@@ -2163,6 +2165,21 @@ var WiseGuiExperimentationView = function(experimentId) {
 
 	this.buildView();
 	this.connectToExperiment();
+	this.loadWisemlViews();
+};
+
+WiseGuiExperimentationView.prototype.loadWisemlViews = function() {
+	var self = this;
+	wisebed.getWiseMLAsJSON(this.experimentId, function(wiseML) {
+		var jsonTab = $('#' + self.wisemlJsonDivId);
+		jsonTab.append($('<pre class="WiseGuiExperimentationViewWiseMLJSON">'+JSON.stringify(wiseML, null, '  ')+'</pre>'));
+		jsonTab.append($('<a href="'+wisebedBaseUrl + '/experiments/'+self.experimentId+'/network.json" target="_blank" class="btn btn-primary pull-right">Download</a>'));
+	}, WiseGui.showAjaxError);
+	wisebed.getWiseMLAsXML(this.experimentId, function(wiseML) {
+		var xmlTab = $('#' + self.wisemlXmlDivId);
+		xmlTab.append($('<pre class="WiseGuiExperimentationViewWiseMLXML">'+new XMLSerializer().serializeToString(wiseML).replace(/</g,"&lt;")+'</pre>'));
+		xmlTab.append($('<a href="'+wisebedBaseUrl + '/experiments/'+self.experimentId+'/network.xml" target="_blank" class="btn btn-primary pull-right">Download</a>'));
+	}, WiseGui.showAjaxError);
 };
 
 WiseGuiExperimentationView.prototype.redrawOutput = function() {
@@ -2460,6 +2477,8 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '			<li><a href="#'+this.channelPipelinesDivId+'">Pipelines</a></li>'
 			+ '			<li><a href="#'+this.scriptingEditorDivId+'">Scripting Editor</a></li>'
 			+ '			<li><a href="#'+this.scriptingOutputDivId+'">Scripting Output</a></li>'
+			+ '         <li class="pull-right"><a href="#'+this.wisemlXmlDivId+'">WiseML (XML)</a></li>'
+			+ '         <li class="pull-right"><a href="#'+this.wisemlJsonDivId+'">WiseML (JSON)</a></li>'
 			+ '		</ul>'
 			+ '		<div class="tab-content">'
 			+ '			<div class="active tab-pane WiseGuiExperimentsViewFlashControl" id="'+this.flashDivId+'">'
@@ -2543,10 +2562,12 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '				</div>'
 			+ '			</div>'
 			+ '			<div class="tab-pane WiseGuiExperimentsViewScriptingOutputTab" id="'+this.scriptingOutputDivId+'"/>'
+			+ '			<div class="tab-pane WiseGuiExperimentsViewWisemlXmlTab" id="'+this.wisemlXmlDivId+'"/>'
+			+ '			<div class="tab-pane WiseGuiExperimentsViewWisemlJsonTab" id="'+this.wisemlJsonDivId+'"/>'
 			+ '		</div>'
 			+ '	</div>'
 			+ '</div>');
-	
+
 	this.outputsNumMessagesInput      = this.view.find('#num-outputs').first();
 	this.outputsRedrawLimitInput      = this.view.find('#redraw-limit').first();
 	this.outputsTable                 = this.view.find('table.WiseGuiExperimentViewOutputsTable tbody').first();
@@ -3340,12 +3361,7 @@ WiseGuiExperimentationView.prototype.addFlashConfiguration = function(conf) {
 				nodeSelectionButton.html(nodeSelectionButtonText);
 			};
 
-			wisebed.getWiseMLAsJSON(this.experimentId, checkNodes,
-					function(jqXHR, textStatus, errorThrown) {
-						console.log('TODO handle error in WiseGuiExperimentationView');
-						WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
-					}
-			);
+			wisebed.getWiseMLAsJSON(this.experimentId, checkNodes, WiseGui.showAjaxError);
 		}
 	}
 
@@ -3655,15 +3671,15 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 			+ '	<li class="active"><a href="#WiseGuiTestbedDetailsOverview">Overview</a></li>'
 			+ '	<li><a href="#WiseGuiTestbedDetailsNodes">Nodes</a></li>'
 			+ '	<li><a href="#WiseGuiTestbedDetailsReservations">Reservations</a></li>'
-			+ '	<li class="pull-right"><a href="#WiseGuiTestbedDetailsWiseMLJSON">WiseML (JSON)</a></li>'
 			+ '	<li class="pull-right"><a href="#WiseGuiTestbedDetailsWiseMLXML">WiseML (XML)</a></li>'
+			+ '	<li class="pull-right"><a href="#WiseGuiTestbedDetailsWiseMLJSON">WiseML (JSON)</a></li>'
 			+ '</ul>'
 			+ '<div class="tab-content">'
 			+ '	<div class="tab-pane active" id="WiseGuiTestbedDetailsOverview"/>'
 			+ '	<div class="tab-pane" id="WiseGuiTestbedDetailsNodes"/>'
 			+ '	<div class="tab-pane" id="WiseGuiTestbedDetailsReservations"/>'
-			+ '	<div class="tab-pane" id="WiseGuiTestbedDetailsWiseMLJSON"/>'
 			+ ' <div class="tab-pane" id="WiseGuiTestbedDetailsWiseMLXML"/>'
+			+ '	<div class="tab-pane" id="WiseGuiTestbedDetailsWiseMLJSON"/>'
 			+ '</div>');
 
 	parentDiv.append(tabs);

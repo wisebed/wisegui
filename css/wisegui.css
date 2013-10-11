@@ -213,6 +213,11 @@ input.success {
 	overflow: auto;
 }
 
+pre.WiseGuiExperimentationViewWiseMLJSON, pre.WiseGuiExperimentationViewWiseMLXML {
+	height: 300px;
+	overflow: auto;
+}
+
 pre.WiseGuiTestbedDetailsWiseMLJSON, pre.WiseGuiTestbedDetailsWiseMLXML {
 	height: 500px;
 	overflow: auto;
