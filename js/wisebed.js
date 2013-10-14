@@ -95,11 +95,22 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 
 	this.reservations = new function() {
 
+		this.getByExperimentId = function(experimentId, callbackDone, callbackError) {
+			var queryUrl = getBaseUri() + "/reservations/byExperimentId/" + experimentId;
+			$.ajax({
+				url       : queryUrl,
+				success   : callbackDone,
+				error     : callbackError,
+				context   : document.body,
+				dataType  : "json",
+				xhrFields : { withCredentials: true }
+			});
+		};
+
 		this.getPersonal = function(from, to, callbackDone, callbackError) {
 			var queryUrl = getBaseUri() + "/reservations?userOnly=true" +
 					(from ? ("&from=" + from.toISOString()) : "") +
 					(to ? ("&to="+to.toISOString()) : "");
-			console.log("Calling " + queryUrl);
 			$.ajax({
 				url       : queryUrl,
 				success   : callbackDone,

@@ -1109,7 +1109,7 @@ Table.prototype.generateFilter = function () {
 
 	if(this.model.length > 0) {
 		helpText += '<br>The data structure looks as follows:';
-		helpText += "<pre style=\"overflow:auto;height:50px;margin:0px;\">" + JSON.stringify(this.model[0], null, '  ') + "</pre>";
+		helpText += "<pre style=\"overflow:auto;height:50px;margin:0px;\">" + JSON.stringify(this.model[0], wiseMLNullFilter, '  ') + "</pre>";
 	}
 
 	helpText += '<h5>Some examples:</h5>';
@@ -1605,7 +1605,7 @@ var WiseGuiReservationObserver = function() {
 
 WiseGuiReservationObserver.prototype.fetchReservationsAndProcess = function() {
 	var self = this;
-	console.log("WiseGuiReservationObserver fetching personal reservations...");
+	console.log("WiseGuiReservationObserver fetching personal reservations");
 	wisebed.reservations.getPersonal(
 			null,
 			null,
@@ -1648,7 +1648,10 @@ WiseGuiReservationObserver.prototype.processReservationsFetched = function(reser
 		if (nowInMillis < newReservations[k].from) {
 
 			var triggerReservationStarted = (function(reservation) {
-				return function() {$(window).trigger('wisegui-reservation-started', reservation);};
+				return function() {
+					console.log('Triggering event: wisegui-reservation-started');
+					$(window).trigger('wisegui-reservation-started', reservation);
+				};
 			})(newReservations[k]);
 
 			setTimeout(triggerReservationStarted, (newReservations[k].from - nowInMillis));
@@ -1657,7 +1660,9 @@ WiseGuiReservationObserver.prototype.processReservationsFetched = function(reser
 		if (nowInMillis < newReservations[k].to) {
 
 			var triggerReservationEnded = (function(reservation) {
-				return function() {$(window).trigger('wisegui-reservation-ended', reservation);};
+				return function() {
+					$(window).trigger('wisegui-reservation-ended', reservation);
+				};
 			})(newReservations[k]);
 
 			setTimeout(triggerReservationEnded, (newReservations[k].to - nowInMillis));
@@ -1674,7 +1679,7 @@ WiseGuiReservationObserver.prototype.startObserving = function() {
 	$(window).bind('wisegui-logged-in', function(e, data) {
 		self.schedule = window.setInterval(function() {self.fetchReservationsAndProcess();}, 60 * 1000);
 		self.fetchReservationsAndProcess();
-		console.log('WiseGuiReservationObserver beginning to observe reservations"');
+		console.log('WiseGuiReservationObserver beginning to observe reservations');
 	});
 
 	$(window).bind('wisegui-logged-out', function(e, data) {
@@ -2139,7 +2144,7 @@ var WiseGuiExperimentationView = function(experimentId) {
 	this.experimentationDivId    = 'WiseGuiExperimentationDiv-'+experimentId.replace(/=/g, '');
 	this.outputsTextAreaId       = this.experimentationDivId+'-outputs-textarea';
 	this.sendDivId               = this.experimentationDivId+'-send';
-	this.channelPipelinesDivId   = this.experimentationDivId+'-channel-pipelines';
+	//this.channelPipelinesDivId   = this.experimentationDivId+'-channel-pipelines';
 	this.flashDivId              = this.experimentationDivId+'-flash';
 	this.resetDivId              = this.experimentationDivId+'-reset';
 	this.scriptingEditorDivId    = this.experimentationDivId+'-scripting-editor';
@@ -2172,7 +2177,7 @@ WiseGuiExperimentationView.prototype.loadWisemlViews = function() {
 	var self = this;
 	wisebed.getWiseMLAsJSON(this.experimentId, function(wiseML) {
 		var jsonTab = $('#' + self.wisemlJsonDivId);
-		jsonTab.append($('<pre class="WiseGuiExperimentationViewWiseMLJSON">'+JSON.stringify(wiseML, null, '  ')+'</pre>'));
+		jsonTab.append($('<pre class="WiseGuiExperimentationViewWiseMLJSON">'+JSON.stringify(wiseML, wiseMLNullFilter, '  ')+'</pre>'));
 		jsonTab.append($('<a href="'+wisebedBaseUrl + '/experiments/'+self.experimentId+'/network.json" target="_blank" class="btn btn-primary pull-right">Download</a>'));
 	}, WiseGui.showAjaxError);
 	wisebed.getWiseMLAsXML(this.experimentId, function(wiseML) {
@@ -2305,8 +2310,12 @@ WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
 	} else if (message.type == 'devicesDetached') {
 		WiseGui.showInfoBlockAlert('Devices [' + message.nodeUrns.join(', ') + '] were detached at ' + message.timestamp);
 	} else if (message.type == 'reservationStarted') {
+		console.log(message);
+		$(window).trigger('wisegui-reservation-started', message.reservationData);
 		WiseGui.showInfoBlockAlert('Reservation started at ' + message.timestamp);
 	} else if (message.type == 'reservationEnded') {
+		console.log(message);
+		$(window).trigger('wisegui-reservation-ended', message.reservationData);
 		WiseGui.showInfoBlockAlert('Reservation ended at ' + message.timestamp);
 	}
 };
@@ -2352,9 +2361,10 @@ WiseGuiExperimentationView.prototype.send = function(targetNodeUrns, payloadBase
 
 WiseGuiExperimentationView.prototype.buildView = function() {
 	var self = this;
-	this.view.append('<div class="WiseGuiExperimentationViewOutputs">'
+	this.view.append(
+			  '<div class="WiseGuiExperimentationViewOutputs">'
 			+ '	<div class="row">'
-			+ '		<div class="span6"><h2>Live Data</h2></div>'
+			+ '		<div class="span6"><h2>Data</h2></div>'
 			+ '		<div class="span6">'
 			+ '			<div class="btn-toolbar btn-toolbar2  pull-right">'
 			+ '				<div class="btn-group">'
@@ -2467,14 +2477,14 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+'			</table>'
 			+ '		</div></div>'
 			+ '	</div>'
-			+ '<div class="WiseGuiExperimentationViewControls">'
-			+ '	<h2>Controls</h2></div>'
-			+ '	<div>'
+			+ ' <div><span class="WiseGuiExperimentationViewStateLabel label pull-right">Loading...</span></div>'
+			+ ' <div class="WiseGuiExperimentationViewControls"><h2>Controls</h2></div>'
+			+ '	 <div>'
 			+ '		<ul class="nav nav-tabs">'
 			+ '			<li class="active"><a href="#'+this.flashDivId+'">Flash</a></li>'
 			+ '			<li><a href="#'+this.resetDivId+'">Reset</a></li>'
 			+ '			<li><a href="#'+this.sendDivId+'">Send Message</a></li>'
-			+ '			<li><a href="#'+this.channelPipelinesDivId+'">Pipelines</a></li>'
+			//+ '			<li><a href="#'+this.channelPipelinesDivId+'">Pipelines</a></li>'
 			+ '			<li><a href="#'+this.scriptingEditorDivId+'">Scripting Editor</a></li>'
 			+ '			<li><a href="#'+this.scriptingOutputDivId+'">Scripting Output</a></li>'
 			+ '         <li class="pull-right"><a href="#'+this.wisemlXmlDivId+'">WiseML (XML)</a></li>'
@@ -2544,9 +2554,9 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '					</div>'
 			+ '				</div>'
 			+ '			</div>'
-			+ '			<div class="tab-pane WiseGuiExperimentsViewChannelPipelinesControl" id="'+this.channelPipelinesDivId+'">'
-			+ '				<button class="btn span2 WiseGuiExperimentsViewGetChannelPipelinesButton">Get Channel Pipelines</a>'
-			+ '			</div>'
+			//+ '			<div class="tab-pane WiseGuiExperimentsViewChannelPipelinesControl" id="'+this.channelPipelinesDivId+'">'
+			//+ '				<button class="btn span2 WiseGuiExperimentsViewGetChannelPipelinesButton">Get Channel Pipelines</a>'
+			//+ '			</div>'
 			+ '			<div class="tab-pane WiseGuiExperimentsViewScriptingControl" id="'+this.scriptingEditorDivId+'">'
 			+ '				<div class="row" style="padding-bottom:10px;">'
 			+ '					<div class="span6">'
@@ -2568,6 +2578,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '	</div>'
 			+ '</div>');
 
+	this.stateLabel                   = this.view.find('.WiseGuiExperimentationViewStateLabel').first();
 	this.outputsNumMessagesInput      = this.view.find('#num-outputs').first();
 	this.outputsRedrawLimitInput      = this.view.find('#redraw-limit').first();
 	this.outputsTable                 = this.view.find('table.WiseGuiExperimentViewOutputsTable tbody').first();
@@ -2578,6 +2589,59 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	this.outputsViewDropdown          = this.view.find('#view-dropdown');
 	this.outputsMakePrintableCheckbox = this.view.find('#make-printable');
 	
+	this.updateStateLabel = function(state, duration) {
+		
+		self.stateLabel.toggleClass('label-info',    state == 'pending');
+		self.stateLabel.toggleClass('label-success', state == 'started');
+		self.stateLabel.toggleClass('label-warning', state == 'ended'  );
+		
+		self.stateLabel.empty();
+		self.stateLabel.append('Reservation ' + state + ' (' + $.format.date(duration.from, "yyyy-MM-dd HH:mm:ss") + ' until ' + $.format.date(duration.to, "yyyy-MM-dd HH:mm:ss") + ')');
+	};
+
+	// parses the duration of a reservation (from -> to) for a (pontentially federated) reservation (represented by a list of secret reservation keys)
+	this.getReservationDuration = function(reservations) {
+		var latestFrom = new Date(reservations[0].from);
+		var earliestTo = new Date(reservations[0].to);
+		for (var i=1; i<reservations.length; i++) {
+			var reservation = reservations[i];
+			if (latestFrom < new Date(reservation.from)) {
+				latestFrom = new Date(reservation.from);
+			}
+			if (earliestTo > new Date(reservation.to)) {
+				earliestTo = new Date(reservation.to);
+			}
+		}
+		return {
+			from: latestFrom,
+			to: earliestTo
+		};
+	};
+
+	// load reservation data to check for reservation start time
+	wisebed.reservations.getByExperimentId(
+		this.experimentId,
+		function(data) {
+			var reservations = data.reservations;
+			var duration = self.getReservationDuration(data.reservations);
+			var now = new Date();
+			if (now < duration.from) {
+				self.updateStateLabel('pending', duration);
+			}
+		},
+		WiseGui.showAjaxError
+	);
+
+	// change label to 'running' as soon as reservation starts
+	$(window).bind('wisegui-reservation-started', function(e, data) {
+		self.updateStateLabel('started', self.getReservationDuration(data.reservations));
+	});
+
+	// change label to 'ended' as soon as reservation starts
+	$(window).bind('wisegui-reservation-ended', function(e, data) {
+		self.updateStateLabel('ended', self.getReservationDuration(data.reservations));
+	});
+
 	// don't close popup when clicking on a form
 	this.view.find('.dropdown-menu').click(function(e) {
 		e.stopPropagation();
@@ -2609,7 +2673,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	this.sendSendButton               = this.view.find('button.WiseGuiExperimentsViewSendControlSendMessage').first();
 	this.sendLineFeedCheckbox         = this.view.find('input.WiseGuiExperimentsViewSendControlLineFeed').first()[0];
 
-	this.getChannelPipelinesButton    = this.view.find('button.WiseGuiExperimentsViewGetChannelPipelinesButton').first();
+	//this.getChannelPipelinesButton    = this.view.find('button.WiseGuiExperimentsViewGetChannelPipelinesButton').first();
 
 	// ******* start ACE displaying error workaround ********
 	// ace editor is not correctly displayed if parent tab is hidden when creating it. therefore we need to workaround
@@ -2831,6 +2895,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	});
 	this.updateSendControls();
 
+	/*
 	this.getChannelPipelinesButton.bind('click', function() {
 		wisebed.experiments.getNodeUrns(
 				self.experimentId,
@@ -2847,6 +2912,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 				WiseGui.showAjaxError
 		);
 	});
+	*/
 
 	this.scriptingEditorHelpModal = '<div id="scriptingHelpModal" class="modal hide">'
 				+ '<div class="modal-header">'
@@ -3662,6 +3728,14 @@ function doLogout() {
 	
 };
 
+function wiseMLNullFilter(key,value) {
+	if (value == null || value === undefined || (value instanceof Array && value.length == 0)) {
+		return undefined;
+	} else {
+		return value;
+	}
+};
+
 function loadTestbedDetailsContainer(navigationData, parentDiv) {
 
 	parentDiv.append($('<h2 class="WiseGuiTestbedTitle">'+testbedDescription.name+'</h2>'));
@@ -3702,7 +3776,7 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 			var overviewTabMapRow = overviewTab.find('.WiseGuiTestbedDetailsOverviewMap');
 
 			var jsonTab = $('#WiseGuiTestbedDetailsWiseMLJSON');
-			jsonTab.append($('<pre class="WiseGuiTestbedDetailsWiseMLJSON">'+JSON.stringify(wiseML, null, '  ')+'</pre>'));
+			jsonTab.append($('<pre class="WiseGuiTestbedDetailsWiseMLJSON">'+JSON.stringify(wiseML, wiseMLNullFilter, '  ')+'</pre>'));
 			jsonTab.append($('<a href="'+wisebedBaseUrl + '/experiments/network.json" target="_blank" class="btn btn-primary pull-right">Download</a>'));
 
 			var nodesTab = $('#WiseGuiTestbedDetailsNodes');
@@ -3851,10 +3925,11 @@ function navigateToExperiment(reservation) {
 	navigateTo(experimentId);
 }
 
-function navigateTo(experimentId) {
+function navigateTo(experimentId, tab) {
 	var navigationData = {
 		nav          : experimentId ? 'experiment' : 'overview',
-		experimentId : experimentId || ''
+		experimentId : experimentId || '',
+		tab          : tab || ''
 	};
 	$.bbq.pushState(navigationData);
 }
@@ -3865,7 +3940,8 @@ function getNavigationData(fragment) {
 
 	return {
 		nav          : parsedFragment['nav']          || 'overview',
-		experimentId : parsedFragment['experimentId'] || ''
+		experimentId : parsedFragment['experimentId'] || '',
+		tab          : parsedFragment['tab']          || ''
 	};
 }
 

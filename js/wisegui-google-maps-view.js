@@ -172,9 +172,16 @@ WiseGuiGoogleMapsView.prototype.addMarker = function(node) {
 	});
 
 	this.infoWindows[node.id] = new google.maps.InfoWindow();
+	this.infoWindowRenderer = function(key,value) {
+		if (value == null || value === undefined) {
+			return undefined;
+		} else {
+			return value;
+		}
+	};
 	this.infoWindows[node.id].setContent(
 			'<h5>' + node.id + '</h5>'
-					+ (JSON.stringify(node.c) + '</br>')
+					+ (JSON.stringify(node.c, this.infoWindowRenderer, '  ').replace(/\n/g, "<br/>") + '</br>')
 					+ (node.desc ? node.desc + '</br>' : '')
 	);
 

@@ -213,6 +213,10 @@ input.success {
 	overflow: auto;
 }
 
+.WiseGuiExperimentationViewStateLabel {
+	vertical-align: bottom;
+}
+
 pre.WiseGuiExperimentationViewWiseMLJSON, pre.WiseGuiExperimentationViewWiseMLXML {
 	height: 300px;
 	overflow: auto;
