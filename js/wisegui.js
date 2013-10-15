@@ -503,127 +503,132 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 
 	 //Show specialized google map for reservation 
 	var showMap = function(wiseML){
-		var wiseMlParser = new WiseGuiGoogleMapsView(wiseML, tabs.find('#WiseGuiTestbedMakeReservationMap'));
-		wiseMlParser.map.enableKeyDragZoom();
-		wiseMlParser.map.selectedURNs = [];
-		that.wiseMlParser = wiseMlParser;
 		
-		$.each(wiseMlParser.markersArray, function (index, marker) {
-			wiseMlParser.mapSpiderfier.clearListeners('click');
-			wiseMlParser.mapSpiderfier.addListener('click', function(marker, event) {
-				 if(marker.getIcon().url == 'img/node.png'){
-					 wiseMlParser.map.selectURNs([marker.urn]);
-				 }else{
-					 wiseMlParser.map.selectURNs([marker.urn], true);
-				 }
-				 var selectedFun =function(data) {
-						var nodeids = wiseMlParser.map.selectedURNs;
-						for(var i = 0; i < nodeids.length; i++) {
-							if(data.id == nodeids[i]) return true;
-						}
-						return false;
-					};
+		that.mapsView = new WiseGuiGoogleMapsView(wiseML, tabs.find('#WiseGuiTestbedMakeReservationMap'));
+		var mapsView = that.mapsView;
 
-				   that.table.applySelected(selectedFun);
-			});
-        });
-		
-		wiseMlParser.map.selectURNs = function(urns, deselect){
-			var image;
-			if(!deselect){ 
-				image = new google.maps.MarkerImage(
-						'img/node_selected.png',
-		      			  new google.maps.Size(25,19),
-		      			  new google.maps.Point(0,0),
-		      			  new google.maps.Point(13,19)
-		      			);
-			}else{
-				image = new google.maps.MarkerImage(
-		      			  'img/node.png',
-		      			  new google.maps.Size(25,19),
-		      			  new google.maps.Point(0,0),
-		      			  new google.maps.Point(13,19)
-		      			);
-			}
+		if (mapsView.map != null) {
+			mapsView.map.enableKeyDragZoom();
+			mapsView.map.selectedURNs = [];
 			
-			//loop over markers and set new image
-			$.each(wiseMlParser.markersArray, function (index, marker) {
-				if(urns.indexOf(marker.urn)>-1)
-                    marker.setIcon(image);
-            });
 			
-			//loop over selected urns and insert them to model if necessary
-			$.each(urns, function(index, urn){
-				var index = wiseMlParser.map.selectedURNs.indexOf(urn);
-					if(index==-1){
-						if(!deselect){
-							wiseMlParser.map.selectedURNs.push(urn);
-						}else{
-							wiseMlParser.map.selectedURNs.splice(index,1);
-						}
-					}else{
-						if(deselect) wiseMlParser.map.selectedURNs.splice(index,1);
-					}	
-			});
-		};
-		
+			$.each(mapsView.markersArray, function (index, marker) {
+				mapsView.mapSpiderfier.clearListeners('click');
+				mapsView.mapSpiderfier.addListener('click', function(marker, event) {
+					 if(marker.getIcon().url == 'img/node.png'){
+						 mapsView.map.selectURNs([marker.urn]);
+					 }else{
+						 mapsView.map.selectURNs([marker.urn], true);
+					 }
+					 var selectedFun =function(data) {
+							var nodeids = mapsView.map.selectedURNs;
+							for(var i = 0; i < nodeids.length; i++) {
+								if(data.id == nodeids[i]) return true;
+							}
+							return false;
+						};
 
-		//Filter out all markers but the ones with the urns given
-		wiseMlParser.map.filter = function(urns){
-			//loop over markers and set new image
-			var markersArray = wiseMlParser.markersArray;
-			$.each(markersArray, function (index, marker) {
-				if(urns.indexOf(marker.urn)==-1){
-		            marker.setMap(null);
+					   that.table.applySelected(selectedFun);
+				});
+	        });
+			
+			mapsView.map.selectURNs = function(urns, deselect){
+				var image;
+				if(!deselect){ 
+					image = new google.maps.MarkerImage(
+							'img/node_selected.png',
+			      			  new google.maps.Size(25,19),
+			      			  new google.maps.Point(0,0),
+			      			  new google.maps.Point(13,19)
+			      			);
 				}else{
-					marker.setMap(wiseMlParser.map);
+					image = new google.maps.MarkerImage(
+			      			  'img/node.png',
+			      			  new google.maps.Size(25,19),
+			      			  new google.maps.Point(0,0),
+			      			  new google.maps.Point(13,19)
+			      			);
 				}
-		    });
-		};
-		
-		that.table.table.addSelectionListener(wiseMlParser.map.selectURNs);
-		that.table.table.addFilterListener(wiseMlParser.map.filter);
-		
-		var dz = wiseMlParser.map.getDragZoomObject();
-		
-		google.maps.event.addListener(dz, 'dragend', function(bounds) {       
-            var selectedURNs = [];
-            var deselectedURNs = [];
-            
-            // get nodes that have been (de-)selected
-            $.each(wiseMlParser.markersArray, function (index, marker) {
-                if (bounds.contains(marker.getPosition()) && marker.getMap() != null) {
-                    if(marker.getIcon().url == 'img/node.png'){
-                    selectedURNs.push(marker.urn);
-                    }else{
-                    	deselectedURNs.push(marker.urn);
-                    }
-                }
-            });
-            
-            // update the map
-            wiseMlParser.map.selectURNs(selectedURNs);
-            wiseMlParser.map.selectURNs(deselectedURNs, true);
-            
-            
-            //remove all deselected nodes
-            wiseMlParser.map.selectedURNs = wiseMlParser.map.selectedURNs.diff(deselectedURNs);
-            //update selection in table
-            var selectedFun =function(data) {
-				var nodeids = wiseMlParser.map.selectedURNs;
-				for(var i = 0; i < nodeids.length; i++) {
-					if(data.id == nodeids[i]) return true;
-				}
-				return false;
+				
+				//loop over markers and set new image
+				$.each(mapsView.markersArray, function (index, marker) {
+					if(urns.indexOf(marker.urn)>-1)
+	                    marker.setIcon(image);
+	            });
+				
+				//loop over selected urns and insert them to model if necessary
+				$.each(urns, function(index, urn){
+					var index = mapsView.map.selectedURNs.indexOf(urn);
+						if(index==-1){
+							if(!deselect){
+								mapsView.map.selectedURNs.push(urn);
+							}else{
+								mapsView.map.selectedURNs.splice(index,1);
+							}
+						}else{
+							if(deselect) mapsView.map.selectedURNs.splice(index,1);
+						}	
+				});
 			};
-            
-           that.table.applySelected(selectedFun);
-    });
-		
-		tabs.find('li a[href=#WiseGuiTestbedMakeReservationMap]').on('shown', function(e) {
-			google.maps.event.trigger(that.wiseMlParser.map, 'resize');
-			that.wiseMlParser.setBounds();
-		});
+			
+
+			//Filter out all markers but the ones with the urns given
+			mapsView.map.filter = function(urns){
+				//loop over markers and set new image
+				var markersArray = mapsView.markersArray;
+				$.each(markersArray, function (index, marker) {
+					if(urns.indexOf(marker.urn)==-1){
+			            marker.setMap(null);
+					}else{
+						marker.setMap(mapsView.map);
+					}
+			    });
+			};
+			
+			that.table.table.addSelectionListener(mapsView.map.selectURNs);
+			that.table.table.addFilterListener(mapsView.map.filter);
+			
+			var dz = mapsView.map.getDragZoomObject();
+			
+			google.maps.event.addListener(dz, 'dragend', function(bounds) {       
+	            var selectedURNs = [];
+	            var deselectedURNs = [];
+	            
+	            // get nodes that have been (de-)selected
+	            $.each(mapsView.markersArray, function (index, marker) {
+	                if (bounds.contains(marker.getPosition()) && marker.getMap() != null) {
+	                    if(marker.getIcon().url == 'img/node.png'){
+	                    selectedURNs.push(marker.urn);
+	                    }else{
+	                    	deselectedURNs.push(marker.urn);
+	                    }
+	                }
+	            });
+	            
+	            // update the map
+	            mapsView.map.selectURNs(selectedURNs);
+	            mapsView.map.selectURNs(deselectedURNs, true);
+	            
+	            
+	            //remove all deselected nodes
+	            mapsView.map.selectedURNs = mapsView.map.selectedURNs.diff(deselectedURNs);
+	            //update selection in table
+	            var selectedFun =function(data) {
+					var nodeids = mapsView.map.selectedURNs;
+					for(var i = 0; i < nodeids.length; i++) {
+						if(data.id == nodeids[i]) return true;
+					}
+					return false;
+				};
+	            
+	           that.table.applySelected(selectedFun);
+	    	});
+			
+			tabs.find('li a[href=#WiseGuiTestbedMakeReservationMap]').on('shown', function(e) {
+				google.maps.event.trigger(that.mapsView.map, 'resize');
+				that.mapsView.setBounds();
+			});
+		}
 	};
 
 	tabs.find('#WiseGuiTestbedMakeReservationMap').append("<h4>Click on single nodes or Shift+Click for bounding box</h4>");
@@ -737,7 +742,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 			$(window).trigger('wisegui-navigation-event', getNavigationData());
 
 			// Refresh the reservation table
-			$(window).trigger('wisegui-reservation-table');
+			$(window).trigger('wisegui-reservations-changed');
 		};
 
 		// TODO support key-value pairs in "options" field
@@ -1967,7 +1972,7 @@ WiseGuiReservationsDropDown.prototype.onReservationsChangedEvent = function(rese
 
 WiseGuiReservationsDropDown.prototype.buildView = function() {
 	this.view = $('<li class="dropdown">'
-			+ '	<a href="#" class="dropdown-toggle" data-toggle="dropdown">Reservations</a>'
+			+ '	<a href="#" class="dropdown-toggle" data-toggle="dropdown">My Reservations</a>'
 			+ '	<ul class="dropdown-menu">'
 			+ '	</ul>'
 			+ '</li>');
@@ -3744,7 +3749,8 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 			  '<ul class="nav nav-tabs">'
 			+ '	<li class="active"><a href="#WiseGuiTestbedDetailsOverview">Map View</a></li>'
 			+ '	<li><a href="#WiseGuiTestbedDetailsNodes">Nodes</a></li>'
-			+ '	<li><a href="#WiseGuiTestbedDetailsReservations">Reservations</a></li>'
+			+ '	<li><a href="#WiseGuiTestbedDetailsReservations">All Reservations</a></li>'
+			+ '	<li><a href="#WiseGuiTestbedDetailsMyReservations">My Reservations</a></li>'
 			+ '	<li class="pull-right"><a href="#WiseGuiTestbedDetailsWiseMLXML">WiseML (XML)</a></li>'
 			+ '	<li class="pull-right"><a href="#WiseGuiTestbedDetailsWiseMLJSON">WiseML (JSON)</a></li>'
 			+ '</ul>'
@@ -3752,6 +3758,7 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 			+ '	<div class="tab-pane active" id="WiseGuiTestbedDetailsOverview"/>'
 			+ '	<div class="tab-pane" id="WiseGuiTestbedDetailsNodes"/>'
 			+ '	<div class="tab-pane" id="WiseGuiTestbedDetailsReservations"/>'
+			+ '	<div class="tab-pane" id="WiseGuiTestbedDetailsMyReservations"/>'
 			+ ' <div class="tab-pane" id="WiseGuiTestbedDetailsWiseMLXML"/>'
 			+ '	<div class="tab-pane" id="WiseGuiTestbedDetailsWiseMLJSON"/>'
 			+ '</div>');
@@ -3785,7 +3792,7 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 			new WiseGuiNodeTable(wiseML, nodesTabDiv, false, true);
 
 			// Show google map
-			var wiseMlParser = new WiseGuiGoogleMapsView(wiseML, overviewTabMapRow);
+			var mapsView = new WiseGuiGoogleMapsView(wiseML, overviewTabMapRow);
 		},
 		WiseGui.showAjaxError
 	);
@@ -3801,50 +3808,110 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 	);
 
 	var reservationsTab = $('#WiseGuiTestbedDetailsReservations');
+	var myReservationsTab = $('#WiseGuiTestbedDetailsMyReservations');
 
 	// we need this to be able to refresh the table
-	$(window).bind('wisegui-reservation-table', function() { buildReservationTable(reservationsTab, navigationData); });
-
+	$(window).bind('wisegui-reservations-changed', function() { buildReservationTable(reservationsTab); });
+	$(window).bind('wisegui-reservations-changed', function() { /*buildMyReservationTable(myReservationsTab);*/ });
+	
 	// build the table
-	buildReservationTable(reservationsTab, navigationData);
+	buildReservationTable(reservationsTab);
+	//buildMyReservationTable(myReservationsTab);
 }
 
-
-function buildReservationTable(reservationsTab, navigationData) {
+function buildMyReservationTable(myReservationsTab) {
 
 	var now = new Date();
-	var tomorrowSameTime = new Date();
-	tomorrowSameTime.setDate(now.getDate() + 7);
 
-	wisebed.reservations.getPublic(
+	wisebed.reservations.getPersonal(
 			now,
-			tomorrowSameTime,
+			null,
 			function(data) {
 
 				var reservations = data.reservations;
-				var tableHead = ["From", "Until", "Node URNs"];
+				var tableHead = ["From", "Until", "Testbed Prefix(es)", "Nodes", ""];
 				var tableRows = [];
+
 				for (var i=0; i<reservations.length; i++) {
+
+					console.log(reservations[i]);
+
+					/*var fromDate = new Date(reservations[i].from);
+					var toDate = new Date(reservations[i].to);
+					var nodesList = reservations[i].nodeUrns.sort().join("<br/>");
+					var nop = function(event){ event.preventDefault(); };
+					var testbeds = [];
+					var nodeUrns = reservations[i].nodeUrns;
+					for (var n=0; n<nodeUrns.length; n++) {
+						testbeds.push(nodeUrns[n].substring(0, nodeUrns[n].lastIndexOf(':') + 1));
+					}
+					testbeds = _.uniq(testbeds);
+
+					var from  = $('<a href="#" rel="tooltip" title="'+fromDate.toISOString()+'">' + $.format.date(fromDate, "yyyy-MM-dd HH:mm:ss") + '</a>').tooltip('show').click(nop);
+					var to    = $('<a href="#" rel="tooltip" title="'+toDate.toISOString()+'">' + $.format.date(toDate, "yyyy-MM-dd HH:mm:ss") + '</a>').tooltip('show').click(nop);
+					var nodes = $('<a href="#" rel="tooltip" title="'+nodesList+'">'+ reservations[i].nodeUrns.length + ' nodes</a>').tooltip('show').click(nop);
+					var nodes = $('<a href="#" class="btn btn-primary">Open</a>').click(function(e) {
+
+					});
+
 					tableRows[i] = [];
-					tableRows[i][0] = new Date(reservations[i].from).toString();
-					tableRows[i][1] = new Date(reservations[i].to).toString();
+					tableRows[i][0] = from;
+					tableRows[i][1] = to;
+					tableRows[i][2] = testbeds.sort().join("<br/>");
+					tableRows[i][3] = nodes;
+					*/
+				}
 
-					var nodesContainer = $('<div>'
-							+ reservations[i].nodeUrns.length + ' nodes.<br/>'
-							+ '<a href="#">Show URNs</a>'
-							+ '</div>');
+				/*var noEntriesMessage = 'There are no reservations for the next week yet!';
+				var table = buildTable(tableHead, tableRows, noEntriesMessage);
+				reservationsTab.empty();
+				reservationsTab.append(table);
+				if (tableRows.length > 0) {
+					table.tablesorter({ sortList: [[0,0]] });
+				}
+				*/
+			},
+			WiseGui.showAjaxError
+	);
+};
 
-					var nodesLink = nodesContainer.find('a');
-					nodesLink.first().bind(
-							'click',
-							{link:nodesLink, container:nodesContainer, reservation:reservations[i]},
-							function(e) {
-								e.preventDefault();
-								e.data.link.remove();
-								e.data.container.append(e.data.reservation.nodeUrns.join("<br/>"));
-							}
-					);
-					tableRows[i][2] = nodesContainer;
+function buildReservationTable(reservationsTab) {
+
+	var now = new Date();
+
+	wisebed.reservations.getPublic(
+			now,
+			null,
+			function(data) {
+
+				var reservations = data.reservations;
+				var tableHead = ["From", "Until", "Testbed Prefix(es)", "Nodes"];
+				var tableRows = [];
+
+				for (var i=0; i<reservations.length; i++) {
+
+					console.log(reservations[i]);
+
+					var fromDate = new Date(reservations[i].from);
+					var toDate = new Date(reservations[i].to);
+					var nodesList = reservations[i].nodeUrns.sort().join("<br/>");
+					var nop = function(event){ event.preventDefault(); };
+					var testbeds = [];
+					var nodeUrns = reservations[i].nodeUrns;
+					for (var n=0; n<nodeUrns.length; n++) {
+						testbeds.push(nodeUrns[n].substring(0, nodeUrns[n].lastIndexOf(':') + 1));
+					}
+					testbeds = _.uniq(testbeds);
+
+					var from  = $('<a href="#" rel="tooltip" title="'+fromDate.toISOString()+'">' + $.format.date(fromDate, "yyyy-MM-dd HH:mm:ss") + '</a>').tooltip('show').click(nop);
+					var to    = $('<a href="#" rel="tooltip" title="'+toDate.toISOString()+'">' + $.format.date(toDate, "yyyy-MM-dd HH:mm:ss") + '</a>').tooltip('show').click(nop);
+					var nodes = $('<a href="#" rel="tooltip" title="'+nodesList+'">'+ reservations[i].nodeUrns.length + ' nodes</a>').tooltip('show').click(nop);
+
+					tableRows[i] = [];
+					tableRows[i][0] = from;
+					tableRows[i][1] = to;
+					tableRows[i][2] = testbeds.sort().join("<br/>");
+					tableRows[i][3] = nodes;
 				}
 
 				var noEntriesMessage = 'There are no reservations for the next week yet!';

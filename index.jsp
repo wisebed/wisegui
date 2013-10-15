@@ -25,14 +25,16 @@
 	<script type="text/javascript" src="js/lib/jquery.dateformat-1.0.js"></script>
 	<script type="text/javascript" src="js/lib/jquery.timePicker-20110318.js"></script>
 	<script type="text/javascript" src="js/lib/jquery.ba-throttle-debounce.min.js"></script>
-
 	<script type="text/javascript" src="js/lib/jquery-ui.min.1.8.17.js"></script>
+
+	<script type="text/javascript" src="js/lib/underscore-1.5.2.min.js"></script>
 
 	<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
 	<script type="text/javascript" src="js/lib/oms.min.js"></script>
 	<script type="text/javascript" src="js/lib/markerclusterer_packed.js"></script>
 
 	<script type="text/javascript" src="js/lib/bootstrap.min.js"></script>
+	<script type="text/javascript" src="js/lib/bootstrap-tooltip.js"></script>
 
 	<script type="text/javascript" src="js/lib/BlobBuilder-20110713.js"></script>
 	<script type="text/javascript" src="js/lib/FileSaver-20110802.js"></script>
