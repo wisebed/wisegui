@@ -3732,11 +3732,11 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 
 	var tabs = $(
 			  '<ul class="nav nav-tabs" id="'+tabsId+'">'
-			+ '	<li class="active"><a href="#'+mapTabDivId+'">Map</a></li>'
-			+ '	<li><a href="#'+nodesTabDivId+'">Nodes</a></li>'
-			+ '	<li><a href="#'+reservationsTabDivId+'">All Reservations</a></li>'
-			+ '	<li class="WiseGuiTestbedDetailsMyReservationsTabHeader"><a href="#'+myReservationsTabDivId+'">My Reservations</a></li>'
-			+ '	<li class="WiseGuiTestbedDetailsFederatableReservationsTabHeader"><a href="#'+federatableReservationsTabDivId+'">Federatable Reservations</a></li>'
+			+ '	<li class="active"    ><a href="#'+mapTabDivId+'">Map</a></li>'
+			+ '	<li                   ><a href="#'+nodesTabDivId+'">Nodes</a></li>'
+			+ '	<li                   ><a href="#'+reservationsTabDivId+'">All Reservations</a></li>'
+			+ '	<li                   ><a href="#'+myReservationsTabDivId+'">My Reservations</a></li>'
+			+ '	<li                   ><a href="#'+federatableReservationsTabDivId+'">Federatable Reservations</a></li>'
 			+ '	<li class="pull-right"><a href="#'+wiseMLXMLTabDivId+'">WiseML (XML)</a></li>'
 			+ '	<li class="pull-right"><a href="#'+wiseMLJSONTabDivId+'">WiseML (JSON)</a></li>'
 			+ '</ul>'
@@ -3771,8 +3771,23 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 			
 			tabs.find('a[href="#'+navigationData.tab+'"]').tab('show');
 
-			if (navigationData.tab == reservationsTabDivId) {
-
+			if (navigationData.tab == mapTabDivId) {
+				// reload?
+			} else if(navigationData.tab == nodesTabDivId) {
+				// reload?
+			} else if (navigationData.tab == reservationsTabDivId) {
+				reservationsTabContentDiv.empty();
+				buildReservationTable(reservationsTabContentDiv);
+			} else if (navigationData.tab == myReservationsTabDivId) {
+				myReservationsTabContentDiv.empty();
+				buildMyReservationTable(myReservationsTabContentDiv);
+			} else if (navigationData.tab == federatableReservationsTabDivId) {
+				federatableReservationsTabContentDiv.empty();
+				buildFederatableReservationTable(federatableReservationsTabContentDiv);
+			} else if (navigationData.tab == wiseMLXMLTabDivId) {
+				// reload?
+			} else if (navigationData.tab == wiseMLJSONTabDivId) {
+				// reload?
 			}
 		}
 	});
