@@ -235,11 +235,7 @@ WiseGuiLoginObserver.prototype.startObserving = function() {
 		}
 	});
 
-	self.checkLoggedIn();
-};
-
-WiseGuiLoginObserver.prototype.checkLoggedIn = function() {
-	isLoggedIn(function(isLoggedIn) {
+	checkLoggedIn(function(isLoggedIn) {
 		$(window).trigger(isLoggedIn ? 'wisegui-logged-in' : 'wisegui-logged-out');
 	});
 };
@@ -1892,14 +1888,6 @@ var WiseGuiReservationsDropDown = function() {
 		} else {
 			self.onReservationsChangedEvent(reservations);
 		}
-	});
-
-	$(window).bind('wisegui-navigation-event', function(e, navigationData) {
-		/*isLoggedIn(function(isLoggedIn) {
-			if (isLoggedIn) {
-				self.update();
-			}
-		});*/
 	});
 
 	this.buildView();
@@ -3669,7 +3657,7 @@ WiseGuiOperationProgressView.prototype.update = function(operationStatus) {
  * #################################################################
  */
 
-function isLoggedIn(callback) {
+function checkLoggedIn(callback) {
 	wisebed.isLoggedIn(callback, WiseGui.showAjaxError);
 };
 
@@ -3773,20 +3761,36 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 
 			if (navigationData.tab == mapTabDivId) {
 				// reload?
-			} else if(navigationData.tab == nodesTabDivId) {
+			}
+
+			else if(navigationData.tab == nodesTabDivId) {
 				// reload?
-			} else if (navigationData.tab == reservationsTabDivId) {
+			}
+
+			else if (navigationData.tab == reservationsTabDivId) {
 				reservationsTabContentDiv.empty();
 				buildReservationTable(reservationsTabContentDiv);
-			} else if (navigationData.tab == myReservationsTabDivId) {
-				myReservationsTabContentDiv.empty();
-				buildMyReservationTable(myReservationsTabContentDiv);
-			} else if (navigationData.tab == federatableReservationsTabDivId) {
-				federatableReservationsTabContentDiv.empty();
-				buildFederatableReservationTable(federatableReservationsTabContentDiv);
-			} else if (navigationData.tab == wiseMLXMLTabDivId) {
+			}
+
+			else if (navigationData.tab == myReservationsTabDivId) {
+				if (isLoggedIn) {
+					myReservationsTabContentDiv.empty();
+					buildMyReservationTable(myReservationsTabContentDiv);
+				}
+			}
+
+			else if (navigationData.tab == federatableReservationsTabDivId) {
+				if (testbedDescription.isFederator && isLoggedIn) {
+					federatableReservationsTabContentDiv.empty();
+					buildFederatableReservationTable(federatableReservationsTabContentDiv);
+				}
+			}
+
+			else if (navigationData.tab == wiseMLXMLTabDivId) {
 				// reload?
-			} else if (navigationData.tab == wiseMLJSONTabDivId) {
+			}
+
+			else if (navigationData.tab == wiseMLJSONTabDivId) {
 				// reload?
 			}
 		}
@@ -3798,7 +3802,7 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 			
 			// init description over map
 			if (wiseML.setup && wiseML.setup.description) {
-				var mapDescription = wiseml.setup.description;
+				var mapDescription = wiseML.setup.description;
 				var mapDescriptionRow = $('<div class="row"><div class="span12">' + mapDescription + '</div></div>');
 				mapTabContentDiv.append(mapDescriptionRow);
 			}
@@ -3843,24 +3847,27 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 	});
 
 	$(window).bind('wisegui-reservations-changed', function() {
-		buildMyReservationTable(myReservationsTabContentDiv);
+		if (isLoggedIn) {
+			buildMyReservationTable(myReservationsTabContentDiv);
+		}
 	});
 	
 	if (testbedDescription.isFederator) {
 		
 		$(window).bind('wisegui-logged-in', function() {
 			federatableReservationsTab.show();
+			buildFederatableReservationTable(federatableReservationsTabContentDiv);
 		});
 
 		$(window).bind('wisegui-logged-out', function() {
-			federatableReservationsTabHeader.hide();
+			federatableReservationsTab.hide();
 		});
 
 		$(window).bind('wisegui-reservations-changed', function() {
-			buildFederatableReservationTable(federatableReservationsTab);
+			if (isLoggedIn) {
+				buildFederatableReservationTable(federatableReservationsTabContentDiv);
+			}
 		});
-
-		buildFederatableReservationTable(federatableReservationsTab);
 	}
 
 	tabs.find('a').click(function (e) {
@@ -3871,6 +3878,9 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 	});
 
 	buildReservationTable(reservationsTabContentDiv);
+	if (isLoggedIn) {
+		buildFederatableReservationTable(federatableReservationsTabContentDiv);
+	}
 }
 
 function buildFederatableReservationTable(tab) {
@@ -4133,11 +4143,15 @@ var notificationsViewer  = new WiseGuiNotificationsViewer();
 
 var testbedDescription   = null;
 var eventWebSocket       = undefined;
+var isLoggedIn           = false;
 
 $(function () {
 
 	$('#WiseGuiContainer').append(notificationsViewer.view);
 	$('.modal').modal({ keyboard: true });
+
+	$(window).bind('wisegui-logged-in', function()  { isLoggedIn = true;  });
+	$(window).bind('wisegui-logged-out', function() { isLoggedIn = false; });
 
 	if (eventWebSocket === undefined) {
 		eventWebSocket = new wisebed.EventWebSocket(
