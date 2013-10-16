@@ -3697,6 +3697,7 @@ function doLogout() {
 	var callbackOK = function() {
 		$(window).trigger('wisegui-logged-out');
 		$('#WiseGuiLoginDialog').remove();
+		navigateTo(undefined, 'WiseGuiTestbedDetailsMapView');
 	};
 
 	var callbackError = function(jqXHR, textStatus, errorThrown) {
@@ -3719,37 +3720,59 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 
 	parentDiv.append($('<h2 class="WiseGuiTestbedTitle">'+testbedDescription.name+'</h2>'));
 
+	var tabsId                          = 'WiseGuiTestbedDetailsTabs';
+	var mapTabDivId                     = 'WiseGuiTestbedDetailsMapView';
+	var nodesTabDivId                   = 'WiseGuiTestbedDetailsNodes';
+	var reservationsTabDivId            = 'WiseGuiTestbedDetailsReservations';
+	var myReservationsTabDivId          = 'WiseGuiTestbedDetailsMyReservations';
+	var federatableReservationsTabDivId = 'WiseGuiTestbedDetailsFederatableReservations';
+	var wiseMLXMLTabDivId               = 'WiseGuiTestbedDetailsWiseMLXML';
+	var wiseMLJSONTabDivId              = 'WiseGuiTestbedDetailsWiseMLJSON';
+
 	var tabs = $(
-			  '<ul class="nav nav-tabs" id="WiseGuiTestbedDetailsTabs">'
-			+ '	<li class="active"><a href="#WiseGuiTestbedDetailsOverview">Map View</a></li>'
-			+ '	<li><a href="#WiseGuiTestbedDetailsNodes">Nodes</a></li>'
-			+ '	<li><a href="#WiseGuiTestbedDetailsReservations">All Reservations</a></li>'
-			+ '	<li class="WiseGuiTestbedDetailsMyReservationsTabHeader"><a href="#WiseGuiTestbedDetailsMyReservations">My Reservations</a></li>'
-			+ '	<li class="WiseGuiTestbedDetailsFederatableReservationsTabHeader"><a href="#WiseGuiTestbedDetailsFederatableReservations">Federatable Reservations</a></li>'
-			+ '	<li class="pull-right"><a href="#WiseGuiTestbedDetailsWiseMLXML">WiseML (XML)</a></li>'
-			+ '	<li class="pull-right"><a href="#WiseGuiTestbedDetailsWiseMLJSON">WiseML (JSON)</a></li>'
+			  '<ul class="nav nav-tabs" id="'+tabsId+'">'
+			+ '	<li class="active"><a href="#'+mapTabDivId+'">Map</a></li>'
+			+ '	<li><a href="#'+nodesTabDivId+'">Nodes</a></li>'
+			+ '	<li><a href="#'+reservationsTabDivId+'">All Reservations</a></li>'
+			+ '	<li class="WiseGuiTestbedDetailsMyReservationsTabHeader"><a href="#'+myReservationsTabDivId+'">My Reservations</a></li>'
+			+ '	<li class="WiseGuiTestbedDetailsFederatableReservationsTabHeader"><a href="#'+federatableReservationsTabDivId+'">Federatable Reservations</a></li>'
+			+ '	<li class="pull-right"><a href="#'+wiseMLXMLTabDivId+'">WiseML (XML)</a></li>'
+			+ '	<li class="pull-right"><a href="#'+wiseMLJSONTabDivId+'">WiseML (JSON)</a></li>'
 			+ '</ul>'
 			+ '<div class="tab-content">'
-			+ '	<div class="tab-pane active" id="WiseGuiTestbedDetailsOverview"/>'
-			+ '	<div class="tab-pane" id="WiseGuiTestbedDetailsNodes"/>'
-			+ '	<div class="tab-pane" id="WiseGuiTestbedDetailsReservations"/>'
-			+ '	<div class="tab-pane" id="WiseGuiTestbedDetailsMyReservations"/>'
-			+ '	<div class="tab-pane" id="WiseGuiTestbedDetailsFederatableReservations"/>'
-			+ ' <div class="tab-pane" id="WiseGuiTestbedDetailsWiseMLXML"/>'
-			+ '	<div class="tab-pane" id="WiseGuiTestbedDetailsWiseMLJSON"/>'
+			+ '	<div class="tab-pane active" id="'+mapTabDivId+'"/>'
+			+ '	<div class="tab-pane       " id="'+nodesTabDivId+'"/>'
+			+ '	<div class="tab-pane       " id="'+reservationsTabDivId+'"/>'
+			+ '	<div class="tab-pane       " id="'+myReservationsTabDivId+'"/>'
+			+ '	<div class="tab-pane       " id="'+federatableReservationsTabDivId+'"/>'
+			+ ' <div class="tab-pane       " id="'+wiseMLXMLTabDivId+'"/>'
+			+ '	<div class="tab-pane       " id="'+wiseMLJSONTabDivId+'"/>'
 			+ '</div>');
 
+	var mapTabContentDiv                     = tabs.find('#'+mapTabDivId).first();
+	var nodesTabContentDiv                   = tabs.find('#'+nodesTabDivId).first();
+	var reservationsTabContentDiv            = tabs.find('#'+reservationsTabDivId).first();
+	var myReservationsTabContentDiv          = tabs.find('#'+myReservationsTabDivId).first();
+	var federatableReservationsTabContentDiv = tabs.find('#'+federatableReservationsTabDivId).first();
+	var wiseMLXMLTabContentDiv               = tabs.find('#'+wiseMLXMLTabDivId).first();
+	var wiseMLJSONTabContentDiv              = tabs.find('#'+wiseMLJSONTabDivId).first();
+
+	var myReservationsTab                    = tabs.find('a[href="#'+myReservationsTabDivId+'"]').first();
+	var federatableReservationsTab           = tabs.find('a[href="#'+federatableReservationsTabDivId+'"]').first();
+
 	parentDiv.append(tabs);
+	myReservationsTab.hide();
+	federatableReservationsTab.hide();
 
-	var myReservationsTabHeader = tabs.find('.WiseGuiTestbedDetailsMyReservationsTabHeader').first();
-	var federatableReservationsTabHeader = tabs.find('.WiseGuiTestbedDetailsFederatableReservationsTabHeader').first();
-
-	myReservationsTabHeader.hide();
-	federatableReservationsTabHeader.hide();
-
+	var self = this;
 	$(window).bind('wisegui-navigation-event', function(e, navigationData) {
 		if (navigationData.tab) {
-			$('#WiseGuiTestbedDetailsTabs a[href="#'+navigationData.tab+'"]').tab('show');
+			
+			tabs.find('a[href="#'+navigationData.tab+'"]').tab('show');
+
+			if (navigationData.tab == reservationsTabDivId) {
+
+			}
 		}
 	});
 
@@ -3757,30 +3780,24 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 		null,
 		function(wiseML) {
 			
-			var overviewTab = $('#WiseGuiTestbedDetailsOverview');
+			// init description over map
 			if (wiseML.setup && wiseML.setup.description) {
-				overviewTab.append(
-						  '<div class="row">'
-						+ '	<div class="span12">' + wiseML.setup.description + '</div>'
-						+ '</div>');
+				var mapDescription = wiseml.setup.description;
+				var mapDescriptionRow = $('<div class="row"><div class="span12">' + mapDescription + '</div></div>');
+				mapTabContentDiv.append(mapDescriptionRow);
 			}
-			overviewTab.append(
-					  '<div class="row">'
-					+ '	<div class="span12 WiseGuiTestbedDetailsOverviewMap"></div>'
-					+ '</div>');
-			var overviewTabMapRow = overviewTab.find('.WiseGuiTestbedDetailsOverviewMap');
 
-			var jsonTab = $('#WiseGuiTestbedDetailsWiseMLJSON');
-			jsonTab.append($('<pre class="WiseGuiTestbedDetailsWiseMLJSON">'+JSON.stringify(wiseML, wiseMLNullFilter, '  ')+'</pre>'));
-			jsonTab.append($('<a href="'+wisebedBaseUrl + '/experiments/network.json" target="_blank" class="btn btn-primary pull-right">Download</a>'));
+			// init map
+			var mapRow = $('<div class="row"><div class="span12"></div></div>');
+			mapTabContentDiv.append(mapRow);
+			new WiseGuiGoogleMapsView(wiseML, mapRow.find('div').first());
 
-			var nodesTab = $('#WiseGuiTestbedDetailsNodes');
-			var nodesTabDiv = $('<div class="WiseGuiTestbedDetailsNodesTable"/>');
-			nodesTab.append(nodesTabDiv);
-			new WiseGuiNodeTable(wiseML, nodesTabDiv, false, true);
+			// init nodes tab
+			new WiseGuiNodeTable(wiseML, nodesTabContentDiv, false, true);
 
-			// Show google map
-			var mapsView = new WiseGuiGoogleMapsView(wiseML, overviewTabMapRow);
+			// init WiseML as JSON tab
+			wiseMLJSONTabContentDiv.append($('<pre class="WiseGuiTestbedDetailsWiseMLJSON">'+JSON.stringify(wiseML, wiseMLNullFilter, '  ')+'</pre>'));
+			wiseMLJSONTabContentDiv.append($('<a href="'+wisebedBaseUrl + '/experiments/network.json" target="_blank" class="btn btn-primary pull-right">Download</a>'));
 		},
 		WiseGui.showAjaxError
 	);
@@ -3794,27 +3811,39 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 			},
 			WiseGui.showAjaxError
 	);
-
-	var reservationsTab = $('#WiseGuiTestbedDetailsReservations');
-	$(window).bind('wisegui-reservations-changed', function() { buildReservationTable(reservationsTab); });
-	buildReservationTable(reservationsTab);
-
-	var myReservationsTab = $('#WiseGuiTestbedDetailsMyReservations');
+	
+	$(window).bind('wisegui-reservations-changed', function() {
+		buildReservationTable(reservationsTabContentDiv);
+	});
+	
 	$(window).bind('wisegui-logged-in', function() {
-		myReservationsTabHeader.show();
-		buildMyReservationTable(myReservationsTab);
+		myReservationsTab.show();
+		buildMyReservationTable(myReservationsTabContentDiv);
 	});
+	
 	$(window).bind('wisegui-logged-out', function() {
-		myReservationsTabHeader.hide();
-		myReservationsTab.empty();
+		myReservationsTab.hide();
+		myReservationsTabContentDiv.empty();
 	});
-	$(window).bind('wisegui-reservations-changed', function() { buildMyReservationTable(myReservationsTab); });
+
+	$(window).bind('wisegui-reservations-changed', function() {
+		buildMyReservationTable(myReservationsTabContentDiv);
+	});
 	
 	if (testbedDescription.isFederator) {
-		var federatableReservationsTab = $('#WiseGuiTestbedDetailsFederatableReservations');
-		$(window).bind('wisegui-logged-in', function() { federatableReservationsTabHeader.show(); });
-		$(window).bind('wisegui-logged-out', function() { federatableReservationsTabHeader.hide(); });
-		$(window).bind('wisegui-reservations-changed', function() { buildFederatableReservationTable(federatableReservationsTab); });
+		
+		$(window).bind('wisegui-logged-in', function() {
+			federatableReservationsTab.show();
+		});
+
+		$(window).bind('wisegui-logged-out', function() {
+			federatableReservationsTabHeader.hide();
+		});
+
+		$(window).bind('wisegui-reservations-changed', function() {
+			buildFederatableReservationTable(federatableReservationsTab);
+		});
+
 		buildFederatableReservationTable(federatableReservationsTab);
 	}
 
@@ -3823,9 +3852,9 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 	    var navigationData = getNavigationData();
 	    navigationData.tab = e.target.hash.substring(1);
 	    window.location.hash = $.param(navigationData);
-	    //navigateTo(navigationData.experimentId, e.target.hash.substring(1));
-	    //$(this).tab('show');
 	});
+
+	buildReservationTable(reservationsTabContentDiv);
 }
 
 function buildFederatableReservationTable(tab) {
@@ -3870,9 +3899,9 @@ function buildPersonalReservationsTable(parent, reservations) {
 		from  = $('<a href="#" rel="tooltip" title="'+reservation.from.toISOString()+'">' + $.format.date(reservation.from, "yyyy-MM-dd HH:mm:ss") + '</a>').tooltip('show').click(nop);
 		to    = $('<a href="#" rel="tooltip" title="'+reservation.to.toISOString()+'">' + $.format.date(reservation.to, "yyyy-MM-dd HH:mm:ss") + '</a>').tooltip('show').click(nop);
 		nodes = $('<a href="#" rel="tooltip" title="'+reservation.nodeUrns.join("<br/>")+'">'+ reservation.nodeUrns.length + ' nodes</a>').tooltip('show').click(nop);
-		btn   = $('<a class="btn btn-primary">Open</a>').click(function(e) {
+		btn   = $('<a class="btn btn-primary">Open</a>').bind('click', reservation, function(e) {
 			e.preventDefault();
-			navigateTo(reservation.experimentId);
+			navigateTo(e.data.experimentId);
 		});
 
 		tableRows[i] = [];
@@ -4003,9 +4032,9 @@ function showReservationsDialog() {
 
 function navigateTo(experimentId, tab) {
 	var navigationData = {
-		nav          : experimentId ? 'experiment' : 'overview',
-		experimentId : experimentId || '',
-		tab          : tab || ''
+		nav          : (experimentId ? 'experiment' : 'overview'),
+		experimentId : (experimentId || ''),
+		tab          : (tab || '')
 	};
 	$.bbq.pushState(navigationData);
 }
