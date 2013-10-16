@@ -88,6 +88,7 @@ WiseGuiNavigationViewer.prototype.buildView = function() {
 			+ ' 		<br/>'
 			+ ' 		<br/>'
 			+ '			&copy; <a href="http://www.itm.uni-luebeck.de/people/bimschas/" target="_blank">Daniel Bimschas</a>,'
+			+ '			<a href="http://www.itm.uni-luebeck.de/people/ebers/" target="_blank">Sebastian Ebers</a>,'
 			+ '			<a href="http://www.itm.uni-luebeck.de/people/pfisterer/" target="_blank">Dennis Pfisterer</a>,'
 			+ '			<a href="http://www.itm.uni-luebeck.de/people/boldt/" target="_blank">Dennis Boldt</a>,'
 			+ '			<a href="http://www.itm.uni-luebeck.de/people/massel/" target="_blank">Florian Massel</a>,'
@@ -4062,18 +4063,23 @@ function createNavigationContainer() {
 }
 
 function switchContentContainer(navigationData, navigationKey) {
-
 	$('#WiseGuiContainer .WiseGuiContentContainer').hide();
+	getOrCreateContentContainer(navigationData, navigationKey).show();
+}
 
-	if (!contentContainers[navigationKey]) {
-		contentContainers[navigationKey] = createContentContainer(navigationData);
+function getOrCreateContentContainer(navigationData, navigationKey) {
+	
+	if (contentContainers[navigationKey]) {
+		return contentContainers[navigationKey];
 	}
 
-	$(contentContainers[navigationKey]).show();
+	var container = createContentContainer(navigationData);
+	contentContainers[navigationKey] = container;
+	return container;
 }
 
 function createContentContainer(navigationData) {
-
+	
 	var container = $('<div class="WiseGuiContentContainer"/>');
 	container.hide();
 
@@ -4133,6 +4139,10 @@ $(function () {
 			testbedDescription = td;
 
 			navigationContainer = createNavigationContainer();
+
+			var navigationData = {nav:'overview', experimentId:'', tab:''};
+			getOrCreateContentContainer(navigationData, getNavigationKey(navigationData));
+
 			reservationObserver.startObserving();
 			loginObserver.startObserving();
 
