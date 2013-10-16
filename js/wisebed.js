@@ -10,6 +10,88 @@ Array.prototype.compareArrays = function(arr) {
 	return true;
 };
 
+var WisebedPublicReservationData = function(prd) {
+	
+	this.from = new Date(prd.from);
+	this.to = new Date(prd.to);
+	this.nodeUrns = prd.nodeUrns;
+	this.nodeUrnPrefixes = [];
+	
+	var self = this;
+	
+	prd.nodeUrns.forEach(function(nodeUrn) {
+		var nodeUrnPrefix = nodeUrn.substring(0, nodeUrn.lastIndexOf(':') + 1);
+		if (self.nodeUrnPrefixes.indexOf(nodeUrnPrefix) < 0) {
+			self.nodeUrnPrefixes.push(nodeUrnPrefix);
+		}
+	});
+};
+
+var WisebedConfidentialReservationData = function(crd) {
+	
+	this.description = crd.description;
+	this.from = new Date(crd.from);
+	this.to = new Date(crd.to);
+	this.nodeUrns = crd.nodeUrns;
+	this.nodeUrnPrefixes = [];
+	this.options = crd.options;
+	this.secretReservationKey = crd.secretReservationKey;
+	this.username = crd.username;
+	
+	var self = this;
+
+	crd.nodeUrns.forEach(function(nodeUrn) {
+		var nodeUrnPrefix = nodeUrn.substring(0, nodeUrn.lastIndexOf(':') + 1);
+		if (self.nodeUrnPrefixes.indexOf(nodeUrnPrefix) < 0) {
+			self.nodeUrnPrefixes.push(nodeUrnPrefix);
+		}
+	});
+};
+
+var WisebedReservation = function(confidentialReservationDataList) {
+
+	this.descriptions = [];
+	this.description = '';
+	this.from = null;
+	this.to = null;
+	this.nodeUrns = [];
+	this.nodeUrnPrefixes = [];
+	this.confidentialReservationDataList = [];
+	this.secretReservationKeys = [];
+	this.serializedSecretReservationKeyBase64 = null;
+	this.experimentId = null;
+
+	var self = this;
+
+	confidentialReservationDataList.forEach(function(confidentialReservationData) {
+		var crd = new WisebedConfidentialReservationData(confidentialReservationData);
+		if (crd.description && crd.description != '') { self.descriptions.push(crd.description); }
+		if (self.from == null || crd.from >= self.from) { self.from = crd.from; }
+		if (self.to   == null || crd.to   <= self.to  ) { self.to   = crd.to;   }
+		self.nodeUrns.push(crd.nodeUrns);
+		crd.nodeUrns.forEach(function(nodeUrn) {
+			var nodeUrnPrefix = nodeUrn.substring(0, nodeUrn.lastIndexOf(':') + 1);
+			if (self.nodeUrnPrefixes.indexOf(nodeUrnPrefix) < 0) {
+				self.nodeUrnPrefixes.push(nodeUrnPrefix);
+			}
+		});
+		self.secretReservationKeys.push(crd.secretReservationKey);
+		self.confidentialReservationDataList.push(new WisebedConfidentialReservationData(crd));
+	});
+	this.nodeUrns.sort();
+	this.nodeUrnPrefixes.sort();
+	this.secretReservationKeys.sort(function(a,b) {
+		if (a.nodeUrnPrefix < b.nodeUrnPrefix) { return -1; }
+		if (a.nodeUrnPrefix > b.nodeUrnPrefix) { return  1; }
+		if (a.key < b.key) { return -1; }
+		if (a.key > b.key) { return  1; }
+		return 0;
+	});
+	this.serializedSecretReservationKeyBase64 = btoa(JSON.stringify(this.secretReservationKeys));
+	this.experimentId = this.serializedSecretReservationKeyBase64;
+	this.description = this.descriptions.join('<br/>');
+};
+
 var Wisebed = function(baseUri, webSocketBaseUri) {
 
 	function getBaseUri() {
@@ -95,11 +177,16 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 
 	this.reservations = new function() {
 
+		/**
+		 * returns a WisebedReservation for the given experimentId (serialized base64-encoded secret reservation key(s))
+		 */
 		this.getByExperimentId = function(experimentId, callbackDone, callbackError) {
 			var queryUrl = getBaseUri() + "/reservations/byExperimentId/" + experimentId;
 			$.ajax({
 				url       : queryUrl,
-				success   : callbackDone,
+				success   : function(confidentialReservationDataList, textStatus, jqXHR) {
+					callbackDone(new WisebedReservation(confidentialReservationDataList), textStatus, jqXHR)
+				},
 				error     : callbackError,
 				context   : document.body,
 				dataType  : "json",
@@ -107,27 +194,20 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 			});
 		};
 
+		/**
+		 * returns a list of WisebedReservation objects
+		 */
 		this.getPersonal = function(from, to, callbackDone, callbackError) {
-			var queryUrl = getBaseUri() + "/reservations?userOnly=true" +
-					(from ? ("&from=" + from.toISOString()) : "") +
-					(to ? ("&to="+to.toISOString()) : "");
-			$.ajax({
-				url       : queryUrl,
-				success   : callbackDone,
-				error     : callbackError,
-				context   : document.body,
-				dataType  : "json",
-				xhrFields : { withCredentials: true }
-			});
-		};
-
-		this.getPublic = function(from, to, callbackDone, callbackError) {
-			var queryUrl = getBaseUri() + "/reservations?" +
+			var queryUrl = getBaseUri() + "/reservations/personal?" +
 					(from ? ("from=" + from.toISOString() + "&") : "") +
 					(to ? ("to="+to.toISOString() + "&") : "");
 			$.ajax({
 				url       : queryUrl,
-				success   : callbackDone,
+				success   : function(crdList, textStatus, jqXHR) {
+					var list = [];
+					crdList.forEach(function(crd) { list.push(new WisebedReservation([crd])); });
+					callbackDone(list, textStatus, jqXHR);
+				},
 				error     : callbackError,
 				context   : document.body,
 				dataType  : "json",
@@ -135,6 +215,87 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 			});
 		};
 
+		/**
+		 * returns a list of WisebedPublicReservationData objects
+		 */
+		this.getPublic = function(from, to, callbackDone, callbackError) {
+			var queryUrl = getBaseUri() + "/reservations/public?" +
+					(from ? ("from=" + from.toISOString() + "&") : "") +
+					(to ? ("to="+to.toISOString() + "&") : "");
+			$.ajax({
+				url       : queryUrl,
+				success   : function(prdList, textStatus, jqXHR) {
+					var list = [];
+					prdList.forEach(function(prd) { list.push(new WisebedPublicReservationData(prd)); });
+					callbackDone(list, textStatus, jqXHR);
+				},
+				error     : callbackError,
+				context   : document.body,
+				dataType  : "json",
+				xhrFields : { withCredentials: true }
+			});
+		};
+
+		this.getFederatable = function(from, to, callbackDone, callbackError) {
+
+			function calculatePowerset(ary) {
+				var ps = [[]];
+				for (var i=0; i < ary.length; i++) {
+					for (var j = 0, len = ps.length; j < len; j++) {
+						ps.push(ps[j].concat(ary[i]));
+					}
+				}
+				return ps;
+			}
+
+			this.getPersonal(from, to, function(reservations) {
+
+				var powerset = calculatePowerset(reservations);
+				var federatableSets = [];
+				var current, currentRes, overlap;
+
+				for (var i=0; i<powerset.length; i++) {
+					
+					if (powerset[i].length == 0) {continue;} // first element (empty set) doesn't make sense
+					if (powerset[i].length == 1) {continue;} // single reservation sets can't be federated
+
+					// for every reservation in the current set of reservations check if reservation interval
+					// overlaps with reservation interval of each other reservation in the set
+					current = powerset[i];
+					overlap = true;
+					
+					for (var k=0; k<current.length; k++) {
+						for (var l=k; l<current.length; l++) {
+
+							// reservations overlap if (startA <= endB) and (endA >= startB)
+							if (!(current[k].from < current[l].to && current[k].to > current[l].from)) {
+								overlap = false;
+							}
+						}
+					}
+
+					if (overlap) {
+						federatableSets.push(current);
+					}
+				}
+
+				var federatableReservations = [];
+				federatableSets.forEach(function(federatableSet) {
+					var federatableSetCrds = [];
+					federatableSet.forEach(function(federatable) {
+						federatableSetCrds = federatableSetCrds.concat(federatable.confidentialReservationDataList);
+					});
+					federatableReservations.push(new WisebedReservation(federatableSetCrds));
+				});
+
+				callbackDone(federatableReservations);
+
+			}, callbackError);
+		}
+
+		/**
+		 * returns a WisebedReservation object
+		 */
 		this.make = function(from, to, nodeUrns, description, options, callbackDone, callbackError) {
 
 			// Generate JavaScript object
@@ -152,7 +313,9 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 				data		:	JSON.stringify(content, null, '  '),
 				contentType	:	"application/json; charset=utf-8",
 				dataType	:	"json",
-				success		: 	callbackDone,
+				success		: 	function(confidentialReservationDataList, textStatus, jqXHR) {
+					callbackDone(new WisebedReservation(confidentialReservationDataList), textStatus, jqXHR)
+				},
 				error		: 	callbackError,
 				xhrFields   : { withCredentials: true }
 			});
@@ -200,13 +363,6 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 				dataType  : "json",
 				xhrFields : { withCredentials: true }
 			});
-		};
-
-		this.getUrl = function(reservation) {
-			var secretReservationKeys = {
-				reservations: [reservation.secretReservationKey]
-			};
-			return getBaseUri() + "/experiments/" + btoa(JSON.stringify(secretReservationKeys));
 		};
 
 		this.areNodesConnected = function(nodeUrns, callbackDone, callbackError) {
