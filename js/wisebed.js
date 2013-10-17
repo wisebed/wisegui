@@ -68,8 +68,8 @@ var WisebedReservation = function(confidentialReservationDataList) {
 		if (crd.description && crd.description != '') { self.descriptions.push(crd.description); }
 		if (self.from == null || crd.from >= self.from) { self.from = crd.from; }
 		if (self.to   == null || crd.to   <= self.to  ) { self.to   = crd.to;   }
-		self.nodeUrns.push(crd.nodeUrns);
 		crd.nodeUrns.forEach(function(nodeUrn) {
+			self.nodeUrns.push(nodeUrn);
 			var nodeUrnPrefix = nodeUrn.substring(0, nodeUrn.lastIndexOf(':') + 1);
 			if (self.nodeUrnPrefixes.indexOf(nodeUrnPrefix) < 0) {
 				self.nodeUrnPrefixes.push(nodeUrnPrefix);
