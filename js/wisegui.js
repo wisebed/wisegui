@@ -103,13 +103,10 @@ WiseGuiNavigationViewer.prototype.buildView = function() {
 	this.secondaryMenu = this.view.find('ul.secondary-nav').first();
 
 	// create all buttons and attach them
-	this.primaryMenu.append('<li class="WiseGuiNavOverviewButton"><a href="#">Testbed Overview</a></li>');
+	this.primaryMenu.append('<li class="WiseGuiNavOverviewButton"><a href="#">Overview</a></li>');
 
 	this.overviewButtonLi         = this.primaryMenu.find('li.WiseGuiNavOverviewButton').first();
 	this.overviewButton           = this.overviewButtonLi.find('a').first();
-
-	this.experimentDropDown = new WiseGuiReservationsDropDown();
-	this.primaryMenu.append(this.experimentDropDown.view);
 
 	this.secondaryMenu.append('<li class="WiseGuiNavReservationsButton"><a href="#">Make Reservation</a></li>'
 			+ '<li class="WiseGuiNavLogoutButton"><a href="#">Logout</a></li>'
@@ -123,7 +120,6 @@ WiseGuiNavigationViewer.prototype.buildView = function() {
 	this.logoutButton         = this.logoutButtonLi.find('a').first();
 
 	// hide all buttons
-	this.experimentDropDown.view.hide();
 	this.loginButtonLi.hide();
 	this.logoutButtonLi.hide();
 	this.reservationsButtonLi.hide();
@@ -159,11 +155,9 @@ WiseGuiNavigationViewer.prototype.buildView = function() {
 	$(window).bind('wisegui-logged-out', function() { self.onLoggedOutEvent(); });
 	$(window).bind('wisegui-navigation-event', function(e, navigationData) {
 		if (navigationData.nav == 'experiment') {
-			self.experimentDropDown.view.toggleClass('active', true);
 			self.overviewButtonLi.removeClass('active');
 		} else {
 			self.overviewButtonLi.addClass('active');
-			self.experimentDropDown.view.toggleClass('active', false);
 		}
 	});
 };
@@ -172,14 +166,12 @@ WiseGuiNavigationViewer.prototype.onLoggedInEvent = function() {
 	this.loginButtonLi.hide();
 	this.logoutButtonLi.show();
 	this.reservationsButtonLi.show();
-	this.experimentDropDown.view.show();
 };
 
 WiseGuiNavigationViewer.prototype.onLoggedOutEvent = function() {
 	this.loginButtonLi.show();
 	this.logoutButtonLi.hide();
 	this.reservationsButtonLi.hide();
-	this.experimentDropDown.view.hide();
 };
 
 /**
@@ -1869,83 +1861,6 @@ WiseGuiNotificationsViewer.prototype.buildView = function() {
 	    	});
 	    }
 	});
-};
-
-/**
- * #################################################################
- * WiseGuiReservationsDropDown
- * #################################################################
- */
-var WiseGuiReservationsDropDown = function() {
-
-	this.view = null;
-
-	var self = this;
-
-	$(window).bind('wisegui-reservations-changed', function(e, reservations) {
-		if (reservations === undefined || reservations == null) {
-			self.update();
-		} else {
-			self.onReservationsChangedEvent(reservations);
-		}
-	});
-
-	this.buildView();
-};
-
-WiseGuiReservationsDropDown.prototype.update = function() {
-	var self = this;
-	wisebed.reservations.getPersonal(null, null, function(reservations) {
-		self.onReservationsChangedEvent(reservations);
-	});
-};
-
-WiseGuiReservationsDropDown.prototype.onReservationsChangedEvent = function(reservations) {
-
-	var menu = this.view.find('.dropdown-menu');
-	menu.empty();
-
-	for (var i=0; i<reservations.length; i++) {
-
-		var reservation = reservations[i];
-
-		var dateNow = new Date();
-		var dateFrom = new Date(reservation.from);
-		var dateTo = new Date(reservation.to);
-
-		var fromStr = $.format.date(dateFrom, "yyyy-MM-dd HH:mm");
-		var toStr = $.format.date(dateTo, "yyyy-MM-dd HH:mm");
-
-		// Skip old reservations
-		if(dateTo < dateNow) continue;
-
-		var li = $('<li><a href="#">' + fromStr + ' - ' + toStr + ' | ' + reservation.description + '</a></li>');
-		var self = this;
-		li.find('a').bind('click', reservation, function(e) {
-			e.preventDefault();
-			navigateTo(e.data.experimentId);
-		});
-
-		menu.append(li);
-	}
-
-	if(menu.children().length == 0) {
-		var li = $('<li style="padding:4px 15px">No active reservations currently</li>');
-		this.view.find('.dropdown-menu').append(li);
-		return;
-	}
-
-};
-
-WiseGuiReservationsDropDown.prototype.buildView = function() {
-	this.view = $('<li class="dropdown">'
-			+ '	<a href="#" class="dropdown-toggle" data-toggle="dropdown">My Reservations</a>'
-			+ '	<ul class="dropdown-menu">'
-			+ '	</ul>'
-			+ '</li>');
-
-	var li = $('<li style="padding:4px 15px">No active reservations currently</li>');
-	this.view.find('.dropdown-menu').append(li);
 };
 
 /**
