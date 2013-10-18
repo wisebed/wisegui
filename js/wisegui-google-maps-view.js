@@ -166,9 +166,10 @@ WiseGuiGoogleMapsView.prototype.addMarker = function(node) {
 
 	var marker = new google.maps.Marker({
 		position : markerLatLng,
-		map : this.map,
-		title : "Sensor: " + node.id,
-		urn : node.id
+		map      : this.map,
+		title    : "Sensor: " + node.id,
+		urn      : node.id,
+		icon     : 'img/maps/red-dot.png'
 	});
 
 	this.infoWindows[node.id] = new google.maps.InfoWindow();

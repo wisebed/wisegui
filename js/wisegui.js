@@ -502,69 +502,61 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 		var mapsView = that.mapsView;
 
 		if (mapsView.map != null) {
+
 			mapsView.map.enableKeyDragZoom();
 			mapsView.map.selectedURNs = [];
 			
+			var ICON_SELECTED   = 'img/maps/yellow-dot.png';
+			var ICON_DESELECTED = 'img/maps/red-dot.png';
 			
 			$.each(mapsView.markersArray, function (index, marker) {
+
 				mapsView.mapSpiderfier.clearListeners('click');
 				mapsView.mapSpiderfier.addListener('click', function(marker, event) {
-					 if(marker.getIcon().url == 'img/node.png'){
-						 mapsView.map.selectURNs([marker.urn]);
-					 }else{
-						 mapsView.map.selectURNs([marker.urn], true);
-					 }
-					 var selectedFun =function(data) {
-							var nodeids = mapsView.map.selectedURNs;
-							for(var i = 0; i < nodeids.length; i++) {
-								if(data.id == nodeids[i]) return true;
-							}
-							return false;
-						};
 
-					   that.table.applySelected(selectedFun);
+					if (marker.getIcon() == ICON_SELECTED){
+						mapsView.map.selectURNs([marker.urn], true);
+					} else {
+						mapsView.map.selectURNs([marker.urn], false);
+					}
+
+					var selectedFun = function(data) {
+						var nodeids = mapsView.map.selectedURNs;
+						for(var i = 0; i < nodeids.length; i++) {
+							if(data.id == nodeids[i]) return true;
+						}
+						return false;
+					};
+
+					that.table.applySelected(selectedFun);
 				});
 	        });
 			
 			mapsView.map.selectURNs = function(urns, deselect){
-				var image;
-				if(!deselect){ 
-					image = new google.maps.MarkerImage(
-							'img/node_selected.png',
-			      			  new google.maps.Size(25,19),
-			      			  new google.maps.Point(0,0),
-			      			  new google.maps.Point(13,19)
-			      			);
-				}else{
-					image = new google.maps.MarkerImage(
-			      			  'img/node.png',
-			      			  new google.maps.Size(25,19),
-			      			  new google.maps.Point(0,0),
-			      			  new google.maps.Point(13,19)
-			      			);
-				}
 				
 				//loop over markers and set new image
 				$.each(mapsView.markersArray, function (index, marker) {
-					if(urns.indexOf(marker.urn)>-1)
-	                    marker.setIcon(image);
+					if (urns.indexOf(marker.urn) > -1) {
+						marker.setIcon(deselect ? ICON_DESELECTED : ICON_SELECTED);
+					}
 	            });
 				
 				//loop over selected urns and insert them to model if necessary
-				$.each(urns, function(index, urn){
+				$.each(urns, function(index, urn) {
 					var index = mapsView.map.selectedURNs.indexOf(urn);
-						if(index==-1){
-							if(!deselect){
-								mapsView.map.selectedURNs.push(urn);
-							}else{
-								mapsView.map.selectedURNs.splice(index,1);
-							}
-						}else{
-							if(deselect) mapsView.map.selectedURNs.splice(index,1);
-						}	
+					if(index == -1) {
+						if (!deselect) {
+							mapsView.map.selectedURNs.push(urn);
+						} else {
+							mapsView.map.selectedURNs.splice(index,1);
+						}
+					} else {
+						if (deselect) {
+							mapsView.map.selectedURNs.splice(index,1);
+						}
+					}	
 				});
 			};
-			
 
 			//Filter out all markers but the ones with the urns given
 			mapsView.map.filter = function(urns){
