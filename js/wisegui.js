@@ -3859,7 +3859,7 @@ function buildPersonalReservationsTable(parent, reservations) {
 		tableRows[i][5] = btn;
 	}
 
-	var noEntriesMessage = 'There are no reservations for the next week yet!';
+	var noEntriesMessage = 'No reservations available';
 	var table = buildTable(tableHead, tableRows, noEntriesMessage);
 	parent.empty();
 	parent.append(table);
