@@ -2493,8 +2493,8 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			self.progressBar.toggleClass('progress-success', true);
 			self.progressBar.find('div.bar').css('width', '1%');
 			self.progressBarSchedule = window.setInterval(function(){
-				var durationInMillis = reservation.to.getTime() - reservation.from.getTime();
-				var millisSinceStart = new Date().getTime() - reservation.from.getTime();
+				var durationInMillis = reservation.to.unix() - reservation.from.unix();
+				var millisSinceStart = moment().unix() - reservation.from.unix();
 				var passedInPercent  = (millisSinceStart / durationInMillis) * 100;
 				self.progressBar.find('div.bar').css('width', (passedInPercent > 1 ? passedInPercent + '%' : '1%'));
 			}, 1000);
