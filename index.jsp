@@ -51,8 +51,8 @@
 
 	<script type="text/javascript">
 
-		var wisebedWebSocketBaseUrl = 'ws://' + window.location.host + '<%= getServletConfig().getInitParameter(PortalServerConfig.WEBSOCKET_CONTEXT_PATH) %>';
-		var wisebedBaseUrl = window.location.origin + '<%= getServletConfig().getInitParameter(PortalServerConfig.REST_API_CONTEXT_PATH) %>';
+		var wisebedWebSocketBaseUrl = 'ws://' + window.location.host + '<%= getServletConfig().getInitParameter(WiseGuiServiceConfig.WEBSOCKET_CONTEXT_PATH) %>';
+		var wisebedBaseUrl = window.location.origin + '<%= getServletConfig().getInitParameter(WiseGuiServiceConfig.REST_API_CONTEXT_PATH) %>';
 
 	</script>
 
