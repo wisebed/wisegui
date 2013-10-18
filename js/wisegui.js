@@ -2018,16 +2018,21 @@ WiseGuiNodeSelectionDialog.prototype.onReady = function(callback) {
  * #################################################################
  */
 
-var WiseGuiExperimentationView = function(experimentId) {
+var WiseGuiExperimentationView = function(reservation) {
 
-	this.experimentId = experimentId;
+	var self = this;
+
+	this.experimentId = reservation.experimentId;
+	this.reservation = reservation;
+
 	this.columns = {
 			'time' : true,
 			'urn' : true,
 			'message' : true
 	};
-	
-	this.experimentationDivId    = 'WiseGuiExperimentationDiv-'+experimentId.replace(/=/g, '');
+
+	this.experimentationDivId    = 'WiseGuiExperimentationDiv-'+this.experimentId.replace(/=/g, '');
+	this.progressBarId           = this.experimentationDivId+'-progress-bar';
 	this.outputsTextAreaId       = this.experimentationDivId+'-outputs-textarea';
 	this.sendDivId               = this.experimentationDivId+'-send';
 	//this.channelPipelinesDivId   = this.experimentationDivId+'-channel-pipelines';
@@ -2037,7 +2042,6 @@ var WiseGuiExperimentationView = function(experimentId) {
 	this.scriptingOutputDivId    = this.experimentationDivId+'-scripting-output';
 	this.wisemlJsonDivId         = this.experimentationDivId+'-wiseml-json';
 	this.wisemlXmlDivId          = this.experimentationDivId+'-wiseml-xml';
-	this.stateLabelId            = this.experimentationDivId+'-state-label';
 
 	this.view = $('<div class="WiseGuiExperimentationView"/>');
 
@@ -2052,7 +2056,6 @@ var WiseGuiExperimentationView = function(experimentId) {
 	this.socket                  = null;
 	this.userScript      = {};
 	
-	var self = this;
 	this.throttledRedraw = $.throttle(self.outputsRedrawLimit, function(){	self.redrawOutput();});
 
 	this.buildView();
@@ -2249,7 +2252,10 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	this.view.append(
 			  '<div class="WiseGuiExperimentationViewOutputs">'
 			+ '	<div class="row">'
-			+ '		<div class="span6"><h2>Data</h2></div>'
+			+ '		<div class="span6">'
+			+ '			<b>' + 'Reservation' + '</b> Start: ' + $.format.date(this.reservation.from, "yyyy-MM-dd HH:mm:ss") + ' End: ' + $.format.date(this.reservation.to, "yyyy-MM-dd HH:mm:ss")
+			+ '			<div id="' + this.progressBarId+ '" class="progress"><div class="bar" style="width: 0%;"></div></div>'
+			+ '		</div>'
 			+ '		<div class="span6">'
 			+ '			<div class="btn-toolbar btn-toolbar2  pull-right">'
 			+ '				<div class="btn-group">'
@@ -2362,7 +2368,6 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+'			</table>'
 			+ '		</div></div>'
 			+ '	</div>'
-			+ ' <div><span class="label pull-right" id="'+this.stateLabelId+'">Loading...</span></div>'
 			+ ' <div class="WiseGuiExperimentationViewControls"><h2>Controls</h2></div>'
 			+ '	 <div>'
 			+ '		<ul class="nav nav-tabs">'
@@ -2463,7 +2468,8 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '	</div>'
 			+ '</div>');
 
-	this.stateLabel                   = this.view.find('#'+this.stateLabelId).first();
+	this.progressBar                  = this.view.find('#'+this.progressBarId).first();
+	this.progressBarSchedule          = undefined;
 	this.outputsNumMessagesInput      = this.view.find('#num-outputs').first();
 	this.outputsRedrawLimitInput      = this.view.find('#redraw-limit').first();
 	this.outputsTable                 = this.view.find('table.WiseGuiExperimentViewOutputsTable tbody').first();
@@ -2489,39 +2495,27 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 		}
 	});
 
-	this.updateStateLabel = function(state, reservation) {
-		
-		self.stateLabel.toggleClass('label-info',    state == 'pending');
-		self.stateLabel.toggleClass('label-success', state == 'started');
-		self.stateLabel.toggleClass('label-warning', state == 'ended'  );
-		
-		self.stateLabel.empty();
-		self.stateLabel.append('Reservation ' + state + ' (' + $.format.date(reservation.from, "yyyy-MM-dd HH:mm:ss") + ' until ' + $.format.date(reservation.to, "yyyy-MM-dd HH:mm:ss") + ')');
-	};
-
-	// load reservation data to check for reservation start time
-	wisebed.reservations.getByExperimentId(
-		this.experimentId,
-		function(reservation) {
-			var now = new Date();
-			if (now < reservation.from) {
-				self.updateStateLabel('pending', reservation);
-			}
-		},
-		WiseGui.showAjaxError
-	);
-
-	// change label to 'running' as soon as reservation starts
+		// change label to 'running' as soon as reservation starts
 	$(window).bind('wisegui-reservation-started', function(e, reservation) {
 		if (self.experimentId == reservation.experimentId) {
-			self.updateStateLabel('started', reservation);
+			self.progressBar.toggleClass('progress-success', true);
+			self.progressBar.find('div.bar').css('width', '1%');
+			self.progressBarSchedule = window.setInterval(function(){
+				var durationInMillis = reservation.to.getTime() - reservation.from.getTime();
+				var millisSinceStart = new Date().getTime() - reservation.from.getTime();
+				var passedInPercent  = (millisSinceStart / durationInMillis) * 100;
+				self.progressBar.find('div.bar').css('width', (passedInPercent > 1 ? passedInPercent + '%' : '1%'));
+			}, 1000);
 		}
 	});
 
 	// change label to 'ended' as soon as reservation starts
 	$(window).bind('wisegui-reservation-ended', function(e, reservation) {
 		if (self.experimentId == reservation.experimentId) {
-			self.updateStateLabel('ended', reservation);
+			window.clearInterval(self.progressBarSchedule);
+			self.progressBar.toggleClass('progress-success', false);
+			self.progressBar.toggleClass('progress-warning', true);
+			self.progressBar.find('div.bar').css('width', '100%');
 		}
 	});
 
@@ -3805,7 +3799,7 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 
 function buildFederatableReservationTable(tab) {
 	wisebed.reservations.getFederatable(
-			new Date(),
+			null,
 			null,
 			function(federatableReservations) { buildPersonalReservationsTable(tab, federatableReservations); },
 			WiseGui.showAjaxError
@@ -3814,7 +3808,7 @@ function buildFederatableReservationTable(tab) {
 
 function buildMyReservationTable(parent) {
 	wisebed.reservations.getPersonal(
-			new Date(),
+			null,
 			null,
 			function(wisebedReservationList) {
 				buildPersonalReservationsTable(parent, wisebedReservationList);
@@ -3864,13 +3858,13 @@ function buildPersonalReservationsTable(parent, reservations) {
 	parent.empty();
 	parent.append(table);
 	if (tableRows.length > 0) {
-		table.tablesorter({ sortList: [[0,0]] });
+		table.tablesorter({ sortList: [[0,1]] });
 	}
 }
 
 function buildReservationTable(reservationsTab) {
 	wisebed.reservations.getPublic(
-			new Date(),
+			null,
 			null,
 			function(reservations) {
 
@@ -3905,7 +3899,7 @@ function buildReservationTable(reservationsTab) {
 				reservationsTab.empty();
 				reservationsTab.append(table);
 				if (tableRows.length > 0) {
-					table.tablesorter({ sortList: [[0,0]] });
+					table.tablesorter({ sortList: [[0,1]] });
 				}
 			},
 			WiseGui.showAjaxError
@@ -3951,8 +3945,12 @@ function buildTable(tableHead, tableRows, noEntriesMessage) {
 
 function loadExperimentContainer(navigationData, parentDiv) {
 
-	var experimentationView = new WiseGuiExperimentationView(navigationData.experimentId);
-	parentDiv.append(experimentationView.view);
+	wisebed.reservations.getByExperimentId(navigationData.experimentId, function(reservation) {
+
+		var experimentationView = new WiseGuiExperimentationView(reservation);
+		parentDiv.append(experimentationView.view);
+
+	}, WiseGui.showAjaxError);
 }
 
 function getNavigationKey(navigationData) {
