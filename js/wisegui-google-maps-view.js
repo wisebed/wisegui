@@ -167,7 +167,6 @@ WiseGuiGoogleMapsView.prototype.addMarker = function(node) {
 	var marker = new google.maps.Marker({
 		position : markerLatLng,
 		map      : this.map,
-		title    : "Sensor: " + node.id,
 		urn      : node.id,
 		icon     : 'img/maps/red-dot.png'
 	});
@@ -180,18 +179,18 @@ WiseGuiGoogleMapsView.prototype.addMarker = function(node) {
 			return value;
 		}
 	};
-	this.infoWindows[node.id].setContent(
-			'<h5>' + node.id + '</h5>'
+
+	var infoWindowContent = '<h5>' + node.id + '</h5>'
 					+ (JSON.stringify(node.c, this.infoWindowRenderer, '  ').replace(/\n/g, "<br/>") + '</br>')
-					+ (node.desc ? node.desc + '</br>' : '')
-	);
+					+ (node.desc ? node.desc + '</br>' : '');
+	this.infoWindows[node.id].setContent(infoWindowContent);
 
 	var self = this;
 	this.mapSpiderfier.addListener('click', function(marker, event) {
 		for (var nodeUrn in self.infoWindows) {
 			self.infoWindows[nodeUrn].close();
 		}
-		self.infoWindows[node.id].open(self.map, marker);
+		self.infoWindows[marker.urn].open(self.map, marker);
 	});
 
 	this.markersArray.push(marker);
