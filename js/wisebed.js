@@ -12,8 +12,8 @@ Array.prototype.compareArrays = function(arr) {
 
 var WisebedPublicReservationData = function(prd) {
 	
-	this.from = new Date(prd.from);
-	this.to = new Date(prd.to);
+	this.from = moment(prd.from);
+	this.to = moment(prd.to);
 	this.nodeUrns = prd.nodeUrns;
 	this.nodeUrnPrefixes = [];
 	
@@ -30,8 +30,8 @@ var WisebedPublicReservationData = function(prd) {
 var WisebedConfidentialReservationData = function(crd) {
 	
 	this.description = crd.description;
-	this.from = new Date(crd.from);
-	this.to = new Date(crd.to);
+	this.from = moment(crd.from);
+	this.to = moment(crd.to);
 	this.nodeUrns = crd.nodeUrns;
 	this.nodeUrnPrefixes = [];
 	this.options = crd.options;

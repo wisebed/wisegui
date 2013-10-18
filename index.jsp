@@ -18,11 +18,12 @@
 	<script type="text/javascript" src="js/lib/base64_encode.js"></script>
 	<script type="text/javascript" src="js/lib/base64_decode.js"></script>
 
+	<script type="text/javascript" src="js/lib/moment-2.3.1.js"></script>
+	
 	<script type="text/javascript" src="js/lib/jquery-1.7.1.js"></script>
 	<script type="text/javascript" src="js/lib/jquery.ba-bbq-1.2.1.min.js"></script>
 	<script type="text/javascript" src="js/lib/jquery.cookie-1.0.0.js"></script>
 	<script type="text/javascript" src="js/lib/jquery.tablesorter-2.0.5.min.js"></script>
-	<script type="text/javascript" src="js/lib/jquery.dateformat-1.0.js"></script>
 	<script type="text/javascript" src="js/lib/jquery.timePicker-20110318.js"></script>
 	<script type="text/javascript" src="js/lib/jquery.ba-throttle-debounce.min.js"></script>
 	<script type="text/javascript" src="js/lib/jquery-ui.min.1.8.17.js"></script>
@@ -52,9 +53,6 @@
 
 		var wisebedWebSocketBaseUrl = 'ws://' + window.location.host + '<%= getServletConfig().getInitParameter(PortalServerConfig.WEBSOCKET_CONTEXT_PATH) %>';
 		var wisebedBaseUrl = window.location.origin + '<%= getServletConfig().getInitParameter(PortalServerConfig.REST_API_CONTEXT_PATH) %>';
-
-		console.log(wisebedWebSocketBaseUrl);
-		console.log(wisebedBaseUrl);
 
 	</script>
 

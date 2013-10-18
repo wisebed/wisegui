@@ -2011,7 +2011,7 @@ WiseGuiNodeSelectionDialog.prototype.onReady = function(callback) {
  */
 
 var WiseGuiExperimentationView = function(reservation) {
-
+	console.log(reservation);
 	var self = this;
 
 	this.experimentId = reservation.experimentId;
@@ -2245,7 +2245,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			  '<div class="WiseGuiExperimentationViewOutputs">'
 			+ '	<div class="row">'
 			+ '		<div class="span6">'
-			+ '			<b>' + 'Reservation' + '</b> Start: ' + $.format.date(this.reservation.from, "yyyy-MM-dd HH:mm:ss") + ' End: ' + $.format.date(this.reservation.to, "yyyy-MM-dd HH:mm:ss")
+			+ '			<b>' + 'Reservation' + '</b> Start: ' + this.reservation.from.format("YYYY-MM-DD HH:mm:ss") + ' End: ' + this.reservation.to.format("YYYY-MM-DD HH:mm:ss")
 			+ '			<div id="' + this.progressBarId+ '" class="progress"><div class="bar" style="width: 0%;"></div></div>'
 			+ '		</div>'
 			+ '		<div class="span6">'
@@ -3843,8 +3843,8 @@ function buildPersonalReservationsTable(parent, reservations) {
 
 		reservation = reservations[i];
 
-		from  = $('<a href="#" rel="tooltip" title="'+reservation.from.toISOString()+'">' + $.format.date(reservation.from, "yyyy-MM-dd HH:mm:ss") + '</a>').tooltip('show').click(nop);
-		to    = $('<a href="#" rel="tooltip" title="'+reservation.to.toISOString()+'">' + $.format.date(reservation.to, "yyyy-MM-dd HH:mm:ss") + '</a>').tooltip('show').click(nop);
+		from  = $('<a href="#" rel="tooltip" title="'+reservation.from.toISOString()+'">' + reservation.from.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop);
+		to    = $('<a href="#" rel="tooltip" title="'+reservation.to.toISOString()+'">' + reservation.to.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop);
 		nodes = $('<a href="#" rel="tooltip" title="'+reservation.nodeUrns.join("<br/>")+'">'+ reservation.nodeUrns.length + ' nodes</a>').tooltip('show').click(nop);
 		btn   = $('<a class="btn btn-primary">Open</a>').bind('click', reservation, function(e) {
 			e.preventDefault();
@@ -3890,8 +3890,8 @@ function buildReservationTable(reservationsTab) {
 				for (var i=0; i<reservations.length; i++) {
 
 					reservation = reservations[i];
-					from  = $('<a href="#" rel="tooltip" title="'+reservation.from.toISOString()+'">' + $.format.date(reservation.from, "yyyy-MM-dd HH:mm:ss") + '</a>').tooltip('show').click(nop);
-					to    = $('<a href="#" rel="tooltip" title="'+reservation.to.toISOString()+'">' + $.format.date(reservation.to, "yyyy-MM-dd HH:mm:ss") + '</a>').tooltip('show').click(nop);
+					from  = $('<a href="#" rel="tooltip" title="'+reservation.from.toISOString()+'">' + reservation.from.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop);
+					to    = $('<a href="#" rel="tooltip" title="'+reservation.to.toISOString()+'">' + reservation.to.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop);
 					nodes = $('<a href="#" rel="tooltip" title="'+reservation.nodeUrns.join("<br/>")+'">'+ reservation.nodeUrns.length + ' nodes</a>').tooltip('show').click(nop);
 
 					tableRows[i]    = [];
