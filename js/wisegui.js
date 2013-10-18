@@ -3675,11 +3675,36 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 			tabs.find('a[href="#'+navigationData.tab+'"]').tab('show');
 
 			if (navigationData.tab == mapTabDivId) {
-				// reload?
+				mapTabContentDiv.empty();
+				wisebed.getWiseMLAsJSON(
+					null,
+					function(wiseML) {
+						
+						// init description over map
+						if (wiseML.setup && wiseML.setup.description) {
+							var mapDescription = wiseML.setup.description;
+							var mapDescriptionRow = $('<div class="row"><div class="span12">' + mapDescription + '</div></div>');
+							mapTabContentDiv.append(mapDescriptionRow);
+						}
+
+						// init map
+						var mapRow = $('<div class="row"><div class="span12"></div></div>');
+						mapTabContentDiv.append(mapRow);
+						new WiseGuiGoogleMapsView(wiseML, mapRow.find('div').first());
+					},
+					WiseGui.showAjaxError
+				);
 			}
 
 			else if(navigationData.tab == nodesTabDivId) {
-				// reload?
+				nodesTabContentDiv.empty();
+				wisebed.getWiseMLAsJSON(
+						null,
+						function(wiseML) {
+							new WiseGuiNodeTable(wiseML, nodesTabContentDiv, false, true);
+						},
+						WiseGui.showAjaxError
+				);
 			}
 
 			else if (navigationData.tab == reservationsTabDivId) {
@@ -3702,50 +3727,30 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 			}
 
 			else if (navigationData.tab == wiseMLXMLTabDivId) {
-				// reload?
+				wiseMLXMLTabContentDiv.empty();
+				wisebed.getWiseMLAsXML(
+						null,
+						function(wiseML) {
+							wiseMLXMLTabContentDiv.append($('<pre class="WiseGuiTestbedDetailsWiseMLXML">'+new XMLSerializer().serializeToString(wiseML).replace(/</g,"&lt;")+'</pre>'));
+							wiseMLXMLTabContentDiv.append($('<a href="'+wisebedBaseUrl + '/experiments/network.xml" target="_blank" class="btn btn-primary pull-right">Download</a>'));
+						},
+						WiseGui.showAjaxError
+				);
 			}
 
 			else if (navigationData.tab == wiseMLJSONTabDivId) {
-				// reload?
+				wiseMLJSONTabContentDiv.empty();
+				wisebed.getWiseMLAsJSON(
+						null,
+						function(wiseML) {
+							wiseMLJSONTabContentDiv.append($('<pre class="WiseGuiTestbedDetailsWiseMLJSON">'+JSON.stringify(wiseML, wiseMLNullFilter, '  ')+'</pre>'));
+							wiseMLJSONTabContentDiv.append($('<a href="'+wisebedBaseUrl + '/experiments/network.json" target="_blank" class="btn btn-primary pull-right">Download</a>'));
+						},
+						WiseGui.showAjaxError
+				);
 			}
 		}
 	});
-
-	wisebed.getWiseMLAsJSON(
-		null,
-		function(wiseML) {
-			
-			// init description over map
-			if (wiseML.setup && wiseML.setup.description) {
-				var mapDescription = wiseML.setup.description;
-				var mapDescriptionRow = $('<div class="row"><div class="span12">' + mapDescription + '</div></div>');
-				mapTabContentDiv.append(mapDescriptionRow);
-			}
-
-			// init map
-			var mapRow = $('<div class="row"><div class="span12"></div></div>');
-			mapTabContentDiv.append(mapRow);
-			new WiseGuiGoogleMapsView(wiseML, mapRow.find('div').first());
-
-			// init nodes tab
-			new WiseGuiNodeTable(wiseML, nodesTabContentDiv, false, true);
-
-			// init WiseML as JSON tab
-			wiseMLJSONTabContentDiv.append($('<pre class="WiseGuiTestbedDetailsWiseMLJSON">'+JSON.stringify(wiseML, wiseMLNullFilter, '  ')+'</pre>'));
-			wiseMLJSONTabContentDiv.append($('<a href="'+wisebedBaseUrl + '/experiments/network.json" target="_blank" class="btn btn-primary pull-right">Download</a>'));
-		},
-		WiseGui.showAjaxError
-	);
-
-	wisebed.getWiseMLAsXML(
-			null,
-			function(wiseML) {
-				var xmlTab = $('#WiseGuiTestbedDetailsWiseMLXML');
-				xmlTab.append($('<pre class="WiseGuiTestbedDetailsWiseMLXML">'+new XMLSerializer().serializeToString(wiseML).replace(/</g,"&lt;")+'</pre>'));
-				xmlTab.append($('<a href="'+wisebedBaseUrl + '/experiments/network.xml" target="_blank" class="btn btn-primary pull-right">Download</a>'));
-			},
-			WiseGui.showAjaxError
-	);
 	
 	$(window).bind('wisegui-reservations-changed', function() {
 		buildReservationTable(reservationsTabContentDiv);
