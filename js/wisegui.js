@@ -3655,6 +3655,7 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 	var wiseMLXMLTabContentDiv               = tabs.find('#'+wiseMLXMLTabDivId).first();
 	var wiseMLJSONTabContentDiv              = tabs.find('#'+wiseMLJSONTabDivId).first();
 
+	var myReservationsTab                    = tabs.find('a[href="#'+mapTabDivId+'"]').first();
 	var myReservationsTab                    = tabs.find('a[href="#'+myReservationsTabDivId+'"]').first();
 	var federatableReservationsTab           = tabs.find('a[href="#'+federatableReservationsTabDivId+'"]').first();
 
@@ -3662,87 +3663,101 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 	myReservationsTab.hide();
 	federatableReservationsTab.hide();
 
+	var reloadMapsTab = function() {
+		mapTabContentDiv.empty();
+		wisebed.getWiseMLAsJSON(
+			null,
+			function(wiseML) {
+				
+				// init description over map
+				if (wiseML.setup && wiseML.setup.description) {
+					var mapDescription = wiseML.setup.description;
+					var mapDescriptionRow = $('<div class="row"><div class="span12">' + mapDescription + '</div></div>');
+					mapTabContentDiv.append(mapDescriptionRow);
+				}
+
+				// init map
+				var mapRow = $('<div class="row"><div class="span12"></div></div>');
+				mapTabContentDiv.append(mapRow);
+				new WiseGuiGoogleMapsView(wiseML, mapRow.find('div').first());
+			},
+			WiseGui.showAjaxError
+		);
+	};
+
+	var reloadNodesTab = function() {
+		nodesTabContentDiv.empty();
+		wisebed.getWiseMLAsJSON(
+				null,
+				function(wiseML) {
+					new WiseGuiNodeTable(wiseML, nodesTabContentDiv, false, true);
+				},
+				WiseGui.showAjaxError
+		);
+	};
+
+	var reloadReservationsTab = function() {
+		reservationsTabContentDiv.empty();
+		buildReservationTable(reservationsTabContentDiv);
+	};
+
+	var reloadMyReservationsTab = function() {
+		if (isLoggedIn) {
+			myReservationsTabContentDiv.empty();
+			buildMyReservationTable(myReservationsTabContentDiv);
+		}
+	};
+
+	var reloadFederatableReservationsTab = function() {
+		if (testbedDescription.isFederator && isLoggedIn) {
+			federatableReservationsTabContentDiv.empty();
+			buildFederatableReservationTable(federatableReservationsTabContentDiv);
+		}
+	};
+
+	var reloadWiseMLXMLTab = function() {
+		wiseMLXMLTabContentDiv.empty();
+		wisebed.getWiseMLAsXML(
+				null,
+				function(wiseML) {
+					wiseMLXMLTabContentDiv.append($('<pre class="WiseGuiTestbedDetailsWiseMLXML">'+new XMLSerializer().serializeToString(wiseML).replace(/</g,"&lt;")+'</pre>'));
+					wiseMLXMLTabContentDiv.append($('<a href="'+wisebedBaseUrl + '/experiments/network.xml" target="_blank" class="btn btn-primary pull-right">Download</a>'));
+				},
+				WiseGui.showAjaxError
+		);
+	};
+
+	var reloadWiseMLJSONTab = function() {
+		wiseMLJSONTabContentDiv.empty();
+		wisebed.getWiseMLAsJSON(
+				null,
+				function(wiseML) {
+					wiseMLJSONTabContentDiv.append($('<pre class="WiseGuiTestbedDetailsWiseMLJSON">'+JSON.stringify(wiseML, wiseMLNullFilter, '  ')+'</pre>'));
+					wiseMLJSONTabContentDiv.append($('<a href="'+wisebedBaseUrl + '/experiments/network.json" target="_blank" class="btn btn-primary pull-right">Download</a>'));
+				},
+				WiseGui.showAjaxError
+		);
+	};
+
+	var reloadFunctions = {};
+	reloadFunctions[mapTabDivId]                     = reloadMapsTab;
+	reloadFunctions[nodesTabDivId]                   = reloadNodesTab;
+	reloadFunctions[reservationsTabDivId]            = reloadReservationsTab;
+	reloadFunctions[myReservationsTabDivId]          = reloadMyReservationsTab;
+	reloadFunctions[federatableReservationsTabDivId] = reloadFederatableReservationsTab;
+	reloadFunctions[wiseMLXMLTabDivId]               = reloadWiseMLXMLTab;
+	reloadFunctions[wiseMLJSONTabDivId]              = reloadWiseMLJSONTab;
+
 	var self = this;
 	$(window).bind('wisegui-navigation-event', function(e, navigationData) {
-		if (navigationData.tab) {
-			
+		if (navigationData.nav == 'overview' && navigationData.tab) {
 			tabs.find('a[href="#'+navigationData.tab+'"]').tab('show');
-
-			if (navigationData.tab == mapTabDivId) {
-				mapTabContentDiv.empty();
-				wisebed.getWiseMLAsJSON(
-					null,
-					function(wiseML) {
-						
-						// init description over map
-						if (wiseML.setup && wiseML.setup.description) {
-							var mapDescription = wiseML.setup.description;
-							var mapDescriptionRow = $('<div class="row"><div class="span12">' + mapDescription + '</div></div>');
-							mapTabContentDiv.append(mapDescriptionRow);
-						}
-
-						// init map
-						var mapRow = $('<div class="row"><div class="span12"></div></div>');
-						mapTabContentDiv.append(mapRow);
-						new WiseGuiGoogleMapsView(wiseML, mapRow.find('div').first());
-					},
-					WiseGui.showAjaxError
-				);
+			var reloadFunction = reloadFunctions[navigationData.tab];
+			if (reloadFunction) {
+				reloadFunction();
 			}
-
-			else if(navigationData.tab == nodesTabDivId) {
-				nodesTabContentDiv.empty();
-				wisebed.getWiseMLAsJSON(
-						null,
-						function(wiseML) {
-							new WiseGuiNodeTable(wiseML, nodesTabContentDiv, false, true);
-						},
-						WiseGui.showAjaxError
-				);
-			}
-
-			else if (navigationData.tab == reservationsTabDivId) {
-				reservationsTabContentDiv.empty();
-				buildReservationTable(reservationsTabContentDiv);
-			}
-
-			else if (navigationData.tab == myReservationsTabDivId) {
-				if (isLoggedIn) {
-					myReservationsTabContentDiv.empty();
-					buildMyReservationTable(myReservationsTabContentDiv);
-				}
-			}
-
-			else if (navigationData.tab == federatableReservationsTabDivId) {
-				if (testbedDescription.isFederator && isLoggedIn) {
-					federatableReservationsTabContentDiv.empty();
-					buildFederatableReservationTable(federatableReservationsTabContentDiv);
-				}
-			}
-
-			else if (navigationData.tab == wiseMLXMLTabDivId) {
-				wiseMLXMLTabContentDiv.empty();
-				wisebed.getWiseMLAsXML(
-						null,
-						function(wiseML) {
-							wiseMLXMLTabContentDiv.append($('<pre class="WiseGuiTestbedDetailsWiseMLXML">'+new XMLSerializer().serializeToString(wiseML).replace(/</g,"&lt;")+'</pre>'));
-							wiseMLXMLTabContentDiv.append($('<a href="'+wisebedBaseUrl + '/experiments/network.xml" target="_blank" class="btn btn-primary pull-right">Download</a>'));
-						},
-						WiseGui.showAjaxError
-				);
-			}
-
-			else if (navigationData.tab == wiseMLJSONTabDivId) {
-				wiseMLJSONTabContentDiv.empty();
-				wisebed.getWiseMLAsJSON(
-						null,
-						function(wiseML) {
-							wiseMLJSONTabContentDiv.append($('<pre class="WiseGuiTestbedDetailsWiseMLJSON">'+JSON.stringify(wiseML, wiseMLNullFilter, '  ')+'</pre>'));
-							wiseMLJSONTabContentDiv.append($('<a href="'+wisebedBaseUrl + '/experiments/network.json" target="_blank" class="btn btn-primary pull-right">Download</a>'));
-						},
-						WiseGui.showAjaxError
-				);
-			}
+		} else if (navigationData.nav == 'overview' && navigationData.tab == '') {
+			reloadMapsTab();
 		}
 	});
 	
