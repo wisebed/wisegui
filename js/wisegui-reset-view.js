@@ -7,6 +7,7 @@
  var WiseGuiResetView = function(reservation) {
  	
  	this.reservation              = reservation;
+
  	this.view                     = null;
  	this.resetNodeSelectionButton = null;
  	this.resetResetButton         = null;

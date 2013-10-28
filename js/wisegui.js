@@ -2040,8 +2040,7 @@ var WiseGuiExperimentationView = function(reservation) {
 	this.wisemlXmlDivId          = this.experimentationDivId+'-wiseml-xml';
 
 	this.view = $('<div class="WiseGuiExperimentationView"/>');
-
-	this.flashConfigurations     = [];
+	
 	this.outputsNumMessages      = 100;
 	this.outputsRedrawLimit      = 200;
 	this.outputs                 = [];
@@ -2384,35 +2383,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '         <li class="pull-right"><a href="#'+this.wisemlJsonDivId+'">WiseML (JSON)</a></li>'
 			+ '		</ul>'
 			+ '		<div class="tab-content">'
-			+ '			<div class="active tab-pane WiseGuiExperimentsViewFlashControl" id="'+this.flashDivId+'">'
-			+ '				<div class="row">'
-			+ '					<div class="span3">'
-			+ '						<button class="btn WiseGuiExperimentsViewFlashControlAddSet"> + </button>'
-			+ '						<button class="btn WiseGuiExperimentsViewFlashControlRemoveSet"> - </button>'
-			+ '						<button class="btn WiseGuiExperimentsViewFlashControlLoadConfiguration">Load</button>'
-			+ '						<button class="btn WiseGuiExperimentsViewFlashControlSaveConfiguration">Save</button>'
-			+ '					</div>'
-			+ '					<div class="span3">'
-			+ '						<button class="btn btn-primary WiseGuiExperimentsViewFlashControlFlashNodes span2">Flash</button>'
-			+ '					</div>'
-			+ '				</div>'
-			+ '				<div class="row">'
-		  	+ '					<div class="span12">'
-			+ '						<table class="table table-striped">'
-			+ '							<thead>'
-			+ '								<tr>'
-			+ '									<th>Set</th>'
-			+ '									<th>Selected Nodes</th>'
-			+ '									<th>Image File</th>'
-			+ '									<th class="span5"></th>'
-			+ '								</tr>'
-			+ '							</thead>'
-			+ '							<tbody>'
-			+ '							</tbody>'
-			+ '						</table>'
-		  	+ '					</div>'
-			+ '				</div>'
-			+ '			</div>'
+			+ '			<div class="active tab-pane WiseGuiExperimentsViewFlashControl" id="'+this.flashDivId+'"></div>'
 			+ '			<div class="tab-pane WiseGuiExperimentsViewResetControl" id="'+this.resetDivId+'"></div>'
 			+ '			<div class="tab-pane WiseGuiExperimentsViewSendControl" id="'+this.sendDivId+'">'
 			+ '				<div class="row">'
@@ -2528,12 +2499,8 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 		self.redrawOutput();
 	});
 
-	this.flashAddSetButton            = this.view.find('button.WiseGuiExperimentsViewFlashControlAddSet').first();
-	this.flashRemoveSetButton         = this.view.find('button.WiseGuiExperimentsViewFlashControlRemoveSet').first();
-	this.flashLoadConfigurationButton = this.view.find('button.WiseGuiExperimentsViewFlashControlLoadConfiguration').first();
-	this.flashSaveConfigurationButton = this.view.find('button.WiseGuiExperimentsViewFlashControlSaveConfiguration').first();
-	this.flashFlashButton             = this.view.find('button.WiseGuiExperimentsViewFlashControlFlashNodes').first();
-	this.flashConfigurationsTableBody = this.view.find('div.WiseGuiExperimentsViewFlashControl table tbody').first();
+	this.flashView = new WiseGuiFlashView(this.reservation);
+	this.view.find('#'+this.flashDivId).append(this.flashView.view);
 
 	this.resetView = new WiseGuiResetView(this.reservation);
 	this.view.find('#'+this.resetDivId).append(this.resetView.view);
@@ -2616,29 +2583,6 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	this.scriptingEditorDiv.attr('style', '');
 	this.scriptingEditorRow.append(this.scriptingEditorDiv);
 	// ******* end ACE displaying error workaround ********
-
-	// bind actions for flash tab buttons
-	this.flashAddSetButton.bind('click', self, function(e) {
-		self.addFlashConfiguration();
-	});
-
-	this.flashRemoveSetButton.bind('click', self, function(e) {
-		self.removeFlashConfiguration();
-	});
-
-	this.flashLoadConfigurationButton.bind('click', self, function(e) {
-		self.loadFlashConfiguration(self.flashLoadConfigurationButton);
-	});
-
-	this.flashSaveConfigurationButton.bind('click', self, function(e) {
-		self.saveFlashConfiguration();
-	});
-
-	this.flashFlashButton.bind('click', self, function(e) {
-		self.executeFlashNodes();
-	});
-
-	this.addFlashConfiguration();
 
 	// bind actions for send message tab buttons
 	this.outputsNumMessagesInput.bind('change', self, function(e) {
@@ -3105,291 +3049,6 @@ WiseGuiExperimentationView.prototype.parseByteArrayFromString = function(message
 	}
 
 	return messageBytes;
-};
-
-WiseGuiExperimentationView.prototype.getFlashFormData = function() {
-
-	var flashFormData = {
-		configurations : []
-	};
-
-	for (var i=0; i<this.flashConfigurations.length; i++) {
-		flashFormData.configurations.push(this.flashConfigurations[i].config);
-	}
-
-	return flashFormData;
-};
-
-WiseGuiExperimentationView.prototype.saveFlashConfiguration = function(button) {
-
-	var json = {
-		configurations : []
-	};
-
-	for (var i=0; i<this.flashConfigurations.length; i++) {
-		json.configurations.push(this.flashConfigurations[i].config);
-	}
-	var jsonString = JSON.stringify(json);
-
-	//if(window.MozBlobBuilder) {
-	//	var uriContent = "data:application/octet-stream;base64," + btoa(json);
-	//	//window.open(uriContent, 'configuration.json');
-	//	window.location = uriContent;
-	//} else {
-		var bb = new BlobBuilder();
-		bb.append(jsonString);
-		saveAs(bb.getBlob("text/plain;charset=utf-8"), "configuration.json");
-	//}
-};
-
-WiseGuiExperimentationView.prototype.loadFlashConfiguration = function(button) {
-
-	button.attr("disabled", "true");
-
-	var self = this;
-
-	// @param: Type is conf-object
-	var dialog;
-	dialog = new WiseGuiLoadConfigurationDialog(
-			function(data, textStatus, jqXHR) {
-
-				dialog.hide();
-				button.removeAttr("disabled");
-
-				if(data == null) {
-					return;
-				}
-
-				var configurations = data.configurations;
-
-				// Reset
-				self.flashConfigurationsTableBody.empty();
-				self.flashConfigurations = [];
-
-				// Iterate all configurations
-				for(var i = 0; i < configurations.length; i++) {
-					self.addFlashConfiguration(configurations[i]);
-				}
-			},
-			function(jqXHR, textStatus, errorThrown) {
-
-				dialog.hide();
-				button.removeAttr("disabled");
-				WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
-			}
-	);
-	dialog.view.on('hide', function() {
-		button.removeAttr("disabled");
-	});
-	dialog.show();
-};
-
-// @see: http://stackoverflow.com/a/5100158/605890
-WiseGuiExperimentationView.prototype.dataURItoBlob = function(dataURI) {
-    // convert base64 to raw binary data held in a string
-    // doesn't handle URLEncoded DataURIs
-    var byteString = atob(dataURI.split(',')[1]);
-
-    // separate out the mime component
-    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-
-    // write the bytes of the string to an ArrayBuffer
-    var ab = new ArrayBuffer(byteString.length);
-    var ia = new Uint8Array(ab);
-    for (var i = 0; i < byteString.length; i++) {
-        ia[i] = byteString.charCodeAt(i);
-    }
-
-    // write the ArrayBuffer to a blob, and you're done
-    var bb = new BlobBuilder();
-    bb.append(ab);
-    return bb.getBlob(mimeString);
-};
-
-WiseGuiExperimentationView.prototype.addFlashConfiguration = function(conf) {
-
-	// build and append the gui elements
-	var nodeSelectionButton   = $('<button class="btn nodeSelectionButton span3">Select Nodes</button>');
-	var imageFileInput        = $('<input type="file" style="opacity: 0; width: 0px; position:absolute; top:-100px;"/>');
-	var imageFileButton       = $('<button class="btn fileSelectionButton span3">Select Image</button>');
-	var imageFileInfoLabel    = $('<div/>');
-	var tr                    = $('<tr/>');
-
-	var setNumberTd           = $('<td>' + (this.flashConfigurations.length + 1) + '</td>');
-	var nodeSelectionButtonTd = $('<td/>');
-	var imageFileInputTd      = $('<td/>');
-	var imageFileInfoLabelTd  = $('<td/>');
-
-	nodeSelectionButtonTd.append(nodeSelectionButton);
-
-	imageFileInputTd.append(imageFileInput);
-	imageFileInputTd.append(imageFileButton);
-	imageFileInfoLabelTd.append(imageFileInfoLabel);
-
-	tr.append(setNumberTd, nodeSelectionButtonTd, imageFileInputTd, imageFileInfoLabelTd);
-	this.flashConfigurationsTableBody.append(tr);
-
-	// build and remember the configuration
-	var configuration = {
-		nodeSelectionButton : nodeSelectionButton,
-		imageFileInput      : imageFileInput,
-		imageFileButton     : imageFileButton,
-		imageFileLabel      : imageFileInfoLabel,
-		tr                  : tr,
-		config              : { nodeUrns : null, image : null }
-	};
-
-	if(typeof(conf) == "object") {
-		// Set the image
-		if(conf.image != null) {
-			configuration.config.image = conf.image;
-			var blob = this.dataURItoBlob(configuration.config.image);
-			imageFileInfoLabel.append(
-					'<strong>' + blob.name + '</strong> (' + (blob.type || 'n/a') + ')<br/>'
-					+ blob.size + ' bytes'
-			);
-		}
-		// Set the node URNs
-		if(conf.nodeUrns != null) {
-
-			var checkNodes = function(data) {
-
-				var reservedNodeUrns = [];
-				for(var i = 0; i < data.setup.node.length; i++) {
-					reservedNodeUrns.push(data.setup.node[i].id);
-				}
-
-				var preSelectedNodeUrns = [];
-				for(var k = 0; k < conf.nodeUrns.length; k++) {
-					if($.inArray(conf.nodeUrns[k], reservedNodeUrns) >= 0) {
-						preSelectedNodeUrns.push(conf.nodeUrns[k]);
-					}
-				}
-
-				configuration.config.nodeUrns = preSelectedNodeUrns;
-
-				var nodeSelectionButtonText = configuration.config.nodeUrns.length == 1 ?
-						'1 node selected' :
-						configuration.config.nodeUrns.length + ' nodes selected';
-
-				nodeSelectionButton.html(nodeSelectionButtonText);
-			};
-
-			wisebed.getWiseMLAsJSON(this.experimentId, checkNodes, WiseGui.showAjaxError);
-		}
-	}
-
-	this.flashConfigurations.push(configuration);
-
-	// bind actions to buttons
-	var self = this;
-
-	nodeSelectionButton.bind('click', function() {
-
-		var nodeSelectionDialog = new WiseGuiNodeSelectionDialog(
-				self.experimentId,
-				'Select Nodes',
-				'Please select the nodes you want to flash.',
-				configuration.config.nodeUrns
-		);
-
-		nodeSelectionButton.attr('disabled', true);
-		nodeSelectionDialog.show(
-			function(nodeUrns) {
-				nodeSelectionButton.attr('disabled', false);
-				configuration.config.nodeUrns = nodeUrns;
-				nodeSelectionButton.html((nodeUrns.length == 1 ? '1 node selected' : (nodeUrns.length + ' nodes selected')));
-			}, function() {
-				nodeSelectionButton.attr('disabled', false);
-			}
-		);
-	});
-
-	imageFileButton.bind('click', function() {
-		configuration.imageFileInput.click();
-	});
-
-	imageFileInput.bind('change', function() {
-
-		var imageFile       = imageFileInput[0].files[0];
-		var imageFileReader = new FileReader();
-
-		imageFileReader.onerror = function(progressEvent) {
-			configuration.config.image = null;
-			WiseGui.showWarningAlert('The file "' + imageFile.name+ '" could not be read!');
-		};
-
-		imageFileReader.onloadend = function(progressEvent) {
-			configuration.config.image = imageFileReader.result;
-			imageFileInfoLabel.empty();
-			imageFileInfoLabel.append(
-					'<strong>' + imageFile.name + '</strong> (' + (imageFile.type || 'n/a') + ')<br/>'
-					+ imageFile.size + ' bytes'
-
-					// last modified: ' +
-					// imageFile.lastModifiedDate.toLocaleDateString()
-					//
-					// Crashes in FF. Even if the File interface specifies a
-					// lastModifiedDate,
-					// it is not working/existing in FF.
-					//
-					// @see https://github.com/wisebed/rest-ws/issues/32
-			);
-		};
-
-		imageFileReader.readAsDataURL(imageFile);
-
-	});
-
-	return configuration;
-};
-
-WiseGuiExperimentationView.prototype.removeFlashConfiguration = function() {
-	if (this.flashConfigurations.length > 1) {
-		var configuration = this.flashConfigurations.pop();
-		configuration.tr.remove();
-		return configuration;
-	}
-	return null;
-};
-
-WiseGuiExperimentationView.prototype.setFlashButtonDisabled = function(disabled) {
-	this.flashFlashButton.attr('disabled', disabled);
-};
-
-WiseGuiExperimentationView.prototype.executeFlashNodes = function() {
-
-	var flashFormData = this.getFlashFormData();
-
-	var allNodeUrns = [];
-	$.each(flashFormData.configurations, function(index, configuration) {
-		$.each(configuration.nodeUrns, function(index, nodeUrn) {
-			allNodeUrns.push(nodeUrn);
-		});
-	});
-
-	var progressViewer = new WiseGuiOperationProgressView(
-			allNodeUrns, 100,
-			"All nodes were successfully flashed."
-	);
-
-	this.setFlashButtonDisabled(true);
-	var self = this;
-	wisebed.experiments.flashNodes(
-			this.experimentId,
-			flashFormData,
-			function(result) {
-				self.setFlashButtonDisabled(false);
-				progressViewer.update(result);
-			},
-			function(progress) {
-				progressViewer.update(progress);
-			},
-			function(jqXHR, textStatus, errorThrown) {
-				self.setResetButtonDisabled(false);
-				WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
-			}
-	);
 };
 
 /**
