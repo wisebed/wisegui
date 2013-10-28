@@ -32,7 +32,7 @@ var WiseGuiConsoleView = function(reservation) {
 	this.outputsMakePrintableCheckbox = null;
 
 	this.buildView();
-	this.connectToExperiment();
+	this.connectToReservation();
 
 	var self = this;
 	this.throttledRedraw = $.throttle(self.outputsRedrawLimit, function(){ self.redrawOutput(); });
@@ -40,7 +40,7 @@ var WiseGuiConsoleView = function(reservation) {
 
 WiseGuiConsoleView.prototype.buildView = function() {
 	this.view = $(
-			  '<div class="WiseGuiExperimentationViewOutputs">'
+			  '<div class="WiseGuiConsoleViewDiv">'
 			+ '	<div class="row">'
 			+ '		<div class="span6">'
 			+ '			<b>' + 'Reservation' + '</b> Start: ' + this.reservation.from.format("YYYY-MM-DD HH:mm:ss") + ' End: ' + this.reservation.to.format("YYYY-MM-DD HH:mm:ss")
@@ -152,8 +152,8 @@ WiseGuiConsoleView.prototype.buildView = function() {
 			+ '		</div>'
 			+ '	</div>'
 			+ '	<div class="row">'
-			+ '		<div class="span12"><div class="well WiseGuiExperimentViewOutputsWell" style="height:300px; overflow:auto;">'
-			+ '			<table class="table WiseGuiExperimentViewOutputsTable">'
+			+ '		<div class="span12"><div class="well WiseGuiConsoleViewOutputsWell" style="height:300px; overflow:auto;">'
+			+ '			<table class="table WiseGuiConsoleViewOutputsTable">'
 			+ '				<tbody></tbody>'
 			+ '			</table>'
 			+ '		</div></div>'
@@ -164,7 +164,7 @@ WiseGuiConsoleView.prototype.buildView = function() {
 	this.progressBarSchedule          = undefined;
 	this.outputsNumMessagesInput      = this.view.find('#num-outputs').first();
 	this.outputsRedrawLimitInput      = this.view.find('#redraw-limit').first();
-	this.outputsTable                 = this.view.find('table.WiseGuiExperimentViewOutputsTable tbody').first();
+	this.outputsTable                 = this.view.find('table.WiseGuiConsoleViewOutputsTable tbody').first();
 	this.outputsClearButton           = this.view.find('.btn#clear-output').first();
 	this.outputsFollowCheckbox        = this.view.find('#auto-scroll').first();
 	this.outputsFilterButton          = this.view.find('.btn#filter-nodes').first();
@@ -238,7 +238,7 @@ WiseGuiConsoleView.prototype.buildView = function() {
 	});
 	
 	this.outputsMakePrintableCheckbox.bind('change', self, function(e) {
-		self.outputsMakePrintable = self.outputsMakePrintableCheckbox.is('checked');
+		self.outputsMakePrintable = self.outputsMakePrintableCheckbox.is(':checked');
 		self.redrawOutput();
 	});
 
@@ -385,9 +385,9 @@ WiseGuiConsoleView.prototype.onWebSocketMessageEvent = function(event) {
 
 		if (getNavigationData().experimentId != this.reservation.experimentId) {
 
-			var goToExperimentButton = $('<button class="btn btn-primary">Go to experiment</button>');
-			blockAlertActions = [goToExperimentButton];
-			goToExperimentButton.bind('click', this, function(e, data) {
+			var goToReservationButton = $('<button class="btn btn-primary">Go to reservation</button>');
+			blockAlertActions = [goToReservationButton];
+			goToReservationButton.bind('click', this, function(e, data) {
 				navigateTo(self.experimentId);
 			});
 
@@ -426,7 +426,7 @@ WiseGuiConsoleView.prototype.onWebSocketClose = function(event) {
 
 };
 
-WiseGuiConsoleView.prototype.connectToExperiment = function() {
+WiseGuiConsoleView.prototype.connectToReservation = function() {
 
 	window.WebSocket = window.MozWebSocket || window.WebSocket;
 
@@ -435,9 +435,10 @@ WiseGuiConsoleView.prototype.connectToExperiment = function() {
 		var self = this;
 
 		this.socket = new WebSocket(wisebedWebSocketBaseUrl + '/experiments/' + this.reservation.experimentId);
-		this.socket.onmessage = function(event) {self.onWebSocketMessageEvent(event);};
-		this.socket.onopen = function(event) {self.onWebSocketOpen(event);};
-		this.socket.onclose = function(event) {self.onWebSocketClose(event);};
+
+		this.socket.onmessage = function(event) {self.onWebSocketMessageEvent(event); };
+		this.socket.onopen    = function(event) {self.onWebSocketOpen(event);         };
+		this.socket.onclose   = function(event) {self.onWebSocketClose(event);        };
 
 	} else {
 		alert("Your browser does not support Web Sockets.");

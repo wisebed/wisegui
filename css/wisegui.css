@@ -43,37 +43,37 @@ body {
 	
 }
 
-.WiseGuiExperimentationViewOutputs .dropdown-menu {
+.WiseGuiConsoleViewOutputs .dropdown-menu {
 	min-width: 0;
 }
 
-.WiseGuiExperimentationViewOutputs #options-dropdown {
+.WiseGuiConsoleViewOutputs #options-dropdown {
 	min-width: 170px;
 }
 
-.WiseGuiExperimentationViewOutputs .dropdown-menu form {
+.WiseGuiConsoleViewOutputs .dropdown-menu form {
 	margin: 0;
 }
 
-.WiseGuiExperimentationViewOutputs .dropdown-menu li form {
+.WiseGuiConsoleViewOutputs .dropdown-menu li form {
 	padding: 3px 15px;
 }
-.WiseGuiExperimentationViewOutputs .dropdown-menu label {
+.WiseGuiConsoleViewOutputs .dropdown-menu label {
 	cursor: pointer;
 }
-.WiseGuiExperimentationViewOutputs .dropdown-menu label.radio,
-.WiseGuiExperimentationViewOutputs .dropdown-menu label.checkbox {
+.WiseGuiConsoleViewOutputs .dropdown-menu label.radio,
+.WiseGuiConsoleViewOutputs .dropdown-menu label.checkbox {
 	margin: 4px;
 }
-.WiseGuiExperimentationViewOutputsDiv {
+.WiseGuiConsoleViewOutputsDiv {
 	padding-bottom: 10px;
 }
 
-.WiseGuiExperimentationViewOutputsDiv ul {
+.WiseGuiConsoleViewOutputsDiv ul {
 	padding-top: 10px;
 }
 
-.WiseGuiExperimentationViewControlsDiv ul {
+.WiseGuiReservationViewControls ul {
 	padding-top: 10px;
 }
 
@@ -167,22 +167,22 @@ input.success {
 	padding-bottom: 150px;
 }
 
-.WiseGuiExperimentViewOutputsTable {
+.WiseGuiConsoleViewOutputsTable {
 	width: auto;
 }
 
-.WiseGuiExperimentViewOutputsWell {
+.WiseGuiConsoleViewOutputsWell {
 	padding: 10px;
 }
 
-.WiseGuiExperimentViewOutputsTable td {
+.WiseGuiConsoleViewOutputsTable td {
 	line-height: 12px;
 	padding: 3px;
 	white-space: nowrap;
 	font-family: monospace;
 }
 
-.WiseGuiExperimentViewOutputsTable td:last-child {
+.WiseGuiConsoleViewOutputsTable td:last-child {
 	width: 100%;
 }
 
@@ -213,11 +213,11 @@ input.success {
 	overflow: auto;
 }
 
-.WiseGuiExperimentationViewStateLabel {
+.WiseGuiConsoleViewStateLabel {
 	vertical-align: bottom;
 }
 
-pre.WiseGuiExperimentationViewWiseMLJSON, pre.WiseGuiExperimentationViewWiseMLXML {
+pre.WiseGuiConsoleViewWiseMLJSON, pre.WiseGuiConsoleViewWiseMLXML {
 	height: 300px;
 	overflow: auto;
 }
@@ -227,7 +227,7 @@ pre.WiseGuiTestbedDetailsWiseMLJSON, pre.WiseGuiTestbedDetailsWiseMLXML {
 	overflow: auto;
 }
 
-div.WiseGuiExperimentsViewScriptingEditor {
+div.WiseGuiScriptingViewEditor {
 	position: relative;
 	height: 400px;
 }
@@ -253,18 +253,19 @@ table thead tr .headerSortDown {
 	btn-toolbar2 source: http://stackoverflow.com/a/11091453/236351
 */
 
-.btn-toolbar2 >.btn-group + .btn-group {
-margin-left: -5px;
+.btn-toolbar2 > .btn-group + .btn-group {
+	margin-left: -5px;
 }
 
-.btn-toolbar2 > .btn-group > .btn, .btn-toolbar2 > .btn-group > .dropdown-toggle
-{
+.btn-toolbar2 > .btn-group > .btn,
+.btn-toolbar2 > .btn-group > .dropdown-toggle {
     -webkit-border-radius: 0px;
     border-radius: 0px;
     -moz-border-radius: 0px;
 }
 
-.btn-toolbar2 > .btn-group:first-child > .btn, .btn-toolbar2 > .btn-group:first-child > .dropdown-toggle{
+.btn-toolbar2 > .btn-group:first-child > .btn,
+.btn-toolbar2 > .btn-group:first-child > .dropdown-toggle {
     -webkit-border-bottom-left-radius: 4px;
     border-bottom-left-radius: 4px;
     -webkit-border-top-left-radius: 4px;
@@ -273,7 +274,8 @@ margin-left: -5px;
     -moz-border-radius-topleft: 4px;    
 }
 
-.btn-toolbar2 > .btn-group:last-child > .btn:last-child, .btn-toolbar2 > .btn-group:last-child > .dropdown-toggle:nth-last-child(2){
+.btn-toolbar2 > .btn-group:last-child > .btn:last-child,
+.btn-toolbar2 > .btn-group:last-child > .dropdown-toggle:nth-last-child(2) {
     -webkit-border-bottom-right-radius: 4px;
     border-bottom-right-radius: 4px;
     -webkit-border-top-right-radius: 4px;
@@ -281,5 +283,3 @@ margin-left: -5px;
     -moz-border-radius-bottomright: 4px;
     -moz-border-radius-topright: 4px;    
 }
-
-​

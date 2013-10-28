@@ -46,9 +46,9 @@ WiseGuiScriptingView.prototype.buildEditorView = function() {
 	this.editorRow         = this.editorView.find('div.WiseGuiScriptingViewEditorRow').first();
 	this.editorStopButton  = this.editorView.find('button.WiseGuiScriptingViewStopButton').first();
 	this.editorStartButton = this.editorView.find('button.WiseGuiScriptingViewStartButton').first();
-	this.editorHelpButton  = this.editorView.find('button.WiseGuiExperimentsViewScriptingHelpButton').first();
+	this.editorHelpButton  = this.editorView.find('button.WiseGuiScriptingViewScriptingHelpButton').first();
 	this.editorDiv         = $(
-			  '<div class="WiseGuiExperimentsViewScriptingEditor" style="z-index:-1;">'
+			  '<div class="WiseGuiScriptingViewEditor" style="z-index:-1;">'
 			+ 'WiseGuiUserScript = function() {\n'
 			+ '  console.log("WiseGuiUserScript instantiated...");\n'
 			+ '  this.experimentId = null;\n'

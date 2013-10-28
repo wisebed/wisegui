@@ -68,6 +68,7 @@
 	<script type="text/javascript" src="js/wisegui-send-view.js"></script>
 	<script type="text/javascript" src="js/wisegui-channelpipelines-view.js"></script>
 	<script type="text/javascript" src="js/wisegui-scripting-view.js"></script>
+	<script type="text/javascript" src="js/wisegui-reservation-view.js"></script>
 	<script type="text/javascript" src="js/wisegui.js"></script>
 
 </head>

@@ -1861,118 +1861,6 @@ WiseGuiNotificationsViewer.prototype.buildView = function() {
 
 /**
  * #################################################################
- * WiseGuiExperimentationView
- * #################################################################
- */
-
-var WiseGuiExperimentationView = function(reservation) {
-	
-	var self = this;
-
-	this.experimentId = reservation.experimentId;
-	this.reservation = reservation;
-
-	this.experimentationDivId    = 'WiseGuiExperimentationDiv-'+this.experimentId.replace(/=/g, '');
-	this.progressBarId           = this.experimentationDivId+'-progress-bar';
-	this.outputsTextAreaId       = this.experimentationDivId+'-outputs-textarea';
-	this.sendDivId               = this.experimentationDivId+'-send';
-	//this.channelPipelinesDivId   = this.experimentationDivId+'-channel-pipelines';
-	this.flashDivId              = this.experimentationDivId+'-flash';
-	this.resetDivId              = this.experimentationDivId+'-reset';
-	this.scriptingEditorDivId    = this.experimentationDivId+'-scripting-editor';
-	this.scriptingOutputDivId    = this.experimentationDivId+'-scripting-output';
-	this.wisemlJsonDivId         = this.experimentationDivId+'-wiseml-json';
-	this.wisemlXmlDivId          = this.experimentationDivId+'-wiseml-xml';
-
-	this.view = $('<div class="WiseGuiExperimentationView"/>');
-
-	this.buildView();
-	this.loadWisemlViews();
-};
-
-WiseGuiExperimentationView.prototype.loadWisemlViews = function() {
-	var self = this;
-	wisebed.getWiseMLAsJSON(this.experimentId, function(wiseML) {
-		var jsonTab = $('#' + self.wisemlJsonDivId);
-		jsonTab.append($('<pre class="WiseGuiExperimentationViewWiseMLJSON">'+JSON.stringify(wiseML, wiseMLNullFilter, '  ')+'</pre>'));
-		jsonTab.append($('<a href="'+wisebedBaseUrl + '/experiments/'+self.experimentId+'/network.json" target="_blank" class="btn btn-primary pull-right">Download</a>'));
-	}, WiseGui.showAjaxError);
-	wisebed.getWiseMLAsXML(this.experimentId, function(wiseML) {
-		var xmlTab = $('#' + self.wisemlXmlDivId);
-		xmlTab.append($('<pre class="WiseGuiExperimentationViewWiseMLXML">'+new XMLSerializer().serializeToString(wiseML).replace(/</g,"&lt;")+'</pre>'));
-		xmlTab.append($('<a href="'+wisebedBaseUrl + '/experiments/'+self.experimentId+'/network.xml" target="_blank" class="btn btn-primary pull-right">Download</a>'));
-	}, WiseGui.showAjaxError);
-};
-
-WiseGuiExperimentationView.prototype.buildView = function() {
-	
-	this.consoleView = new WiseGuiConsoleView(this.reservation);
-	this.view.append(this.consoleView.view);
-
-	this.view.append(
-			  ' <div class="WiseGuiExperimentationViewControls"><h2>Controls</h2></div>'
-			+ '	 <div>'
-			+ '		<ul class="nav nav-tabs">'
-			+ '			<li class="active"><a href="#'+this.flashDivId+'">Flash</a></li>'
-			+ '			<li><a href="#'+this.resetDivId+'">Reset</a></li>'
-			+ '			<li><a href="#'+this.sendDivId+'">Send Message</a></li>'
-			//+ '			<li><a href="#'+this.channelPipelinesDivId+'">Pipelines</a></li>'
-			+ '			<li><a href="#'+this.scriptingEditorDivId+'">Scripting Editor</a></li>'
-			+ '			<li><a href="#'+this.scriptingOutputDivId+'">Scripting Output</a></li>'
-			+ '         <li class="pull-right"><a href="#'+this.wisemlXmlDivId+'">WiseML (XML)</a></li>'
-			+ '         <li class="pull-right"><a href="#'+this.wisemlJsonDivId+'">WiseML (JSON)</a></li>'
-			+ '		</ul>'
-			+ '		<div class="tab-content">'
-			+ '			<div class="active tab-pane WiseGuiExperimentsViewFlashControl" id="'+this.flashDivId+'"></div>'
-			+ '			<div class="tab-pane WiseGuiExperimentsViewResetControl" id="'+this.resetDivId+'"></div>'
-			+ '			<div class="tab-pane WiseGuiExperimentsViewSendControl" id="'+this.sendDivId+'"/>'
-			//+ '			<div class="tab-pane WiseGuiExperimentsViewChannelPipelinesControl" id="'+this.channelPipelinesDivId+'"/>'
-			+ '			<div class="tab-pane WiseGuiExperimentsViewScriptingControl" id="'+this.scriptingEditorDivId+'"/>'
-			+ '			<div class="tab-pane WiseGuiExperimentsViewScriptingOutputTab" id="'+this.scriptingOutputDivId+'"/>'
-			+ '			<div class="tab-pane WiseGuiExperimentsViewWisemlXmlTab" id="'+this.wisemlXmlDivId+'"/>'
-			+ '			<div class="tab-pane WiseGuiExperimentsViewWisemlJsonTab" id="'+this.wisemlJsonDivId+'"/>'
-			+ '		</div>'
-			+ '	</div>'
-			+ '</div>');
-	
-	// attach views
-	this.flashView = new WiseGuiFlashView(this.reservation);
-	this.view.find('#'+this.flashDivId).append(this.flashView.view);
-
-	this.resetView = new WiseGuiResetView(this.reservation);
-	this.view.find('#'+this.resetDivId).append(this.resetView.view);
-
-	this.sendView = new WiseGuiSendView(this.reservation);
-	this.view.find('#'+this.sendDivId).append(this.sendView.view);
-
-	//this.channelPipelinesView = new WiseGuiChannelPipelinesView(this.reservation);
-	//this.view.find('#'+this.channelPipelinesDivId).append(this.channelPipelinesView.view);
-
-	this.scriptingView = new WiseGuiScriptingView(this.reservation);
-	this.view.find('#'+this.scriptingEditorDivId).append(this.scriptingView.editorView);
-	this.view.find('#'+this.scriptingOutputDivId).append(this.scriptingView.outputView);
-
-	// bind some actions
-
-	var self = this;
-	var tabs = this.view.find('.nav-tabs').first();
-
-	tabs.find('a').click(function (e) {
-		e.preventDefault();
-		var navigationData = getNavigationData();
-		navigationData.tab = e.target.hash.substring(1);
-		window.location.hash = $.param(navigationData);
-	});
-
-	$(window).bind('wisegui-navigation-event', function(e, navigationData) {
-		if (navigationData.tab) {
-			tabs.find('a[href="#'+navigationData.tab+'"]').tab('show');
-		}
-	});
-};
-
-/**
- * #################################################################
  * WiseGuiOperationProgressView
  * #################################################################
  */
@@ -2436,12 +2324,12 @@ function buildTable(tableHead, tableRows, noEntriesMessage) {
 	return table;
 }
 
-function loadExperimentContainer(navigationData, parentDiv) {
+function loadReservationViewContainer(navigationData, parentDiv) {
 
 	wisebed.reservations.getByExperimentId(navigationData.experimentId, function(reservation) {
 
-		var experimentationView = new WiseGuiExperimentationView(reservation);
-		parentDiv.append(experimentationView.view);
+		var reservationView = new WiseGuiReservationView(reservation);
+		parentDiv.append(reservationView.view);
 		$(window).trigger('hashchange');
 
 	}, WiseGui.showAjaxError);
@@ -2457,8 +2345,8 @@ function getNavigationKey(navigationData) {
 }
 
 function getCreateContentFunction(navigationData) {
-	if (navigationData.nav == 'overview' && navigationData.experimentId == '') {return loadTestbedDetailsContainer;}
-	if (navigationData.nav == 'experiment' && navigationData.experimentId != '') {return loadExperimentContainer;}
+	if (navigationData.nav == 'overview' && navigationData.experimentId == '')   { return loadTestbedDetailsContainer;  }
+	if (navigationData.nav == 'experiment' && navigationData.experimentId != '') { return loadReservationViewContainer; }
 	return undefined;
 }
 
