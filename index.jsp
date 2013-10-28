@@ -59,6 +59,7 @@
 	<script type="text/javascript" src="js/string-utils.js"></script>
 	<script type="text/javascript" src="js/wisegui-google-maps-view.js"></script>
 	<script type="text/javascript" src="js/wisebed.js"></script>
+	<script type="text/javascript" src="js/wisegui-reset-view.js"></script>
 	<script type="text/javascript" src="js/wisegui.js"></script>
 
 </head>
