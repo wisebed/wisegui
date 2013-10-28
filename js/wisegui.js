@@ -1691,7 +1691,7 @@ var WiseGuiNotificationsViewer = function() {
 				}
 				this.count = 0;
 				self.button.find('#notifications-counter').removeClass(
-						  'badge-info'
+						  ' badge-info'
 						+ ' badge-success'
 						+ ' badge-warning'
 						+ ' badge-important');
@@ -1744,26 +1744,30 @@ WiseGuiNotificationsViewer.prototype.updateCounter = function() {
 };
 
 WiseGuiNotificationsViewer.prototype.showAlert = function(alert) {
-	var alertDiv = $('<div class="alert alert-'+alert.severity+'">'
+	var alertDiv = $(
+			  '<div class="alert alert-'+alert.severity+'">'
 			+ '<button class="close" data-dismiss="alert">&times;</button>'
-			+ '</div>');
+			+ '</div>'
+	);
 	alertDiv.append(alert.message);
 	this.history.append(alertDiv);
 	this.flash(alertDiv.clone());
 };
 
 WiseGuiNotificationsViewer.prototype.showBlockAlert = function(alert) {
-	var blockAlertDiv = $('<div class="alert block-message alert-'+alert.severity+'">'
+	var blockAlertDiv = $(
+			  '<div class="alert block-message alert-' + alert.severity + '">'
 			+ '	<button class="close" data-dismiss="alert">x</button>'
 			+ '	<div class="alert-actions">'
 			+ '	</div>'
-			+ '</div>');
+			+ '</div>'
+	);
 	if (alert.message instanceof Array) {
 		for (var i=0; i<alert.message.length; i++) {
-			blockAlertDiv.append(alert.message[i]);
+			blockAlertDiv.prepend(alert.message[i]);
 		}
 	} else {
-		blockAlertDiv.append(alert.message);
+		blockAlertDiv.prepend(alert.message);
 	}
 	var actionsDiv = blockAlertDiv.find('.alert-actions');
 	if (alert.actions) {
@@ -2011,7 +2015,7 @@ WiseGuiNodeSelectionDialog.prototype.onReady = function(callback) {
  */
 
 var WiseGuiExperimentationView = function(reservation) {
-	console.log(reservation);
+	
 	var self = this;
 
 	this.experimentId = reservation.experimentId;
@@ -2044,7 +2048,6 @@ var WiseGuiExperimentationView = function(reservation) {
 	this.outputsFollow           = true;
 	this.outputsMakePrintable    = true;
 	this.outputsType             = 'ascii';
-	this.resetSelectedNodeUrns   = [];
 	this.socket                  = null;
 	this.userScript      = {};
 	
@@ -2192,8 +2195,18 @@ WiseGuiExperimentationView.prototype.onWebSocketMessageEvent = function(event) {
 	} else if (message.type == 'devicesDetached') {
 		WiseGui.showInfoBlockAlert('Devices [' + message.nodeUrns.join(', ') + '] were detached at ' + message.timestamp);
 	} else if (message.type == 'reservationStarted') {
-		$(window).trigger('wisegui-reservation-started', new WisebedReservation(message.reservationData));
-		WiseGui.showInfoBlockAlert('Reservation started at ' + message.timestamp);
+		
+		var reservation = new WisebedReservation(message.reservationData);
+		$(window).trigger('wisegui-reservation-started', reservation);
+
+		if (reservation.experimentId != getNavigationData().experimentId) {
+			var button = $('<input class="btn" type="button" value="Take me there">');
+			button.bind('click', reservation, function(e) {
+				navigateTo(e.data.experimentId);
+			});
+			WiseGui.showInfoBlockAlert('Reservation started at ' + message.timestamp, [button]);
+		}
+
 	} else if (message.type == 'reservationEnded') {
 		$(window).trigger('wisegui-reservation-ended', new WisebedReservation(message.reservationData));
 		WiseGui.showInfoBlockAlert('Reservation ended at ' + message.timestamp);
@@ -2236,8 +2249,6 @@ WiseGuiExperimentationView.prototype.send = function(targetNodeUrns, payloadBase
 		this.socket.send(JSON.stringify(message));
 	}
 };
-
-/** ******************************************************************************************************************* */
 
 WiseGuiExperimentationView.prototype.buildView = function() {
 	var self = this;
@@ -2363,7 +2374,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ ' <div class="WiseGuiExperimentationViewControls"><h2>Controls</h2></div>'
 			+ '	 <div>'
 			+ '		<ul class="nav nav-tabs">'
-			+ '			<li class="active"><a href="#'+this.flashDivId+'">Flash</a></li>'
+			+ '			<li><a href="#'+this.flashDivId+'">Flash</a></li>'
 			+ '			<li><a href="#'+this.resetDivId+'">Reset</a></li>'
 			+ '			<li><a href="#'+this.sendDivId+'">Send Message</a></li>'
 			//+ '			<li><a href="#'+this.channelPipelinesDivId+'">Pipelines</a></li>'
@@ -2373,7 +2384,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '         <li class="pull-right"><a href="#'+this.wisemlJsonDivId+'">WiseML (JSON)</a></li>'
 			+ '		</ul>'
 			+ '		<div class="tab-content">'
-			+ '			<div class="active tab-pane WiseGuiExperimentsViewFlashControl" id="'+this.flashDivId+'">'
+			+ '			<div class="tab-pane WiseGuiExperimentsViewFlashControl" id="'+this.flashDivId+'">'
 			+ '				<div class="row">'
 			+ '					<div class="span3">'
 			+ '						<button class="btn WiseGuiExperimentsViewFlashControlAddSet"> + </button>'
@@ -2402,16 +2413,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 		  	+ '					</div>'
 			+ '				</div>'
 			+ '			</div>'
-			+ '			<div class="tab-pane WiseGuiExperimentsViewResetControl" id="'+this.resetDivId+'">'
-		  	+ '				<div class="row">'
-		  	+ '					<div class="span4">'
-			+ '						<button class="btn WiseGuiExperimentsViewResetControlSelectNodeUrns span4">Select Nodes</button>'
-			+ '					</div>'
-		  	+ '					<div class="span4">'
-			+ '						<button class="btn btn-primary WiseGuiExperimentsViewResetControlResetNodeUrns span4" disabled>Reset Nodes</button>'
-			+ '					</div>'
-		  	+ '				</div>'
-			+ '			</div>'
+			+ '			<div class="tab-pane WiseGuiExperimentsViewResetControl" id="'+this.resetDivId+'"></div>'
 			+ '			<div class="tab-pane WiseGuiExperimentsViewSendControl" id="'+this.sendDivId+'">'
 			+ '				<div class="row">'
 			+ '					<button class="btn WiseGuiExperimentsViewSendControlSelectNodeUrns span2">Select Nodes</button>'
@@ -2487,7 +2489,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 		}
 	});
 
-		// change label to 'running' as soon as reservation starts
+	// change label to 'running' as soon as reservation starts
 	$(window).bind('wisegui-reservation-started', function(e, reservation) {
 		if (self.experimentId == reservation.experimentId) {
 			self.progressBar.toggleClass('progress-success', true);
@@ -2501,7 +2503,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 		}
 	});
 
-	// change label to 'ended' as soon as reservation starts
+	// change label to 'ended' as soon as reservation ends
 	$(window).bind('wisegui-reservation-ended', function(e, reservation) {
 		if (self.experimentId == reservation.experimentId) {
 			window.clearInterval(self.progressBarSchedule);
@@ -2533,8 +2535,8 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	this.flashFlashButton             = this.view.find('button.WiseGuiExperimentsViewFlashControlFlashNodes').first();
 	this.flashConfigurationsTableBody = this.view.find('div.WiseGuiExperimentsViewFlashControl table tbody').first();
 
-	this.resetNodeSelectionButton     = this.view.find('button.WiseGuiExperimentsViewResetControlSelectNodeUrns').first();
-	this.resetResetButton             = this.view.find('button.WiseGuiExperimentsViewResetControlResetNodeUrns').first();
+	this.resetView = new WiseGuiResetView(this.reservation);
+	this.view.find('#'+this.resetDivId).append(this.resetView.view);
 
 	this.sendNodeSelectionButton      = this.view.find('button.WiseGuiExperimentsViewSendControlSelectNodeUrns').first();
 	this.sendModeSelect               = this.view.find('select.WiseGuiExperimentsViewSendControlSelectMode').first();
@@ -2637,23 +2639,6 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	});
 
 	this.addFlashConfiguration();
-
-	// bind actions for reset tab buttons
-	this.resetNodeSelectionDialog = new WiseGuiNodeSelectionDialog(
-			this.experimentId,
-			'Reset Nodes',
-			'Please select the nodes you want to reset.',
-			this.resetSelectedNodeUrns,
-			'nodeselection.reset.'
-	);
-	this.resetNodeSelectionButton.bind('click', self, function(e) {
-		e.data.showResetNodeSelectionDialog();
-	});
-	this.updateResetSelectNodeUrns();
-
-	this.resetResetButton.bind('click', self, function(e) {
-		e.data.executeResetNodes();
-	});
 
 	// bind actions for send message tab buttons
 	this.outputsNumMessagesInput.bind('change', self, function(e) {
@@ -2934,8 +2919,6 @@ WiseGuiExperimentationView.prototype.getOutputsFilterNodes = function() {
 	return this.outputsFilterNodeSelectionDialog.getSelection();
 };
 
-/**********************************************************************************************************************/
-
 WiseGuiExperimentationView.prototype.startUserScript = function() {
 
 	this.stopUserScript();
@@ -2993,8 +2976,6 @@ WiseGuiExperimentationView.prototype.stopUserScript = function() {
 	}
 
 };
-
-/**********************************************************************************************************************/
 
 WiseGuiExperimentationView.prototype.isSendMessageInputValid = function() {
 	return this.parseSendMessagePayloadBase64() != null;
@@ -3125,8 +3106,6 @@ WiseGuiExperimentationView.prototype.parseByteArrayFromString = function(message
 
 	return messageBytes;
 };
-
-/**********************************************************************************************************************/
 
 WiseGuiExperimentationView.prototype.getFlashFormData = function() {
 
@@ -3413,9 +3392,60 @@ WiseGuiExperimentationView.prototype.executeFlashNodes = function() {
 	);
 };
 
-/** ******************************************************************************************************************* */
+/**
+ * #################################################################
+ * WiseGuiResetView
+ * #################################################################
+ */
 
-WiseGuiExperimentationView.prototype.updateResetSelectNodeUrns = function() {
+ var WiseGuiResetView = function(reservation) {
+ 	
+ 	this.reservation              = reservation;
+ 	this.view                     = null;
+ 	this.resetNodeSelectionButton = null;
+ 	this.resetResetButton         = null;
+ 	this.resetNodeSelectionDialog = null;
+
+ 	this.resetSelectedNodeUrns    = [];
+
+ 	this.buildView();
+ };
+
+ WiseGuiResetView.prototype.buildView = function() {
+
+ 	this.view = $(
+ 		  '<div class="row">'
+		+ '	<div class="span4">'
+		+ '		<button class="btn WiseGuiResetViewNodeSelectionButton span4">Select Nodes</button>'
+		+ '	</div>'
+		+ '	<div class="span4">'
+		+ '		<button class="btn btn-primary WiseGuiResetViewResetButton span4" disabled>Reset Nodes</button>'
+		+ '	</div>'
+		+ '</div>');
+
+ 	this.resetNodeSelectionButton = this.view.find('button.WiseGuiResetViewNodeSelectionButton').first();
+	this.resetResetButton         = this.view.find('button.WiseGuiResetViewResetButton').first();
+
+	this.resetNodeSelectionDialog = new WiseGuiNodeSelectionDialog(
+			this.experimentId,
+			'Reset Nodes',
+			'Please select the nodes you want to reset.',
+			this.resetSelectedNodeUrns,
+			'nodeselection.reset.'
+	);
+
+	this.resetNodeSelectionButton.bind('click', this, function(e) {
+		e.data.showResetNodeSelectionDialog();
+	});
+
+	this.updateResetSelectNodeUrns();
+
+	this.resetResetButton.bind('click', this, function(e) {
+		e.data.executeResetNodes();
+	});
+ }
+
+ WiseGuiResetView.prototype.updateResetSelectNodeUrns = function() {
 	this.resetSelectedNodeUrns = this.resetNodeSelectionDialog.getSelection();
 	this.setResetButtonDisabled(this.resetSelectedNodeUrns.length == 0);
 	this.resetNodeSelectionButton.html((this.resetSelectedNodeUrns.length == 1 ?
@@ -3424,12 +3454,12 @@ WiseGuiExperimentationView.prototype.updateResetSelectNodeUrns = function() {
 	));
 };
 
-WiseGuiExperimentationView.prototype.showResetNodeSelectionDialog = function() {
+WiseGuiResetView.prototype.showResetNodeSelectionDialog = function() {
 
 	this.setResetSelectNodesButtonDisabled(true);
 	var self = this;
 	wisebed.getWiseMLAsJSON(
-			this.experimentId,
+			this.reservation.experimentId,
 			function(wiseML) {
 
 				self.setResetSelectNodesButtonDisabled(false);
@@ -3455,20 +3485,20 @@ WiseGuiExperimentationView.prototype.showResetNodeSelectionDialog = function() {
 	);
 };
 
-WiseGuiExperimentationView.prototype.setResetSelectNodesButtonDisabled = function(disabled) {
+WiseGuiResetView.prototype.setResetSelectNodesButtonDisabled = function(disabled) {
 	this.resetResetButton.attr('disabled', disabled);
 };
 
-WiseGuiExperimentationView.prototype.setResetButtonDisabled = function(disabled) {
+WiseGuiResetView.prototype.setResetButtonDisabled = function(disabled) {
 	this.resetResetButton.attr('disabled', disabled);
 };
 
-WiseGuiExperimentationView.prototype.executeResetNodes = function() {
+WiseGuiResetView.prototype.executeResetNodes = function() {
 
 	this.setResetButtonDisabled(true);
 	var self = this;
 	wisebed.experiments.resetNodes(
-			this.experimentId,
+			this.reservation.experimentId,
 			this.resetSelectedNodeUrns,
 			function(result) {
 				var progressView = new WiseGuiOperationProgressView(
@@ -3956,6 +3986,7 @@ function loadExperimentContainer(navigationData, parentDiv) {
 
 		var experimentationView = new WiseGuiExperimentationView(reservation);
 		parentDiv.append(experimentationView.view);
+		$(window).trigger('hashchange');
 
 	}, WiseGui.showAjaxError);
 }
