@@ -2074,30 +2074,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '		<div class="tab-content">'
 			+ '			<div class="active tab-pane WiseGuiExperimentsViewFlashControl" id="'+this.flashDivId+'"></div>'
 			+ '			<div class="tab-pane WiseGuiExperimentsViewResetControl" id="'+this.resetDivId+'"></div>'
-			+ '			<div class="tab-pane WiseGuiExperimentsViewSendControl" id="'+this.sendDivId+'">'
-			+ '				<div class="row">'
-			+ '					<button class="btn WiseGuiExperimentsViewSendControlSelectNodeUrns span2">Select Nodes</button>'
-			+ '					<div class="span2">'
-			+ '						<select class="WiseGuiExperimentsViewSendControlSelectMode span2">'
-			+ '							<option value="binary">Binary</option>'
-			+ '							<option value="ascii">ASCII</option>'
-			+ '						</select>'
-			+ '					</div>'
-			+ '					<div class="span4">'
-			+ '						<input type="text" class="WiseGuiExperimentsViewSendControlSendMessageInput span4"/>'
-			+ '					</div>'
-			+ '					<div class="span2">'
-			+ '						<button class="btn btn-primary WiseGuiExperimentsViewSendControlSendMessage span2">Send message</button><br/>'
-			+ '					</div>'
-			+ '				</div>'
-			+ '				<div class="row">'
-			+ '					<div class="offset4 span8">'
-			+ '						<div class="inputs-list">'
-			+ '							<label class="checkbox inline"><input class="WiseGuiExperimentsViewSendControlLineFeed" type="checkbox"> always append line feed</label>'
-			+ '						</div>'
-			+ '					</div>'
-			+ '				</div>'
-			+ '			</div>'
+			+ '			<div class="tab-pane WiseGuiExperimentsViewSendControl" id="'+this.sendDivId+'"/>'
 			//+ '			<div class="tab-pane WiseGuiExperimentsViewChannelPipelinesControl" id="'+this.channelPipelinesDivId+'">'
 			//+ '				<button class="btn span2 WiseGuiExperimentsViewGetChannelPipelinesButton">Get Channel Pipelines</a>'
 			//+ '			</div>'
@@ -2131,65 +2108,14 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 	this.resetView = new WiseGuiResetView(this.reservation);
 	this.view.find('#'+this.resetDivId).append(this.resetView.view);
 
-	this.sendNodeSelectionButton      = this.view.find('button.WiseGuiExperimentsViewSendControlSelectNodeUrns').first();
-	this.sendModeSelect               = this.view.find('select.WiseGuiExperimentsViewSendControlSelectMode').first();
-	this.sendMessageInput             = this.view.find('input.WiseGuiExperimentsViewSendControlSendMessageInput').first();
-	this.sendSendButton               = this.view.find('button.WiseGuiExperimentsViewSendControlSendMessage').first();
-	this.sendLineFeedCheckbox         = this.view.find('input.WiseGuiExperimentsViewSendControlLineFeed').first()[0];
+	this.sendView = new WiseGuiSendView(this.reservation);
+	this.view.find('#'+this.sendDivId).append(this.sendView.view);
 
 	//this.getChannelPipelinesButton    = this.view.find('button.WiseGuiExperimentsViewGetChannelPipelinesButton').first();
 
 	this.scriptingView = new WiseGuiScriptingView(this.reservation);
 	this.view.find('#'+this.scriptingEditorDivId).append(this.scriptingView.editorView);
 	this.view.find('#'+this.scriptingOutputDivId).append(this.scriptingView.outputView);
-
-	this.sendNodeSelectionDialog = new WiseGuiNodeSelectionDialog(
-			this.experimentId,
-			'Select Node URNs',
-			'Please select the nodes to which you want to send a message.',
-			null,
-			'nodeselection.send.'
-	);
-
-	this.sendNodeSelectionButton.bind('click', self, function(e) {
-		self.sendNodeSelectionDialog.show(function(){
-			self.updateSendControls();
-		});
-	});
-
-	this.sendSendButton.bind('click', self, function(e) { self.onSendMessageButtonClicked(); });
-
-	this.sendMessageInput.bind('keyup', self, function(e) {
-		self.updateSendControls();
-		// send on 'enter' (keycode 13)
-		if (e.which == 13 && self.isSendMessageInputValid() && self.isSendMessageNodesSelectionValid()) {
-			self.onSendMessageButtonClicked();
-		}
-	});
-	
-	this.sendMessageInput.popover({
-		placement : 'bottom',
-		trigger   : 'manual',
-		animation   : true,
-		content   : 'The message must consist of comma-separated bytes in base_10 (no prefix), base_2 (prefix 0b) or base_16 (prefix 0x).<br/>'
-				+ '<br/>'
-				+ 'Example: <code>0x0A,0x1B,0b11001001,40,80</code>',
-		title     : "Message Format"
-	});
-	
-	this.sendMessageInput.focusin(function() {
-		if (self.getSendMode() == 'binary') {
-			self.sendMessageInput.popover("show");
-		}
-	});
-	
-	this.sendMessageInput.focusout(function() {
-		if (self.getSendMode() == 'binary') {
-			self.sendMessageInput.popover("hide");
-		}
-	});
-
-	this.updateSendControls();
 
 	/*
 	this.getChannelPipelinesButton.bind('click', function() {
@@ -2209,147 +2135,6 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 		);
 	});
 	*/
-};
-
-WiseGuiExperimentationView.prototype.send = function(targetNodeUrns, payloadBase64) {
-
-	for (var i=0; i<targetNodeUrns.length; i++) {
-		var message = {
-			targetNodeUrn : targetNodeUrns[i],
-			payloadBase64 : payloadBase64
-		};
-		this.socket.send(JSON.stringify(message));
-	}
-};
-
-WiseGuiExperimentationView.prototype.isSendMessageInputValid = function() {
-	return this.parseSendMessagePayloadBase64() != null;
-};
-
-WiseGuiExperimentationView.prototype.isSendMessageNodesSelectionValid = function() {
-	return this.getSendSelectedNodeUrns().length > 0;
-};
-
-WiseGuiExperimentationView.prototype.getSendSelectedNodeUrns = function() {
-	return this.sendNodeSelectionDialog.getSelection();
-};
-
-WiseGuiExperimentationView.prototype.updateSendControls = function() {
-
-	var nodes = this.sendNodeSelectionDialog.getSelection();
-	this.sendNodeSelectionButton.html(nodes.length == 1 ? "1 node selected" : nodes.length + ' nodes selected');
-
-	if (this.isSendMessageInputValid()) {
-		this.sendMessageInput.removeClass('error');
-	} else {
-		this.sendMessageInput.addClass('error');
-	}
-
-	this.sendSendButton.attr('disabled', !(this.isSendMessageInputValid() && this.isSendMessageNodesSelectionValid()));
-};
-
-WiseGuiExperimentationView.prototype.onSendMessageButtonClicked = function() {
-
-	var self = this;
-	this.sendSendButton.attr('disabled', true);
-	var nodeUrns = this.getSendSelectedNodeUrns();
-
-	wisebed.experiments.send(
-			this.experimentId,
-			nodeUrns,
-			this.parseSendMessagePayloadBase64(),
-			function(result) {
-				var progressView = new WiseGuiOperationProgressView(
-						nodeUrns, 1,
-						"The message was sent successfully to all nodes."
-				);
-				progressView.update(result);
-				self.sendSendButton.attr('disabled', false);
-			},
-			function(jqXHR, textStatus, errorThrown) {
-				self.sendSendButton.attr('disabled', false);
-				WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
-			}
-	);
-};
-
-WiseGuiExperimentationView.prototype.parseSendMessagePayloadBase64 = function() {
-
-	var messageBytes;
-	var messageString = this.sendMessageInput[0].value;
-
-	if (messageString === undefined || '') {
-		return null;
-	}
-	
-	if (this.sendLineFeedCheckbox.checked) {
-		messageString += '\n';
-	}
-
-	messageBytes = this.getSendMode() == 'binary' ?
-			this.parseByteArrayFromString(messageString) :
-			this.parseByteArrayFromAsciiString(messageString);
-
-	return messageBytes == null ? null : base64_encode(messageBytes);
-};
-
-WiseGuiExperimentationView.prototype.getSendMode = function() {
-	return this.sendModeSelect[0].options[this.sendModeSelect[0].selectedIndex].value;
-};
-
-WiseGuiExperimentationView.prototype.parseByteArrayFromAsciiString = function(messageString) {
-
-	if (messageString == null || messageString == '') {
-		return null;
-	}
-
-	var messageBytes = new Array();
-	for(var i = 0; i < messageString.length; i++) {
-		messageBytes[i] = messageString.charCodeAt(i);
-	}
-
-	return messageBytes;
-};
-
-WiseGuiExperimentationView.prototype.parseByteArrayFromString = function(messageString) {
-
-	var splitMessage = messageString.split(",");
-	var messageBytes = [];
-
-	for (var i=0; i < splitMessage.length; i++) {
-
-		splitMessage[i] = splitMessage[i].replace(/ /g, '');
-
-		var radix = 10;
-
-		if (splitMessage[i].indexOf("0x") == 0) {
-
-			radix = 16;
-			splitMessage[i] = splitMessage[i].replace("0x","");
-
-		} else if (splitMessage[i].indexOf("0b") == 0) {
-
-			radix = 2;
-			splitMessage[i] = splitMessage[i].replace("0b","");
-
-			if (/^(0|1)*$/.exec(splitMessage[i]) == null) {
-				return null;
-			}
-
-		}
-
-		messageBytes[i] = parseInt(splitMessage[i], radix);
-
-		if (isNaN(messageBytes[i])) {
-			return null;
-		}
-	}
-
-	if (messageBytes.length == 0) {
-		return null;
-	}
-
-	return messageBytes;
 };
 
 /**

@@ -62,6 +62,7 @@
 	<script type="text/javascript" src="js/wisegui-console-view.js"></script>
 	<script type="text/javascript" src="js/wisegui-flash-view.js"></script>
 	<script type="text/javascript" src="js/wisegui-reset-view.js"></script>
+	<script type="text/javascript" src="js/wisegui-send-view.js"></script>
 	<script type="text/javascript" src="js/wisegui-scripting-view.js"></script>
 	<script type="text/javascript" src="js/wisegui.js"></script>
 
