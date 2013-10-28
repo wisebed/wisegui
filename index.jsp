@@ -60,6 +60,7 @@
 
 	<script type="text/javascript" src="js/wisebed.js"></script>
 
+	<script type="text/javascript" src="js/wisegui-reservation-observer.js"></script>
 	<script type="text/javascript" src="js/wisegui-nodestatus-icon.js"></script>
 	<script type="text/javascript" src="js/wisegui-navigation-view.js"></script>
 	<script type="text/javascript" src="js/wisegui-login-observer.js"></script>
