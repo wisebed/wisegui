@@ -11,9 +11,9 @@ var WiseGui = new function() {
 	};
 
 	this.showWarningAlert = function(message) { this.showAlert(message, 'warning'); };
-	this.showErrorAlert = function(message) { this.showAlert(message, 'error'); };
+	this.showErrorAlert   = function(message) { this.showAlert(message, 'error'  ); };
 	this.showSuccessAlert = function(message) { this.showAlert(message, 'success'); };
-	this.showInfoAlert = function(message) { this.showAlert(message, 'info'); };
+	this.showInfoAlert    = function(message) { this.showAlert(message, 'info'   ); };
 
 	this.showBlockAlert = function(message, actions, severity) {
 		$(window).trigger('wisegui-notification',
@@ -25,10 +25,11 @@ var WiseGui = new function() {
 				}
 		);
 	};
+
 	this.showWarningBlockAlert = function(message, actions) { this.showBlockAlert(message, actions, 'warning'); };
-	this.showErrorBlockAlert = function(message, actions) { this.showBlockAlert(message, actions, 'error'); };
+	this.showErrorBlockAlert   = function(message, actions) { this.showBlockAlert(message, actions, 'error'  ); };
 	this.showSuccessBlockAlert = function(message, actions) { this.showBlockAlert(message, actions, 'success'); };
-	this.showInfoBlockAlert = function(message, actions) { this.showBlockAlert(message, actions, 'info'); };
+	this.showInfoBlockAlert    = function(message, actions) { this.showBlockAlert(message, actions, 'info'   ); };
 
 	var self = this;
 	this.showAjaxError = function(jqXHR, textStatus, errorThrown) {
@@ -45,201 +46,6 @@ var WiseGui = new function() {
 		self.showErrorBlockAlert(message);
 	};
 };
-
-var WiseGuiNavigationViewer = function() {
-
-	this.view                 = null;
-	this.primaryMenu          = null;
-	this.secondaryMenu        = null;
-
-	this.aboutButton          = null;
-	this.loginButtonLi        = null;
-	this.loginButton          = null;
-	this.logoutButtonLi       = null;
-	this.logoutButton         = null;
-	this.reservationsButtonLi = null;
-	this.reservationsButton   = null;
-
-	this.buildView();
-};
-
-WiseGuiNavigationViewer.prototype.buildView = function() {
-
-	this.view = $('<div class="navbar">'
-			+ '		<div class="navbar-inner">'
-			+ '			<div class="container">'
-			+ '				<ul class="nav"/>'
-			+ '				<ul class="nav secondary-nav pull-right">'
-			+ '					<li class="WiseGuiNavAboutButton">'
-			+ '						<a href="#" data-toggle="modal" data-target="#aboutModal">About</a>'
-			+ '				</li>'
-			+ '				</ul>'
-			+ '			</div>'
-			+ '		</div>'
-			+ '	</div>'
-			+ '	<div id="aboutModal" class="modal hide">'
-			+ '		<div class="modal-header">'
-			+ ' 		<h1>About WiseGui</h1>'
-			+ '		</div>'
-			+ '		<div class="modal-body">'
-			+ '			This is an open-source project published under the terms of the BSD license.<br/>'
-			+ ' 		The sources are freely available from'
-			+ '			<a href="https://github.com/wisebed/wisegui" target="_blank">github.com/wisebed/wisegui</a>.'
-			+ ' 		<br/>'
-			+ ' 		<br/>'
-			+ '			&copy; <a href="http://www.itm.uni-luebeck.de/people/bimschas/" target="_blank">Daniel Bimschas</a>,'
-			+ '			<a href="http://www.itm.uni-luebeck.de/people/ebers/" target="_blank">Sebastian Ebers</a>,'
-			+ '			<a href="http://www.itm.uni-luebeck.de/people/pfisterer/" target="_blank">Dennis Pfisterer</a>,'
-			+ '			<a href="http://www.itm.uni-luebeck.de/people/boldt/" target="_blank">Dennis Boldt</a>,'
-			+ '			<a href="http://www.itm.uni-luebeck.de/people/massel/" target="_blank">Florian Massel</a>,'
-			+ '			Philipp Abraham<br/>'
-			+ '		</div>'
-			+ '		<div class="modal-footer">'
-			+ '		</div>'
-			+ '	</div>'
-	);
-
-	this.primaryMenu   = this.view.find('ul.nav:not(ul.secondary-nav)').first();
-	this.secondaryMenu = this.view.find('ul.secondary-nav').first();
-
-	// create all buttons and attach them
-	this.primaryMenu.append('<li class="WiseGuiNavOverviewButton"><a href="#">Overview</a></li>');
-
-	this.overviewButtonLi         = this.primaryMenu.find('li.WiseGuiNavOverviewButton').first();
-	this.overviewButton           = this.overviewButtonLi.find('a').first();
-
-	this.secondaryMenu.append('<li class="WiseGuiNavReservationsButton"><a href="#">Make Reservation</a></li>'
-			+ '<li class="WiseGuiNavLogoutButton"><a href="#">Logout</a></li>'
-			+ '<li class="WiseGuiNavLoginButton"><a href="#">Login</a></li>');
-
-	this.reservationsButtonLi = this.secondaryMenu.find('li.WiseGuiNavReservationsButton').first();
-	this.reservationsButton   = this.reservationsButtonLi.find('a').first();
-	this.loginButtonLi        = this.secondaryMenu.find('li.WiseGuiNavLoginButton').first();
-	this.loginButton          = this.loginButtonLi.find('a').first();
-	this.logoutButtonLi       = this.secondaryMenu.find('li.WiseGuiNavLogoutButton').first();
-	this.logoutButton         = this.logoutButtonLi.find('a').first();
-
-	// hide all buttons
-	this.loginButtonLi.hide();
-	this.logoutButtonLi.hide();
-	this.reservationsButtonLi.hide();
-
-	// bind actions to buttons
-	var self = this;
-
-	this.overviewButton.bind('click', function(e) {
-		e.preventDefault();
-		if (getNavigationData().experimentId) {
-			navigateTo();
-		}
-	});
-
-	this.reservationsButton.bind('click', function(e) {
-		e.preventDefault();
-		showReservationsDialog();
-	});
-
-	this.logoutButton.bind('click', function(e) {
-		e.preventDefault();
-		doLogout();
-	});
-
-	this.loginButton.bind('click', function(e) {
-		e.preventDefault();
-		new WiseGuiLoginDialog().show();
-	});
-
-	// bind to login and logout events
-	var self = this;
-	$(window).bind('wisegui-logged-in',  function() { self.onLoggedInEvent();  });
-	$(window).bind('wisegui-logged-out', function() { self.onLoggedOutEvent(); });
-	$(window).bind('wisegui-navigation-event', function(e, navigationData) {
-		if (navigationData.nav == 'experiment') {
-			self.overviewButtonLi.removeClass('active');
-		} else {
-			self.overviewButtonLi.addClass('active');
-		}
-	});
-};
-
-WiseGuiNavigationViewer.prototype.onLoggedInEvent = function() {
-	this.loginButtonLi.hide();
-	this.logoutButtonLi.show();
-	this.reservationsButtonLi.show();
-};
-
-WiseGuiNavigationViewer.prototype.onLoggedOutEvent = function() {
-	this.loginButtonLi.show();
-	this.logoutButtonLi.hide();
-	this.reservationsButtonLi.hide();
-};
-
-/**
- * #################################################################
- * WiseGuiLoginObserver
- * #################################################################
- *
- * Listens to WiseGui events 'wisegui-logged-in' and 'wisegui-logged-out'
- */
-var WiseGuiLoginObserver = function() {
-	this.isObserving = false;
-	this.loginData   = undefined;
-	this.schedule    = undefined;
-	this.interval    = 10 * 60 * 1000;
-};
-
-WiseGuiLoginObserver.prototype.renewLogin = function() {
-
-	console.log('WiseGuiLoginObserver trying to renew login');
-
-	var self = this;
-	wisebed.login(
-			this.loginData,
-			function(){
-				console.log('WiseGuiLoginObserver successfully renewed login');
-			},
-			function(jqXHR, textStatus, errorThrown) {
-				console.log('WiseGuiLoginObserver failed renewing login');
-				self.stopObservation();
-				WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
-			}
-	);
-};
-
-WiseGuiLoginObserver.prototype.startObserving = function() {
-
-	this.isObserving = true;
-	var self = this;
-
-	$(window).bind('wisegui-logged-in', function(e, data) {
-		console.log('WiseGuiLoginObserver starting observation');
-		if (data && data.loginData) {
-			self.loginData = data.loginData;
-			self.schedule = window.setInterval(self.renewLogin, self.interval);
-		}
-	});
-
-	$(window).bind('wisegui-logged-out', function(e, data) {
-		if (self.schedule !== undefined) {
-			console.log('WiseGuiLoginObserver stopping observation');
-			window.clearInterval(self.schedule);
-			this.schedule = undefined;
-		}
-	});
-
-	checkLoggedIn(function(isLoggedIn) {
-		$(window).trigger(isLoggedIn ? 'wisegui-logged-in' : 'wisegui-logged-out');
-	});
-};
-
-WiseGuiLoginObserver.prototype.stopObserving = function() {
-	console.log('WiseGuiLoginObserver.stopObserving()');
-	this.isObserving = false;
-	if (this.schedule !== undefined) {
-		window.clearInterval(this.schedule);
-	}
-};
-
 
 /**
  * #################################################################
@@ -2382,7 +2188,7 @@ function createNavigationContainer() {
 	
 	$('#WiseGuiContainer .WiseGuiNotificationsContainer').before(container);
 
-	var navigationViewer = new WiseGuiNavigationViewer();
+	var navigationViewer = new WiseGuiNavigationView();
 	container.append(navigationViewer.view);
 	return container;
 }

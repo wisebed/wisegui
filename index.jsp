@@ -60,6 +60,8 @@
 
 	<script type="text/javascript" src="js/wisebed.js"></script>
 
+	<script type="text/javascript" src="js/wisegui-navigation-view.js"></script>
+	<script type="text/javascript" src="js/wisegui-login-observer.js"></script>
 	<script type="text/javascript" src="js/wisegui-google-maps-view.js"></script>
 	<script type="text/javascript" src="js/wisegui-nodeselection-dialog.js"></script>
 	<script type="text/javascript" src="js/wisegui-console-view.js"></script>
