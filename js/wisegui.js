@@ -1861,155 +1861,6 @@ WiseGuiNotificationsViewer.prototype.buildView = function() {
 
 /**
  * #################################################################
- * WiseGuiNodeSelectionDialog
- * #################################################################
- */
-
-var WiseGuiNodeSelectionDialog = function(experimentId, headerHtml, bodyHtml, preSelected, storageKeyPrefix) {
-
-	this.experimentId = experimentId;
-	this.table = null;
-
-	this.preSelected = preSelected;
-	this.storageKeyPrefix = storageKeyPrefix;
-
-	this.dialogDivId = 'WiseGuiNodeSelectionDialog-' + Math.random();
-
-	this.dialogDiv = $('<div id="'+this.dialogDivId+'" class="modal hide WiseGuiNodeSelectionDialog"></div>');
-
-	var bodyHeader = $('	<div class="modal-header">'
-			+ '		<h3>' + headerHtml + '</h3>'
-			+ '	</div>');
-
-	var body = $('	<div class="modal-body">'
-			+ '		<p>' + bodyHtml + '</p>'
-			+ '	</div>');
-
-	var imgAjaxLoader = $('<img class="ajax-loader" width="32" height="32"/>');
-	imgAjaxLoader.attr("src", "img/ajax-loader-big.gif");
-	body.append(imgAjaxLoader);
-
-	var bodyFooter = $(' <div class="modal-footer">'
-			+ '		<a class="modal-cancel btn">Cancel</a>'
-			+ '		<a class="modal-ok btn btn-primary">OK</a>'
-			+ '	</div>');
-
-	this.dialogDiv.append(bodyHeader, body, bodyFooter);
-
-	this.nodeUrns = undefined;
-	this.callbackCancel = undefined;
-	this.callbackOK = undefined;
-	this.callbacksReady = [];
-
-	var self = this;
-	wisebed.getWiseMLAsJSON(
-			this.experimentId,
-			function(wiseML) {
-				self.constructDialogInternal(wiseML);
-				self.callbacksReady.forEach(function(callback) { callback(); });
-			},
-			function(jqXHR, status, error) {
-				self.hide();
-				WiseGui.showAjaxError(jqXHR, status, error);
-			}
-	);
-};
-
-WiseGuiNodeSelectionDialog.prototype.setSelection = function(nodeUrns) {
-	if (nodeUrns != null && nodeUrns.length > 0) {
-		window.localStorage.setItem(this.storageKeyPrefix + this.experimentId, nodeUrns.join(","));
-		this.table.applySelected(function(data) { return nodeUrns.indexOf(data.id) > -1; });
-	} else {
-		window.localStorage.removeItem(this.storageKeyPrefix + this.experimentId);
-		this.table.applySelected(function() { return false; });
-	}
-};
-
-WiseGuiNodeSelectionDialog.prototype.getSelection = function() {
-	var nodeUrnsString = window.localStorage.getItem(this.storageKeyPrefix + this.experimentId);
-	return nodeUrnsString == null ? [] : nodeUrnsString.split(",");
-};
-
-WiseGuiNodeSelectionDialog.prototype.areSomeSelected = function() {
-	return this.getSelection().length > 0;
-};
-
-WiseGuiNodeSelectionDialog.prototype.areAllSelected = function() {
-	return this.getSelection().length == this.nodeUrns.length;
-};
-
-WiseGuiNodeSelectionDialog.prototype.constructDialogInternal = function(wiseML) {
-
-	this.nodeUrns = wiseML.setup.node.map(function(node) { return node.id; });
-
-	this.dialogDiv.on('hide', function() {
-		if (this.callbackCancel) {
-			this.callbackCancel();
-		}
-	});
-
-	this.dialogDiv.find('.ajax-loader').attr('hidden', 'true');
-	this.table = new WiseGuiNodeTable(wiseML, this.dialogDiv.find('.modal-body').first(), true, true);
-
-	// Apply preselected
-	if(typeof(this.preSelected) == "function") {
-		this.table.applySelected(this.preSelected);
-	} else if (this.storageKeyPrefix) {
-		this.setSelection(this.getSelection());
-	}
-
-	// Cancel clicked
-	this.dialogDiv.find('.modal-cancel').first().bind(
-			'click',
-			{dialog : this},
-			function(event) {
-				// reset to last selection set
-				event.data.dialog.setSelection(event.data.dialog.getSelection());
-				event.data.dialog.dialogDiv.modal('hide');
-				if (event.data.dialog.callbackCancel) {
-					event.data.dialog.callbackCancel();
-				}
-			}
-	);
-
-	// OK clicked
-	this.dialogDiv.find('.modal-ok').first().bind(
-			'click',
-			{dialog : this},
-			function(event) {
-				var dialog = event.data.dialog;
-				var selectedNodes = dialog.table.getSelectedNodes();
-				dialog.dialogDiv.modal('hide');
-				if (dialog.storageKeyPrefix) {
-					dialog.setSelection(selectedNodes);
-				}
-				if (event.data.dialog.callbackOK) {
-					event.data.dialog.callbackOK(selectedNodes);
-				}
-			}
-	);
-
-	if (!document.body.contains(this.dialogDiv)) {
-		$(document.body).append(this.dialogDiv);
-	}
-};
-
-WiseGuiNodeSelectionDialog.prototype.hide = function() {
-	this.dialogDiv.modal('hide');
-};
-
-WiseGuiNodeSelectionDialog.prototype.show = function(callbackOK, callbackCancel) {
-	this.callbackOK = callbackOK;
-	this.callbackCancel = callbackCancel;
-	this.dialogDiv.modal('show');
-};
-
-WiseGuiNodeSelectionDialog.prototype.onReady = function(callback) {
-	this.callbacksReady.push(callback);
-};
-
-/**
- * #################################################################
  * WiseGuiExperimentationView
  * #################################################################
  */
@@ -2075,9 +1926,7 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '			<div class="active tab-pane WiseGuiExperimentsViewFlashControl" id="'+this.flashDivId+'"></div>'
 			+ '			<div class="tab-pane WiseGuiExperimentsViewResetControl" id="'+this.resetDivId+'"></div>'
 			+ '			<div class="tab-pane WiseGuiExperimentsViewSendControl" id="'+this.sendDivId+'"/>'
-			//+ '			<div class="tab-pane WiseGuiExperimentsViewChannelPipelinesControl" id="'+this.channelPipelinesDivId+'">'
-			//+ '				<button class="btn span2 WiseGuiExperimentsViewGetChannelPipelinesButton">Get Channel Pipelines</a>'
-			//+ '			</div>'
+			//+ '			<div class="tab-pane WiseGuiExperimentsViewChannelPipelinesControl" id="'+this.channelPipelinesDivId+'"/>'
 			+ '			<div class="tab-pane WiseGuiExperimentsViewScriptingControl" id="'+this.scriptingEditorDivId+'"/>'
 			+ '			<div class="tab-pane WiseGuiExperimentsViewScriptingOutputTab" id="'+this.scriptingOutputDivId+'"/>'
 			+ '			<div class="tab-pane WiseGuiExperimentsViewWisemlXmlTab" id="'+this.wisemlXmlDivId+'"/>'
@@ -2085,6 +1934,25 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			+ '		</div>'
 			+ '	</div>'
 			+ '</div>');
+	
+	// attach views
+	this.flashView = new WiseGuiFlashView(this.reservation);
+	this.view.find('#'+this.flashDivId).append(this.flashView.view);
+
+	this.resetView = new WiseGuiResetView(this.reservation);
+	this.view.find('#'+this.resetDivId).append(this.resetView.view);
+
+	this.sendView = new WiseGuiSendView(this.reservation);
+	this.view.find('#'+this.sendDivId).append(this.sendView.view);
+
+	//this.channelPipelinesView = new WiseGuiChannelPipelinesView(this.reservation);
+	//this.view.find('#'+this.channelPipelinesDivId).append(this.channelPipelinesView.view);
+
+	this.scriptingView = new WiseGuiScriptingView(this.reservation);
+	this.view.find('#'+this.scriptingEditorDivId).append(this.scriptingView.editorView);
+	this.view.find('#'+this.scriptingOutputDivId).append(this.scriptingView.outputView);
+
+	// bind some actions
 
 	var self = this;
 	var tabs = this.view.find('.nav-tabs').first();
@@ -2101,40 +1969,6 @@ WiseGuiExperimentationView.prototype.buildView = function() {
 			tabs.find('a[href="#'+navigationData.tab+'"]').tab('show');
 		}
 	});
-	
-	this.flashView = new WiseGuiFlashView(this.reservation);
-	this.view.find('#'+this.flashDivId).append(this.flashView.view);
-
-	this.resetView = new WiseGuiResetView(this.reservation);
-	this.view.find('#'+this.resetDivId).append(this.resetView.view);
-
-	this.sendView = new WiseGuiSendView(this.reservation);
-	this.view.find('#'+this.sendDivId).append(this.sendView.view);
-
-	//this.getChannelPipelinesButton    = this.view.find('button.WiseGuiExperimentsViewGetChannelPipelinesButton').first();
-
-	this.scriptingView = new WiseGuiScriptingView(this.reservation);
-	this.view.find('#'+this.scriptingEditorDivId).append(this.scriptingView.editorView);
-	this.view.find('#'+this.scriptingOutputDivId).append(this.scriptingView.outputView);
-
-	/*
-	this.getChannelPipelinesButton.bind('click', function() {
-		wisebed.experiments.getNodeUrns(
-				self.experimentId,
-				function(nodeUrns) {
-					wisebed.experiments.getChannelPipelines(
-							self.experimentId,
-							nodeUrns,
-							function(channelPipelines) {
-								console.log(channelPipelines);
-							},
-							WiseGui.showAjaxError
-					);
-				},
-				WiseGui.showAjaxError
-		);
-	});
-	*/
 };
 
 /**

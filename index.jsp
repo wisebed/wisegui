@@ -57,19 +57,23 @@
 	</script>
 
 	<script type="text/javascript" src="js/string-utils.js"></script>
-	<script type="text/javascript" src="js/wisegui-google-maps-view.js"></script>
+
 	<script type="text/javascript" src="js/wisebed.js"></script>
+
+	<script type="text/javascript" src="js/wisegui-google-maps-view.js"></script>
+	<script type="text/javascript" src="js/wisegui-nodeselection-dialog.js"></script>
 	<script type="text/javascript" src="js/wisegui-console-view.js"></script>
 	<script type="text/javascript" src="js/wisegui-flash-view.js"></script>
 	<script type="text/javascript" src="js/wisegui-reset-view.js"></script>
 	<script type="text/javascript" src="js/wisegui-send-view.js"></script>
+	<script type="text/javascript" src="js/wisegui-channelpipelines-view.js"></script>
 	<script type="text/javascript" src="js/wisegui-scripting-view.js"></script>
 	<script type="text/javascript" src="js/wisegui.js"></script>
 
 </head>
 
 <body>
-<div id="WiseGuiContainer" class="container"></div>
+	<div id="WiseGuiContainer" class="container"></div>
 </body>
 
 </html>
