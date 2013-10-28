@@ -364,3 +364,151 @@ WiseGuiFlashView.prototype.executeFlashNodes = function() {
 			}
 	);
 };
+
+/**
+ * #################################################################
+ * WiseGuiLoadConfigurationDialog
+ * #################################################################
+ */
+
+var WiseGuiLoadConfigurationDialog = function(onSuccess, onError) {
+	this.onSuccess = onSuccess;
+	this.onError = onError;
+	this.table = null;
+	this.view = $('<div id="WiseGuiLoadDialog" class="modal hide"></div>');
+	this.buildView();
+};
+
+WiseGuiLoadConfigurationDialog.prototype.hide = function() {
+	this.view.modal('hide');
+	this.view.remove();
+};
+
+WiseGuiLoadConfigurationDialog.prototype.show = function() {
+	$(document.body).append(this.view);
+	this.view.modal('show');
+};
+
+WiseGuiLoadConfigurationDialog.prototype.buildView = function() {
+
+	var self = this;
+
+	function handleError(errorMessage, input) {
+		input.addClass('error');
+		alert("Error: " + (errorMessage.length > 500 ? (errorMessage.substr(0, 500) + " [...]") : errorMessage));
+		okButton.removeAttr('disabled');
+		cancelButton.removeAttr('disabled');
+	}
+
+	function loadFromURL() {
+		wisebed.experiments.getConfiguration(
+				$.trim(input_url.val()),
+				function(data, textStatus, jqXHR) {
+					self.onSuccess(data, textStatus, jqXHR);
+				},
+				function(jqXHR, textStatus, errorThrown) {
+					handleError(jqXHR.responseText, input_url);
+				}
+		);
+	}
+
+	function loadFromFile() {
+
+		var files = document.getElementById('input_file').files;
+		var f = files[0];
+
+		if(f != "") {
+			var fileReader = new FileReader();
+			fileReader.onloadend = function(progressEvent) {
+				try {
+					self.onSuccess(JSON.parse(fileReader.result));
+				} catch(e) {
+					handleError(e, input_file);
+				}
+			};
+			fileReader.readAsText(f);
+		} else {
+			handleError("No file chosen", input_file);
+		}
+	}
+
+	/*
+	 * Dialog Header
+	 */
+	var dialogHeader = $('<div class="modal-header"><h3>Load a configuration</h3></div>');
+
+	/*
+	 * Dialog Body
+	 */
+	var dialogBody = $('<div class="modal-body"/>');
+
+	var url = "";
+
+	var form = $('<form class="form-horizontal"/>');
+
+	var control_group_url = $('<div class="control-group"/>');
+	var label_url = $('<label for="type_url" class="control-label">URL:</label>');
+	var controls_url = $('<div class="controls"/>');
+	var input_checkbox_url  = $('<input type="radio" name="type" id="type_url" value="url" checked>');
+	var input_url = $('<input type="text" value="' + url + '" id="input_url" />');
+
+	var control_group_file = $('<div class="control-group"/>');
+	var label_file = $('<label for="type_file" class="control-label">File:</label>');
+	var controls_file = $('<div class="controls"/>');
+	var input_checkbox_file = $('<input type="radio" name="type" id="type_file" value="file">');
+	var input_file = $('<input type="file" id="input_file"/>');
+
+	input_url.focusin(
+		function() {
+			input_checkbox_file.attr('checked', false);
+			input_checkbox_url.attr('checked', true);
+		}
+	);
+
+	input_file.change(
+		function() {
+			input_checkbox_url.attr('checked', false);
+			input_checkbox_file.attr('checked', true);
+		}
+	);
+
+	controls_url.append(input_checkbox_url, input_url);
+	control_group_url.append(label_url, controls_url);
+	controls_file.append(input_checkbox_file, input_file);
+	control_group_file.append(label_file, controls_file);
+	form.append(control_group_url, control_group_file);
+	dialogBody.append(form);
+
+	/*
+	 * Dialog Footer
+	 */
+	var dialogFooter = $('<div class="modal-footer"/>');
+
+	var okButton = $('<input class="btn btn-primary" value="OK" style="width:35px;text-align:center;"/>');
+	var cancelButton = $('<input class="btn" value="Cancel" style="width:45px;text-align:center;"/>');
+
+	okButton.bind('click', this, function(e) {
+
+		okButton.attr("disabled", "true");
+		cancelButton.attr("disabled", "true");
+
+		// Check, which radio button is used
+		var val = dialogBody.find("input:checked").val();
+		if(val == "url") {
+			loadFromURL.bind(self)();
+		} else if (val == "file") {
+			loadFromFile.bind(self)();
+		}
+	});
+
+	cancelButton.bind('click', this, function(e) {
+		self.onSuccess(null);
+	});
+
+	dialogFooter.append(okButton, cancelButton);
+
+	/**
+	 * Build view
+	 */
+	this.view.append(dialogHeader, dialogBody, dialogFooter);
+};
