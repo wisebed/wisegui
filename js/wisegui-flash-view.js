@@ -4,21 +4,21 @@
  * #################################################################
  */
 
- var WiseGuiFlashView = function(reservation) {
- 	
- 	this.reservation              = reservation;
- 	this.configurations           = [];
+var WiseGuiFlashView = function(reservation) {
+	
+	this.reservation              = reservation;
+	this.configurations           = [];
 
- 	this.addSetButton             = null;
- 	this.removeSetButton          = null;
- 	this.loadConfigurationButton  = null;
- 	this.saveConfigurationButton  = null;
- 	this.flashButton              = null;
- 	this.configurationsTableBody  = null;
- 	this.view                     = null;
+	this.addSetButton             = null;
+	this.removeSetButton          = null;
+	this.loadConfigurationButton  = null;
+	this.saveConfigurationButton  = null;
+	this.flashButton              = null;
+	this.configurationsTableBody  = null;
+	this.view                     = null;
 
- 	this.buildView();
- };
+	this.buildView();
+};
 
 WiseGuiFlashView.prototype.buildView = function() {
 	this.view = $(

@@ -4,21 +4,21 @@
  * #################################################################
  */
 
- var WiseGuiResetView = function(reservation) {
- 	
- 	this.reservation              = reservation;
+var WiseGuiResetView = function(reservation) {
+	
+	this.reservation              = reservation;
 
- 	this.view                     = null;
- 	this.resetNodeSelectionButton = null;
- 	this.resetResetButton         = null;
- 	this.resetNodeSelectionDialog = null;
+	this.view                     = null;
+	this.resetNodeSelectionButton = null;
+	this.resetResetButton         = null;
+	this.resetNodeSelectionDialog = null;
 
- 	this.resetSelectedNodeUrns    = [];
+	this.resetSelectedNodeUrns    = [];
 
- 	this.buildView();
- };
+	this.buildView();
+};
 
- WiseGuiResetView.prototype.buildView = function() {
+WiseGuiResetView.prototype.buildView = function() {
 
  	this.view = $(
  		  '<div class="row">'
@@ -50,9 +50,9 @@
 	this.resetResetButton.bind('click', this, function(e) {
 		e.data.executeResetNodes();
 	});
- }
+};
 
- WiseGuiResetView.prototype.updateResetSelectNodeUrns = function() {
+WiseGuiResetView.prototype.updateResetSelectNodeUrns = function() {
 	this.resetSelectedNodeUrns = this.resetNodeSelectionDialog.getSelection();
 	this.setResetButtonDisabled(this.resetSelectedNodeUrns.length == 0);
 	this.resetNodeSelectionButton.html((this.resetSelectedNodeUrns.length == 1 ?
