@@ -45,6 +45,36 @@ var WiseGui = new function() {
 				+ '<pre>'+errorThrown+'</pre>');
 		self.showErrorBlockAlert(message);
 	};
+
+	this.bindToReservationState = function(elems, experimentId) {
+
+		$.each(elems, function(index,e) {
+
+			var elem = $(e);
+			var originalDisabled = elem.attr('disabled') == 'disabled';
+
+			elem.attr('disabled', 'disabled');
+
+			$(window).bind('wisegui-reservation-started', function(e, reservation) {
+				if (experimentId == reservation.experimentId) {
+					
+					if (originalDisabled) {
+						elem.attr('disabled', 'disabled');
+					} else {
+						elem.removeAttr('disabled');
+					}
+				}
+			});
+
+			$(window).bind('wisegui-reservation-ended', function(e, reservation) {
+				if (experimentId == reservation.experimentId) {
+					elem.attr('disabled', 'disabled');
+				}
+			});
+		});
+
+		return elems;
+	};
 };
 
 /**

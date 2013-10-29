@@ -99,6 +99,10 @@ WiseGuiSendView.prototype.buildView = function() {
 	});
 
 	this.updateControls();
+
+	WiseGui.bindToReservationState(this.view.find('button'), this.experimentId);
+	WiseGui.bindToReservationState(this.view.find('input'), this.experimentId);
+	WiseGui.bindToReservationState(this.view.find('select'), this.experimentId);
 };
 
 WiseGuiSendView.prototype.send = function(targetNodeUrns, payloadBase64) {

@@ -253,6 +253,8 @@ WiseGuiScriptingView.prototype.buildEditorView = function() {
 	this.editorStopButton.attr('disabled', true);
 	this.editorStartButton.bind('click', self, function(e) { self.startUserScript(); });
 	this.editorStopButton.bind('click', self, function(e) { self.stopUserScript(); });
+
+	WiseGui.bindToReservationState(this.editorStartButton, this.experimentId);
 };
 
 WiseGuiScriptingView.prototype.startUserScript = function() {

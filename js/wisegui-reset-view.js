@@ -7,6 +7,7 @@
 var WiseGuiResetView = function(reservation) {
 	
 	this.reservation              = reservation;
+	this.experimentId             = reservation.experimentId;
 
 	this.view                     = null;
 	this.resetNodeSelectionButton = null;
@@ -50,6 +51,8 @@ WiseGuiResetView.prototype.buildView = function() {
 	this.resetResetButton.bind('click', this, function(e) {
 		e.data.executeResetNodes();
 	});
+
+	WiseGui.bindToReservationState(this.view.find('button'), this.experimentId);
 };
 
 WiseGuiResetView.prototype.updateResetSelectNodeUrns = function() {

@@ -172,6 +172,8 @@ WiseGuiConsoleView.prototype.buildView = function() {
 	this.outputsViewDropdown          = this.view.find('#view-dropdown');
 	this.outputsMakePrintableCheckbox = this.view.find('#make-printable');
 
+	WiseGui.bindToReservationState(this.view.find('button'), this.experimentId);
+
 	// change label to 'running' as soon as reservation starts
 	$(window).bind('wisegui-reservation-started', function(e, reservation) {
 		if (self.experimentId == reservation.experimentId) {

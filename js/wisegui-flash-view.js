@@ -7,6 +7,7 @@
 var WiseGuiFlashView = function(reservation) {
 	
 	this.reservation              = reservation;
+	this.experimentId             = reservation.experimentId;
 	this.configurations           = [];
 
 	this.addSetButton             = null;
@@ -81,6 +82,8 @@ WiseGuiFlashView.prototype.buildView = function() {
 	});
 
 	this.addConfiguration();
+
+	WiseGui.bindToReservationState(this.view.find('button'), this.experimentId);
 };
 
 WiseGuiFlashView.prototype.getFormData = function() {
