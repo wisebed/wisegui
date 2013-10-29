@@ -370,7 +370,12 @@ function buildPersonalReservationsTable(parent, reservations) {
 
 		from  = $('<a href="#" rel="tooltip" title="'+reservation.from.toISOString()+'">' + reservation.from.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop);
 		to    = $('<a href="#" rel="tooltip" title="'+reservation.to.toISOString()+'">' + reservation.to.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop);
-		nodes = $('<a href="#" rel="tooltip" title="'+reservation.nodeUrns.join("<br/>")+'">'+ reservation.nodeUrns.length + ' nodes</a>').tooltip('show').click(nop);
+		nodes = $(
+			  '<div>'
+			+ '	<a href="javascript:;" data-target="#wisegui-personal-reservation-nodes-'+reservation.experimentId+'" data-toggle="collapse">'+ reservation.nodeUrns.length + ' nodes</a>'
+			+ ' <div class="collapse" id="wisegui-personal-reservation-nodes-' + reservation.experimentId + '">' + reservation.nodeUrns.join("<br/>") + '</div>'
+			+ '</div>'
+		);
 		btn   = $('<a class="btn btn-primary">Open</a>').bind('click', reservation, function(e) {
 			e.preventDefault();
 			navigateTo(e.data.experimentId);
@@ -417,7 +422,12 @@ function buildReservationTable(reservationsTab) {
 					reservation = reservations[i];
 					from  = $('<a href="#" rel="tooltip" title="'+reservation.from.toISOString()+'">' + reservation.from.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop);
 					to    = $('<a href="#" rel="tooltip" title="'+reservation.to.toISOString()+'">' + reservation.to.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop);
-					nodes = $('<a href="#" rel="tooltip" title="'+reservation.nodeUrns.join("<br/>")+'">'+ reservation.nodeUrns.length + ' nodes</a>').tooltip('show').click(nop);
+					nodes = $(
+						  '<div>'
+						+ '	<a href="javascript:;" data-target="#wisegui-reservation-nodes-'+i+'" data-toggle="collapse">'+ reservation.nodeUrns.length + ' nodes</a>'
+						+ ' <div class="collapse" id="wisegui-reservation-nodes-'+i+'">' + reservation.nodeUrns.join("<br/>") + '</div>'
+						+ '</div>'
+					);
 
 					tableRows[i]    = [];
 					tableRows[i][0] = from;
