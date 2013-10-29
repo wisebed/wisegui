@@ -190,11 +190,11 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 	            var deselectedURNs = [];
 	            
 	            // get nodes that have been (de-)selected
-	            $.each(mapsView.markersArray, function (index, marker) {
-	                if (bounds.contains(marker.getPosition()) && marker.getMap() != null) {
-	                    if(marker.getIcon().url == 'img/node.png'){
-	                    selectedURNs.push(marker.urn);
-	                    }else{
+	            mapsView.markersArray.forEach(function(marker) {
+	            	if (bounds.contains(marker.getPosition()) && marker.getMap() != null) {
+	                    if (marker.getIcon() == ICON_DESELECTED) {
+	                    	selectedURNs.push(marker.urn);
+	                    } else {
 	                    	deselectedURNs.push(marker.urn);
 	                    }
 	                }
@@ -203,7 +203,6 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 	            // update the map
 	            mapsView.map.selectURNs(selectedURNs);
 	            mapsView.map.selectURNs(deselectedURNs, true);
-	            
 	            
 	            //remove all deselected nodes
 	            mapsView.map.selectedURNs = mapsView.map.selectedURNs.diff(deselectedURNs);
