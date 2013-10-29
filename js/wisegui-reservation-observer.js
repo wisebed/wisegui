@@ -41,10 +41,6 @@ WiseGuiReservationObserver.prototype.processReservationsFetched = function(reser
 		}
 	}
 
-	if (newReservations.length > 0) {
-		$(window).trigger('wisegui-reservations-changed', [reservations]);
-	}
-
 	for (var k=0; k<newReservations.length; k++) {
 		$(window).trigger('wisegui-reservation-added', newReservations[k]);
 		this.lastKnownReservations.push(newReservations[k]);

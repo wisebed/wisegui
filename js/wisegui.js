@@ -280,6 +280,9 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 	
 	$(window).bind('wisegui-reservations-changed', function() {
 		buildReservationTable(reservationsTabContentDiv);
+		if (isLoggedIn) {
+			buildMyReservationTable(myReservationsTabContentDiv);
+		}
 	});
 	
 	$(window).bind('wisegui-logged-in', function() {
@@ -290,12 +293,6 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 	$(window).bind('wisegui-logged-out', function() {
 		myReservationsTab.hide();
 		myReservationsTabContentDiv.empty();
-	});
-
-	$(window).bind('wisegui-reservations-changed', function() {
-		if (isLoggedIn) {
-			buildMyReservationTable(myReservationsTabContentDiv);
-		}
 	});
 	
 	if (testbedDescription.isFederator) {
@@ -322,31 +319,38 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 	    navigationData.tab = e.target.hash.substring(1);
 	    window.location.hash = $.param(navigationData);
 	});
-
-	buildReservationTable(reservationsTabContentDiv);
-	if (isLoggedIn) {
-		buildFederatableReservationTable(federatableReservationsTabContentDiv);
-	}
 }
 
-function buildFederatableReservationTable(tab) {
+function buildFederatableReservationTable(parent) {
+	
+	var currentAndFuture = $('<div><h3>Current and Future Reservations</h3><div class="WiseGuiReservationTableDiv"/></div>');
+	var currentAndFutureDiv = currentAndFuture.find('div.WiseGuiReservationTableDiv');
+	
+	parent.empty();
+	parent.append(currentAndFuture);
+
 	wisebed.reservations.getFederatable(
-			null,
-			null,
-			function(federatableReservations) { buildPersonalReservationsTable(tab, federatableReservations); },
-			WiseGui.showAjaxError
+		moment(),
+		null,
+		function(federatableReservations) {
+			buildPersonalReservationsTable(currentAndFutureDiv, federatableReservations);
+		},
+		WiseGui.showAjaxError
 	);
 }
 
 function buildMyReservationTable(parent) {
-	wisebed.reservations.getPersonal(
-			null,
-			null,
-			function(wisebedReservationList) {
-				buildPersonalReservationsTable(parent, wisebedReservationList);
-			},
-			WiseGui.showAjaxError
-	);
+
+	var currentAndFuture = $('<div><h3>Current and Future Reservations</h3><div class="WiseGuiReservationTableDiv"/></div>');
+	var past = $('<div><h3>Past Reservations</h3><div class="WiseGuiReservationTableDiv"/></div>');
+	var currentAndFutureDiv = currentAndFuture.find('div.WiseGuiReservationTableDiv');
+	var pastDiv = past.find('div.WiseGuiReservationTableDiv');
+	
+	parent.empty();
+	parent.append(currentAndFuture, past);
+
+	wisebed.reservations.getPersonal(moment(), null, function(reservations) { buildPersonalReservationsTable(currentAndFutureDiv, reservations); }, WiseGui.showAjaxError);
+	wisebed.reservations.getPersonal(null, moment(), function(reservations) { buildPersonalReservationsTable(pastDiv, reservations); }, WiseGui.showAjaxError);
 };
 
 function buildPersonalReservationsTable(parent, reservations) {
@@ -363,6 +367,7 @@ function buildPersonalReservationsTable(parent, reservations) {
 	var tableRows = [];
 	var nop = function(event){ event.preventDefault(); };
 	var reservation, from, to, nodes, btn;
+	var rand = Math.floor(Math.random() * 100000);
 
 	for (var i=0; i<reservations.length; i++) {
 
@@ -372,8 +377,8 @@ function buildPersonalReservationsTable(parent, reservations) {
 		to    = $('<a href="#" rel="tooltip" title="'+reservation.to.toISOString()+'">' + reservation.to.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop);
 		nodes = $(
 			  '<div>'
-			+ '	<a href="javascript:;" data-target="#wisegui-personal-reservation-nodes-'+reservation.experimentId+'" data-toggle="collapse">'+ reservation.nodeUrns.length + ' nodes</a>'
-			+ ' <div class="collapse" id="wisegui-personal-reservation-nodes-' + reservation.experimentId + '">' + reservation.nodeUrns.join("<br/>") + '</div>'
+			+ '	<a href="javascript:;" data-target="#wisegui-personal-reservation-nodes-'+rand+'-'+i+'" data-toggle="collapse">'+reservation.nodeUrns.length+' nodes</a>'
+			+ ' <div class="collapse" id="wisegui-personal-reservation-nodes-'+rand+'-'+i+'">'+reservation.nodeUrns.join("<br/>")+'</div>'
 			+ '</div>'
 		);
 		btn   = $('<a class="btn btn-primary">Open</a>').bind('click', reservation, function(e) {
@@ -392,60 +397,72 @@ function buildPersonalReservationsTable(parent, reservations) {
 
 	var noEntriesMessage = 'No reservations available';
 	var table = buildTable(tableHead, tableRows, noEntriesMessage);
+	
 	parent.empty();
 	parent.append(table);
+	
 	if (tableRows.length > 0) {
 		table.tablesorter({ sortList: [[0,1]] });
 	}
 }
 
-function buildReservationTable(reservationsTab) {
-	wisebed.reservations.getPublic(
-			null,
-			null,
-			function(reservations) {
+function buildReservationTableInternal(parent, reservations) {
 
-				var tableHead = [
-					"From",
-					"Until",
-					"Testbed Prefix(es)",
-					"Nodes"
-				];
+	var tableHead = [
+		"From",
+		"Until",
+		"Testbed Prefix(es)",
+		"Nodes"
+	];
 
-				var tableRows = [];
-				var reservation;
-				var nop = function(event){ event.preventDefault(); };
-				var from, to, nodes;
+	var tableRows = [];
+	var reservation;
+	var nop = function(event){ event.preventDefault(); };
+	var from, to, nodes;
+	var rand = Math.floor(Math.random() * 100000);
 
-				for (var i=0; i<reservations.length; i++) {
+	for (var i=0; i<reservations.length; i++) {
 
-					reservation = reservations[i];
-					from  = $('<a href="#" rel="tooltip" title="'+reservation.from.toISOString()+'">' + reservation.from.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop);
-					to    = $('<a href="#" rel="tooltip" title="'+reservation.to.toISOString()+'">' + reservation.to.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop);
-					nodes = $(
-						  '<div>'
-						+ '	<a href="javascript:;" data-target="#wisegui-reservation-nodes-'+i+'" data-toggle="collapse">'+ reservation.nodeUrns.length + ' nodes</a>'
-						+ ' <div class="collapse" id="wisegui-reservation-nodes-'+i+'">' + reservation.nodeUrns.join("<br/>") + '</div>'
-						+ '</div>'
-					);
+		reservation = reservations[i];
+		from  = $('<a href="#" rel="tooltip" title="'+reservation.from.toISOString()+'">' + reservation.from.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop);
+		to    = $('<a href="#" rel="tooltip" title="'+reservation.to.toISOString()+'">' + reservation.to.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop);
+		nodes = $(
+			  '<div>'
+			+ '	<a href="javascript:;" data-target="#wisegui-reservation-nodes-'+rand+'-'+i+'" data-toggle="collapse">'+ reservation.nodeUrns.length + ' nodes</a>'
+			+ ' <div class="collapse" id="wisegui-reservation-nodes-'+rand+'-'+i+'">' + reservation.nodeUrns.join("<br/>") + '</div>'
+			+ '</div>'
+		);
 
-					tableRows[i]    = [];
-					tableRows[i][0] = from;
-					tableRows[i][1] = to;
-					tableRows[i][2] = reservation.nodeUrnPrefixes.join("<br/>");
-					tableRows[i][3] = nodes;
-				}
+		tableRows[i]    = [];
+		tableRows[i][0] = from;
+		tableRows[i][1] = to;
+		tableRows[i][2] = reservation.nodeUrnPrefixes.join("<br/>");
+		tableRows[i][3] = nodes;
+	}
 
-				var noEntriesMessage = 'There are no reservations for the next week yet!';
-				var table = buildTable(tableHead, tableRows, noEntriesMessage);
-				reservationsTab.empty();
-				reservationsTab.append(table);
-				if (tableRows.length > 0) {
-					table.tablesorter({ sortList: [[0,1]] });
-				}
-			},
-			WiseGui.showAjaxError
-	);
+	var noEntriesMessage = 'There are no reservations for the next week yet!';
+	var table = buildTable(tableHead, tableRows, noEntriesMessage);
+	
+	parent.empty();
+	parent.append(table);
+	
+	if (tableRows.length > 0) {
+		table.tablesorter({ sortList: [[0,1]] });
+	};
+}
+
+function buildReservationTable(parent) {
+	
+	var currentAndFuture = $('<div><h3>Current and Future Reservations</h3><div class="WiseGuiReservationTableDiv"/></div>');
+	var past = $('<div><h3>Past Reservations</h3><div class="WiseGuiReservationTableDiv"/></div>');
+	var currentAndFutureDiv = currentAndFuture.find('div.WiseGuiReservationTableDiv');
+	var pastDiv = past.find('div.WiseGuiReservationTableDiv');
+	
+	parent.empty();
+	parent.append(currentAndFuture, past);
+
+	wisebed.reservations.getPublic(moment(), null, function(reservations) { buildReservationTableInternal(currentAndFutureDiv, reservations); }, WiseGui.showAjaxError);
+	wisebed.reservations.getPublic(null, moment(), function(reservations) { buildReservationTableInternal(pastDiv, reservations); }, WiseGui.showAjaxError);
 }
 
 
