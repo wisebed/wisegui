@@ -53,7 +53,7 @@ WiseGuiConsoleView.prototype.buildView = function() {
 			+ '		</div>'
 			+ '		<div class="span3">'
 			+ '			<span id="' + this.statusBadgeId + '" class="badge">Loading...</span>'
-			+ '			<span id="' + this.statusBadgeDetachedId + '" class="badge">Loading...</span>'
+			+ '			<span id="' + this.statusBadgeDetachedId + '" class="badge badge-important" style="display: none;">Loading...</span>'
 			+ '		</div>'
 			+ '		<div class="span4">'
 			+ '			<div class="btn-toolbar btn-toolbar2  pull-right">'
@@ -207,10 +207,10 @@ WiseGuiConsoleView.prototype.buildView = function() {
 
 			if (devicesDetached.length > 0) {
 				
-				self.statusBadgeDetached.addClass('badge-important');
 				self.statusBadgeDetached.empty();
 				self.statusBadgeDetached.append(devicesDetached.length + ' devices currently detached');
-				self.statusBadgeDetached.show();
+				self.statusBadgeDetached.toggle(true);
+
 				self.statusBadgeDetached.tooltip('hide');
 				self.statusBadgeDetached.data('tooltip', false);
 				self.statusBadgeDetached.tooltip({title: devicesDetached.join('<br/>'), placement:'bottom' });
@@ -220,7 +220,7 @@ WiseGuiConsoleView.prototype.buildView = function() {
 				self.statusBadgeDetached.empty();
 				self.statusBadgeDetached.tooltip('hide');
 				self.statusBadgeDetached.data('tooltip', false);
-				self.statusBadgeDetached.hide();
+				self.statusBadgeDetached.toggle(false);
 			}
 
 		} else if (status == 'ended') {
@@ -270,9 +270,11 @@ WiseGuiConsoleView.prototype.buildView = function() {
 	$(window).bind('wisegui-devices-attached-event', function(e, devicesAttachedEvent) {
 
 		devicesAttachedEvent.nodeUrns.forEach(function(nodeUrn) {
-			var index = devicesDetached.indexOf(nodeUrn);
-			if (index > -1) {
-				devicesDetached.splice(index, 1);
+			if (self.reservation.nodeUrns.indexOf(nodeUrn) > -1) {
+				var index = devicesDetached.indexOf(nodeUrn);
+				if (index > -1) {
+					devicesDetached.splice(index, 1);
+				}
 			}
 		});
 
@@ -282,9 +284,11 @@ WiseGuiConsoleView.prototype.buildView = function() {
 	$(window).bind('wisegui-devices-detached-event', function(e, devicesDetachedEvent) {
 
 		devicesDetachedEvent.nodeUrns.forEach(function(nodeUrn) {
-			var index = devicesDetached.indexOf(nodeUrn);
-			if (index == -1) {
-				devicesDetached.push(nodeUrn);
+			if (self.reservation.nodeUrns.indexOf(nodeUrn) > -1) {
+				var index = devicesDetached.indexOf(nodeUrn);
+				if (index == -1) {
+					devicesDetached.push(nodeUrn);
+				}
 			}
 		});
 
