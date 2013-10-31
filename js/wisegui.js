@@ -440,7 +440,7 @@ function buildReservationTableInternal(parent, reservations) {
 		tableRows[i][3] = nodes;
 	}
 
-	var noEntriesMessage = 'There are no reservations for the next week yet!';
+	var noEntriesMessage = 'No reservations found.';
 	var table = buildTable(tableHead, tableRows, noEntriesMessage);
 	
 	parent.empty();
