@@ -222,7 +222,7 @@ pre.WiseGuiReservationViewWiseMLJSON, pre.WiseGuiReservationViewWiseMLXML {
 	overflow: auto;
 }
 
-pre.WiseGuiTestbedDetailsWiseMLJSON, pre.WiseGuiTestbedDetailsWiseMLXMLTab {
+pre.WiseGuiTestbedDetailsWiseMLJSON, pre.WiseGuiTestbedDetailsWiseMLXML {
 	height: 500px;
 	overflow: auto;
 }
