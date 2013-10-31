@@ -54,7 +54,7 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 
 		// emulate devicesDetachedEvent
 		$(window).trigger('wisegui-devices-detached-event', {
-			type : 'devicesAttached',
+			type : 'devicesDetached',
 			timestamp : new Date().toISOString(),
 			nodeUrns : detached
 		});

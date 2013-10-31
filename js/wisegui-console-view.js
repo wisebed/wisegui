@@ -22,8 +22,9 @@ var WiseGuiConsoleView = function(reservation) {
 	this.progressBarId                = 'WiseGuiConsoleView-'+this.experimentId+'-progress-bar';
 	this.progressBar                  = null;
 	this.progressBarSchedule          = undefined;
-	this.statusBadgeId            = 'WiseGuiConsoleView-'+this.experimentId+'-node-health-badge';
-	this.statusBadge              = null;
+	this.statusBadgeId                = 'WiseGuiConsoleView-'+this.experimentId+'-status-badge';
+	this.statusBadgeDetachedId        = 'WiseGuiConsoleView-'+this.experimentId+'-status-badge-detached';
+	this.statusBadge                  = null;
 	this.outputsNumMessagesInput      = null;
 	this.outputsRedrawLimitInput      = null;
 	this.outputsTable                 = null;
@@ -52,6 +53,7 @@ WiseGuiConsoleView.prototype.buildView = function() {
 			+ '		</div>'
 			+ '		<div class="span3">'
 			+ '			<span id="' + this.statusBadgeId + '" class="badge">Loading...</span>'
+			+ '			<span id="' + this.statusBadgeDetachedId + '" class="badge">Loading...</span>'
 			+ '		</div>'
 			+ '		<div class="span4">'
 			+ '			<div class="btn-toolbar btn-toolbar2  pull-right">'
@@ -170,6 +172,7 @@ WiseGuiConsoleView.prototype.buildView = function() {
 	this.progressBar                  = this.view.find('#'+this.progressBarId).first();
 	this.progressBarSchedule          = undefined;
 	this.statusBadge                  = this.view.find('#'+this.statusBadgeId).first();
+	this.statusBadgeDetached          = this.view.find('#'+this.statusBadgeDetachedId).first();
 	this.outputsNumMessagesInput      = this.view.find('#num-outputs').first();
 	this.outputsRedrawLimitInput      = this.view.find('#redraw-limit').first();
 	this.outputsTable                 = this.view.find('table.WiseGuiConsoleViewOutputsTable tbody').first();
@@ -186,16 +189,42 @@ WiseGuiConsoleView.prototype.buildView = function() {
 	var interval = undefined;
 	var statusBadgeInterval = undefined;
 	var status = 'pending';
+	var devicesDetached = [];
 
 	var updateStatusBadge = function() {
+		
 		self.statusBadge.empty();
+
 		if (status == 'pending') {
+
 			self.statusBadge.addClass('badge-info');
 			self.statusBadge.append('Reservation starting in ' + now.from(self.reservation.from, true));
+
 		} else if (status == 'running') {
+			
 			self.statusBadge.removeClass('badge-info').addClass('badge-success');
 			self.statusBadge.append('Reservation running since ' + moment.duration(self.reservation.from.diff(moment())).humanize());
+
+			if (devicesDetached.length > 0) {
+				
+				self.statusBadgeDetached.addClass('badge-important');
+				self.statusBadgeDetached.empty();
+				self.statusBadgeDetached.append(devicesDetached.length + ' devices currently detached');
+				self.statusBadgeDetached.show();
+				self.statusBadgeDetached.tooltip('hide');
+				self.statusBadgeDetached.data('tooltip', false);
+				self.statusBadgeDetached.tooltip({title: devicesDetached.join('<br/>'), placement:'bottom' });
+
+			} else if (self.statusBadgeDetached != null) {
+
+				self.statusBadgeDetached.empty();
+				self.statusBadgeDetached.tooltip('hide');
+				self.statusBadgeDetached.data('tooltip', false);
+				self.statusBadgeDetached.hide();
+			}
+
 		} else if (status == 'ended') {
+
 			self.statusBadge.removeClass('badge-info badge-success').addClass('badge-warning');
 			self.statusBadge.append('Reservation ended ' + self.reservation.to.from(moment()));
 		}
@@ -236,6 +265,30 @@ WiseGuiConsoleView.prototype.buildView = function() {
 			status = 'ended';
 			updateStatusBadge();
 		}
+	});
+
+	$(window).bind('wisegui-devices-attached-event', function(e, devicesAttachedEvent) {
+
+		devicesAttachedEvent.nodeUrns.forEach(function(nodeUrn) {
+			var index = devicesDetached.indexOf(nodeUrn);
+			if (index > -1) {
+				devicesDetached.splice(index, 1);
+			}
+		});
+
+		updateStatusBadge();
+	});
+
+	$(window).bind('wisegui-devices-detached-event', function(e, devicesDetachedEvent) {
+
+		devicesDetachedEvent.nodeUrns.forEach(function(nodeUrn) {
+			var index = devicesDetached.indexOf(nodeUrn);
+			if (index == -1) {
+				devicesDetached.push(nodeUrn);
+			}
+		});
+
+		updateStatusBadge();
 	});
 
 	// don't close popup when clicking on a form
