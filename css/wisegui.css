@@ -217,12 +217,12 @@ input.success {
 	vertical-align: bottom;
 }
 
-pre.WiseGuiConsoleViewWiseMLJSON, pre.WiseGuiConsoleViewWiseMLXML {
+pre.WiseGuiReservationViewWiseMLJSON, pre.WiseGuiReservationViewWiseMLXML {
 	height: 300px;
 	overflow: auto;
 }
 
-pre.WiseGuiTestbedDetailsWiseMLJSON, pre.WiseGuiTestbedDetailsWiseMLXML {
+pre.WiseGuiTestbedDetailsWiseMLJSON, pre.WiseGuiTestbedDetailsWiseMLXMLTab {
 	height: 500px;
 	overflow: auto;
 }

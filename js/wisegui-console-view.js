@@ -19,8 +19,11 @@ var WiseGuiConsoleView = function(reservation) {
 	this.socket                       = null;
 	this.view                         = null;
 
+	this.progressBarId                = 'WiseGuiConsoleView-'+this.experimentId+'-progress-bar';
 	this.progressBar                  = null;
 	this.progressBarSchedule          = undefined;
+	this.statusBadgeId            = 'WiseGuiConsoleView-'+this.experimentId+'-node-health-badge';
+	this.statusBadge              = null;
 	this.outputsNumMessagesInput      = null;
 	this.outputsRedrawLimitInput      = null;
 	this.outputsTable                 = null;
@@ -42,11 +45,15 @@ WiseGuiConsoleView.prototype.buildView = function() {
 	this.view = $(
 			  '<div class="WiseGuiConsoleViewDiv">'
 			+ '	<div class="row">'
-			+ '		<div class="span6">'
-			+ '			<b>' + 'Reservation' + '</b> Start: ' + this.reservation.from.format("YYYY-MM-DD HH:mm:ss") + ' End: ' + this.reservation.to.format("YYYY-MM-DD HH:mm:ss")
+			+ '		<div class="span5">'
+			+ '			<span><b>start:</b> ' + this.reservation.from.format("YYYY-MM-DD HH:mm:ss") + '</b></span>'
+			+ '			<span class="pull-right"><b>end:</b> ' + this.reservation.to.format("YYYY-MM-DD HH:mm:ss") + '</span>'
 			+ '			<div id="' + this.progressBarId+ '" class="progress"><div class="bar" style="width: 0%;"></div></div>'
 			+ '		</div>'
-			+ '		<div class="span6">'
+			+ '		<div class="span3">'
+			+ '			<span id="' + this.statusBadgeId + '" class="badge">Loading...</span>'
+			+ '		</div>'
+			+ '		<div class="span4">'
 			+ '			<div class="btn-toolbar btn-toolbar2  pull-right">'
 			+ '				<div class="btn-group">'
 			+ '					<button id="pause-output" class="btn" data-toggle="button" title="Pause receiving messages"><i class="icon-pause"></i></button>'
@@ -162,6 +169,7 @@ WiseGuiConsoleView.prototype.buildView = function() {
 	var self = this;
 	this.progressBar                  = this.view.find('#'+this.progressBarId).first();
 	this.progressBarSchedule          = undefined;
+	this.statusBadge                  = this.view.find('#'+this.statusBadgeId).first();
 	this.outputsNumMessagesInput      = this.view.find('#num-outputs').first();
 	this.outputsRedrawLimitInput      = this.view.find('#redraw-limit').first();
 	this.outputsTable                 = this.view.find('table.WiseGuiConsoleViewOutputsTable tbody').first();
@@ -174,9 +182,32 @@ WiseGuiConsoleView.prototype.buildView = function() {
 
 	WiseGui.bindToReservationState(this.view.find('button'), this.experimentId);
 
-	// change label to 'running' as soon as reservation starts
+	var now = moment();
+	var interval = undefined;
+	var statusBadgeInterval = undefined;
+	var status = 'pending';
+
+	var updateStatusBadge = function() {
+		self.statusBadge.empty();
+		if (status == 'pending') {
+			self.statusBadge.addClass('badge-info');
+			self.statusBadge.append('Reservation starting in ' + now.from(self.reservation.from, true));
+		} else if (status == 'running') {
+			self.statusBadge.removeClass('badge-info').addClass('badge-success');
+			self.statusBadge.append('Reservation running since ' + moment.duration(self.reservation.from.diff(moment())).humanize());
+		} else if (status == 'ended') {
+			self.statusBadge.removeClass('badge-info badge-success').addClass('badge-warning');
+			self.statusBadge.append('Reservation ended ' + self.reservation.to.from(moment()));
+		}
+	}
+
+	updateStatusBadge();
+	statusBadgeInterval = window.setInterval(updateStatusBadge, 5000);
+	
 	$(window).bind('wisegui-reservation-started', function(e, reservation) {
 		if (self.experimentId == reservation.experimentId) {
+			
+			// start progress bar as soon as reservation starts
 			self.progressBar.toggleClass('progress-success', true);
 			self.progressBar.find('div.bar').css('width', '1%');
 			self.progressBarSchedule = window.setInterval(function(){
@@ -185,16 +216,25 @@ WiseGuiConsoleView.prototype.buildView = function() {
 				var passedInPercent  = (millisSinceStart / durationInMillis) * 100;
 				self.progressBar.find('div.bar').css('width', (passedInPercent > 1 ? passedInPercent + '%' : '1%'));
 			}, 1000);
+
+			// update status badge to show device connectivity
+			status = 'running';
+			updateStatusBadge();
 		}
 	});
 
-	// change label to 'ended' as soon as reservation ends
 	$(window).bind('wisegui-reservation-ended', function(e, reservation) {
 		if (self.experimentId == reservation.experimentId) {
+
+			// stop progress bar as soon as reservation ends
 			window.clearInterval(self.progressBarSchedule);
 			self.progressBar.toggleClass('progress-success', false);
 			self.progressBar.toggleClass('progress-warning', true);
 			self.progressBar.find('div.bar').css('width', '100%');
+
+			// update status badge
+			status = 'ended';
+			updateStatusBadge();
 		}
 	});
 

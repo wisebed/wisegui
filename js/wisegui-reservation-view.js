@@ -10,7 +10,6 @@ var WiseGuiReservationView = function(reservation) {
 	this.experimentId            = reservation.experimentId;
 
 	this.reservationViewDivId    = 'WiseGuiReservationView-'+this.experimentId.replace(/=/g, '');
-	this.progressBarId           = this.reservationViewDivId+'-progress-bar';
 	this.outputsTextAreaId       = this.reservationViewDivId+'-outputs-textarea';
 	this.sendDivId               = this.reservationViewDivId+'-send';
 	this.flashDivId              = this.reservationViewDivId+'-flash';
