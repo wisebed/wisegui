@@ -323,11 +323,26 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 
 function buildFederatableReservationTable(parent) {
 	
-	var currentAndFuture = $('<div><h3>Current and Future Reservations</h3><div class="WiseGuiReservationTableDiv"/></div>');
-	var currentAndFutureDiv = currentAndFuture.find('div.WiseGuiReservationTableDiv');
+	var pills = $(
+			'<div class="tabbable">'
+		  + '	<ul class="nav nav-pills">'
+		  + '		<li class="active"><a href="#WiseGuiFederatableReservationsCurrentFuture">Current and Upcoming</a></li>'
+		  + '	</ul>'
+		  + '	<div class="tab-content">'
+		  + '		<div class="tab-pane active" id="WiseGuiFederatableReservationsCurrentFuture"></div>'
+		  + '	</div>'
+		  + '</div>'
+	);
+
+	pills.find('a').click(function(e) {
+		e.preventDefault();
+		$(this).tab('show');
+	});
+
+	var currentAndFutureDiv = pills.find('#WiseGuiFederatableReservationsCurrentFuture');
 	
 	parent.empty();
-	parent.append(currentAndFuture);
+	parent.append(pills);
 
 	wisebed.reservations.getFederatable(
 		moment(),
@@ -341,16 +356,49 @@ function buildFederatableReservationTable(parent) {
 
 function buildMyReservationTable(parent) {
 
-	var currentAndFuture = $('<div><h3>Current and Future Reservations</h3><div class="WiseGuiReservationTableDiv"/></div>');
-	var past = $('<div><h3>Past Reservations</h3><div class="WiseGuiReservationTableDiv"/></div>');
-	var currentAndFutureDiv = currentAndFuture.find('div.WiseGuiReservationTableDiv');
-	var pastDiv = past.find('div.WiseGuiReservationTableDiv');
-	
-	parent.empty();
-	parent.append(currentAndFuture, past);
+	var pills = $(
+			'<div class="tabbable">'
+		  + '	<ul class="nav nav-pills">'
+		  + '		<li class="active"><a href="#WiseGuiMyReservationsCurrentFuture">Current and Upcoming</a></li>'
+		  + '		<li               ><a href="#WiseGuiMyReservationsPast">Past</a></li>'
+		  + '	</ul>'
+		  + '	<div class="tab-content">'
+		  + '		<div class="tab-pane active" id="WiseGuiMyReservationsCurrentFuture"></div>'
+		  + '		<div class="tab-pane"        id="WiseGuiMyReservationsPast"></div>'
+		  + '	</div>'
+		  + '</div>'
+	);
 
-	wisebed.reservations.getPersonal(moment(), null, function(reservations) { buildPersonalReservationsTable(currentAndFutureDiv, reservations); }, WiseGui.showAjaxError);
-	wisebed.reservations.getPersonal(null, moment(), function(reservations) { buildPersonalReservationsTable(pastDiv, reservations); }, WiseGui.showAjaxError);
+	var currentAndFutureDiv = pills.find('#WiseGuiMyReservationsCurrentFuture');
+	var pastDiv = pills.find('#WiseGuiMyReservationsPast');
+
+	var loadPersonalReservations = function(past) {
+		wisebed.reservations.getPersonal(
+			!past ? moment() : null,
+			 past ? moment() : null,
+			function(reservations) {
+				buildPersonalReservationsTable(!past ? currentAndFutureDiv : pastDiv, reservations);
+			},
+			WiseGui.showAjaxError
+		);
+	}
+
+	pills.find('a[href="#WiseGuiMyReservationsCurrentFuture"]').click(function(e) {
+		e.preventDefault();
+		loadPersonalReservations(false);
+		$(this).tab('show');
+	});
+
+	pills.find('a[href="#WiseGuiMyReservationsPast"]').click(function(e) {
+		e.preventDefault();
+		loadPersonalReservations(true);
+		$(this).tab('show');
+	});
+
+	loadPersonalReservations(false);
+
+	parent.empty();
+	parent.append(pills);
 };
 
 function buildPersonalReservationsTable(parent, reservations) {
@@ -453,16 +501,49 @@ function buildReservationTableInternal(parent, reservations) {
 
 function buildReservationTable(parent) {
 	
-	var currentAndFuture = $('<div><h3>Current and Future Reservations</h3><div class="WiseGuiReservationTableDiv"/></div>');
-	var past = $('<div><h3>Past Reservations</h3><div class="WiseGuiReservationTableDiv"/></div>');
-	var currentAndFutureDiv = currentAndFuture.find('div.WiseGuiReservationTableDiv');
-	var pastDiv = past.find('div.WiseGuiReservationTableDiv');
+	var pills = $(
+			'<div class="tabbable">'
+		  + '	<ul class="nav nav-pills">'
+		  + '		<li class="active"><a href="#WiseGuiPublicReservationsCurrentFuture">Current and Upcoming</a></li>'
+		  + '		<li               ><a href="#WiseGuiPublicReservationsPast">Past</a></li>'
+		  + '	</ul>'
+		  + '	<div class="tab-content">'
+		  + '		<div class="tab-pane active" id="WiseGuiPublicReservationsCurrentFuture"></div>'
+		  + '		<div class="tab-pane"        id="WiseGuiPublicReservationsPast"></div>'
+		  + '	</div>'
+		  + '</div>'
+	);
+
+	var currentAndFutureDiv = pills.find('#WiseGuiPublicReservationsCurrentFuture');
+	var pastDiv = pills.find('#WiseGuiPublicReservationsPast');
+
+	var loadPublicReservations = function(past) {
+		wisebed.reservations.getPublic(
+			!past ? moment() : null,
+			 past ? moment() : null,
+			function(reservations) {
+				buildReservationTableInternal(!past ? currentAndFutureDiv : pastDiv, reservations);
+			},
+			WiseGui.showAjaxError
+		);
+	}
+
+	pills.find('a[href="#WiseGuiPublicReservationsCurrentFuture"]').click(function(e) {
+		e.preventDefault();
+		loadPublicReservations(false);
+		$(this).tab('show');
+	});
+
+	pills.find('a[href="#WiseGuiPublicReservationsPast"]').click(function(e) {
+		e.preventDefault();
+		loadPublicReservations(true);
+		$(this).tab('show');
+	});
+
+	loadPublicReservations(false);
 	
 	parent.empty();
-	parent.append(currentAndFuture, past);
-
-	wisebed.reservations.getPublic(moment(), null, function(reservations) { buildReservationTableInternal(currentAndFutureDiv, reservations); }, WiseGui.showAjaxError);
-	wisebed.reservations.getPublic(null, moment(), function(reservations) { buildReservationTableInternal(pastDiv, reservations); }, WiseGui.showAjaxError);
+	parent.append(pills);
 }
 
 
