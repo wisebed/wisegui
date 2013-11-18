@@ -16,7 +16,7 @@ var WiseGuiTableElem = function (data) {
  * preFilterFun: fun(obj) -> true | false preSelectFun: fun(obj) -> true | false
  * showCheckBoxes: true | false showFilterBox: true | false
  */
-var WiseGuiTable = function (model, headers, rowProducer, preFilterFun, preSelectFun, showCheckBoxes, showFilterBox) {
+var WiseGuiTable = function (model, headers, rowProducer, preFilterFun, preSelectFun, showCheckBoxes, showFilterBox, options) {
 
 	this.model = model;
 	this.headers = headers;
@@ -24,6 +24,7 @@ var WiseGuiTable = function (model, headers, rowProducer, preFilterFun, preSelec
 	this.preFilterFun = preFilterFun;
 	this.preSelectFun = preSelectFun;
 	this.showCheckBoxes = showCheckBoxes;
+	this.options = options;
 
 	this.html = $("<div></div>");
 	this.table = null;
@@ -175,10 +176,11 @@ WiseGuiTable.prototype.generateTable = function () {
 	var tbody = $('<tbody></tbody>');
 
 	if(this.rowProducer != null) {
+
 		for ( var i = 0; i < this.data.length; i++) {
 
 			var data = this.data[i].data;
-
+		
 			var row = null;
 			if(this.rowProducer != null) {
 				row = this.rowProducer.bind(data)(data);
@@ -210,32 +212,26 @@ WiseGuiTable.prototype.generateTable = function () {
 		}
 	}
 
+	if (this.data.length == 0) {
+		var noDataMessage = this.options && this.options['noDataMessage'] ? this.options['noDataMessage'] : 'No data available.';
+		tbody.append($('<tr><td colspan="'+this.headers.length+'">'+noDataMessage+'<td></tr>'));
+	}
+
 	this.table.append(thead);
 	this.table.append(tbody);
 	this.html.append(this.table);
 
-	// add link for json representation of selected nodes
-	var jsonLink = $('<a href="#" title="Opens a new window containing the selected NodeUrns as JSON">Get JSON representation</a>');
-	jsonLink.click(function(e) {
-		e.preventDefault();
-
-		var obj = {"nodeUrns": $.map(that.getSelectedRows(), function(val,i) {
-			return val.id;
-		})}
-
-		var json = JSON.stringify(obj);
-		var w = window.open();
-		$(w.document.body).html(json);
-	});
-	this.html.append(jsonLink);
-
-	if(this.showCheckBoxes) {
-		this.table.tablesorter({
-			headers:{0:{sorter:false}},
-			sortList: [[2,0]]
-		});
-	} else {
-		this.table.tablesorter({sortList: [[1,0]]});
+	if (this.options && this.options['sortColumn'] !== undefined && this.data.length > 0) {
+		if(this.showCheckBoxes) {
+			this.table.tablesorter({
+				headers  : { 0 : {sorter:false}},
+				sortList : [[this.options['sortColumn']+1, 0]]
+			});
+		} else {
+			this.table.tablesorter({
+				sortList : [[this.options['sortColumn'], 0]]
+			});
+		}
 	}
 };
 

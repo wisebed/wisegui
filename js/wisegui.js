@@ -473,100 +473,82 @@ function buildMyReservationTable(parent) {
 
 function buildPersonalReservationsTable(parent, reservations) {
 
-	var tableHead = [
-		{content: "From", style: "white-space: nowrap;"},
-		{content: "Until", style: "white-space: nowrap;"},
-		"Testbed Prefix(es)",
-		{content: "Nodes", style: "white-space: nowrap;"},
-		"Description",
-		""
-	];
-
-	var tableRows = [];
 	var nop = function(event){ event.preventDefault(); };
-	var reservation, from, to, nodes, btn;
-	var rand = Math.floor(Math.random() * 100000);
 
-	for (var i=0; i<reservations.length; i++) {
-
-		reservation = reservations[i];
-
-		from  = $('<a href="#" rel="tooltip" title="'+reservation.from.toISOString()+'">' + reservation.from.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop);
-		to    = $('<a href="#" rel="tooltip" title="'+reservation.to.toISOString()+'">' + reservation.to.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop);
-		nodes = $(
+	var headers = ['From', 'Until', 'Testbed Prefix(es)', 'Nodes', 'Description', ''];
+	var model = reservations;
+	var rowProducer = function(reservation) {
+		
+		var rand = Math.floor(Math.random() * 100000);
+		var rowData = [];
+		
+		rowData.push($('<a href="#" rel="tooltip" title="'+reservation.from.toISOString()+'">' + reservation.from.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop));
+		rowData.push($('<a href="#" rel="tooltip" title="'+reservation.to.toISOString()+'">' + reservation.to.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop));
+		rowData.push(reservation.nodeUrnPrefixes.join("<br/>"));
+		rowData.push($(
 			  '<div>'
 			+ '	<a href="javascript:;" data-target="#wisegui-personal-reservation-nodes-'+rand+'-'+i+'" data-toggle="collapse">'+reservation.nodeUrns.length+' nodes</a>'
 			+ ' <div class="collapse" id="wisegui-personal-reservation-nodes-'+rand+'-'+i+'">'+reservation.nodeUrns.join("<br/>")+'</div>'
 			+ '</div>'
-		);
-		btn   = $('<a class="btn btn-primary">Open</a>').bind('click', reservation, function(e) {
+		));
+		rowData.push(reservation.description);
+		rowData.push($('<a class="btn btn-primary">Open</a>').bind('click', reservation, function(e) {
 			e.preventDefault();
 			navigateTo(e.data.experimentId);
-		});
+		}));
 
-		tableRows[i] = [];
-		tableRows[i][0] = from;
-		tableRows[i][1] = to;
-		tableRows[i][2] = reservation.nodeUrnPrefixes.join("<br/>");
-		tableRows[i][3] = nodes;
-		tableRows[i][4] = reservation.description;
-		tableRows[i][5] = btn;
+		return rowData;
+	}
+	var preFilterFun = null;
+	var preSelectFun = null;
+	var showCheckBoxes = false;
+	var showFilterBox = false;
+	var options = {
+		'noDataMessage' : 'No reservations found.'
 	}
 
-	var noEntriesMessage = 'No reservations available';
-	var table = buildTable(tableHead, tableRows, noEntriesMessage);
-	
+	var table = new WiseGuiTable(model, headers, rowProducer, preFilterFun, preSelectFun, showCheckBoxes, showFilterBox, options);
+
 	parent.empty();
-	parent.append(table);
-	
-	if (tableRows.length > 0) {
-		table.tablesorter({ sortList: [[0,1]] });
-	}
+	parent.append(table.html);
 }
 
 function buildReservationTableInternal(parent, reservations) {
 
-	var tableHead = [
-		"From",
-		"Until",
-		"Testbed Prefix(es)",
-		"Nodes"
-	];
-
-	var tableRows = [];
-	var reservation;
 	var nop = function(event){ event.preventDefault(); };
-	var from, to, nodes;
-	var rand = Math.floor(Math.random() * 100000);
 
-	for (var i=0; i<reservations.length; i++) {
-
-		reservation = reservations[i];
-		from  = $('<a href="#" rel="tooltip" title="'+reservation.from.toISOString()+'">' + reservation.from.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop);
-		to    = $('<a href="#" rel="tooltip" title="'+reservation.to.toISOString()+'">' + reservation.to.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop);
-		nodes = $(
+	var headers = ['From', 'Until', 'Testbed Prefix(es)', 'Nodes'];
+	var model = reservations;
+	var rowProducer = function(reservation) {
+		
+		var rand = Math.floor(Math.random() * 100000);
+		var rowData = [];
+		
+		rowData.push($('<a href="#" rel="tooltip" title="'+reservation.from.toISOString()+'">' + reservation.from.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop));
+		rowData.push($('<a href="#" rel="tooltip" title="'+reservation.to.toISOString()+'">' + reservation.to.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop));
+		rowData.push(reservation.nodeUrnPrefixes.join("<br/>"));
+		rowData.push($(
 			  '<div>'
-			+ '	<a href="javascript:;" data-target="#wisegui-reservation-nodes-'+rand+'-'+i+'" data-toggle="collapse">'+ reservation.nodeUrns.length + ' nodes</a>'
-			+ ' <div class="collapse" id="wisegui-reservation-nodes-'+rand+'-'+i+'">' + reservation.nodeUrns.join("<br/>") + '</div>'
+			+ '	<a href="javascript:;" data-target="#wisegui-personal-reservation-nodes-'+rand+'-'+i+'" data-toggle="collapse">'+reservation.nodeUrns.length+' nodes</a>'
+			+ ' <div class="collapse" id="wisegui-personal-reservation-nodes-'+rand+'-'+i+'">'+reservation.nodeUrns.join("<br/>")+'</div>'
 			+ '</div>'
-		);
+		));
 
-		tableRows[i]    = [];
-		tableRows[i][0] = from;
-		tableRows[i][1] = to;
-		tableRows[i][2] = reservation.nodeUrnPrefixes.join("<br/>");
-		tableRows[i][3] = nodes;
+		return rowData;
+	}
+	var preFilterFun = null;
+	var preSelectFun = null;
+	var showCheckBoxes = false;
+	var showFilterBox = false;
+	var options = {
+		noDataMessage : 'No reservations found.',
+		sortColumn    : 0
 	}
 
-	var noEntriesMessage = 'No reservations found.';
-	var table = buildTable(tableHead, tableRows, noEntriesMessage);
-	
+	var table = new WiseGuiTable(model, headers, rowProducer, preFilterFun, preSelectFun, showCheckBoxes, showFilterBox, options);
+
 	parent.empty();
-	parent.append(table);
-	
-	if (tableRows.length > 0) {
-		table.tablesorter({ sortList: [[0,1]] });
-	};
+	parent.append(table.html);
 }
 
 function buildReservationTable(parent) {
@@ -614,43 +596,6 @@ function buildReservationTable(parent) {
 	
 	parent.empty();
 	parent.append(pills);
-}
-
-
-function buildTable(tableHead, tableRows, noEntriesMessage) {
-
-	var table = $('<table class="table table-striped table-bordered"/>"');
-	var thead = $('<thead/>');
-	var theadRow = $('<tr/>');
-	thead.append(theadRow);
-
-	for (var i=0; i<tableHead.length; i++) {
-		if (typeof tableHead[i] === 'object') {
-			theadRow.append('<th style="'+tableHead[i].style+'">'+tableHead[i].content+'</th>');
-		} else {
-			theadRow.append('<th>'+tableHead[i]+'</th>');
-		}
-	}
-
-	var tbody = $('<tbody/>');
-
-	if(tableRows.length == 0 && noEntriesMessage) {
-	    tbody.append('<tr><td colspan="'+tableHead.length+'">'+noEntriesMessage+'</td></tr>');
-	}
-
-	for (var k=0; k<tableRows.length; k++) {
-		var row = $('<tr/>');
-		tbody.append(row);
-		for (var l=0; l<tableRows[k].length; l++) {
-			var td = $(typeof tableHead[l] === 'object' ? '<td style="' + tableHead[l].style + '"/>' : '<td/>');
-			row.append(td);
-			td.append(tableRows[k][l]);
-		}
-	}
-
-	table.append(thead, tbody);
-
-	return table;
 }
 
 function loadReservationViewContainer(navigationData, parentDiv) {

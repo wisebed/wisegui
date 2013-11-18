@@ -110,8 +110,16 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 	};
 
 	// Use the usual table
-	var t = new WiseGuiTable (this.wiseML.setup.node, header, rowProducer, null, null, this.showCheckboxes, this.showFilter);
-	this.table = t;
+	this.table = new WiseGuiTable(
+		this.wiseML.setup.node,
+		header,
+		rowProducer,
+		null,
+		null,
+		this.showCheckboxes,
+		this.showFilter,
+		{ sortColumn : 1 }
+	);
 
 	// This vars store the predefined filters
 	var predefined_filter_types = [];
@@ -155,9 +163,22 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 		}
 	);
 
-	t.filter_input.css("width", "59%");
-	t.filter_input.after(select);
-	this.parent.append(t.html);
+	this.table.filter_input.css("width", "59%");
+	this.table.filter_input.after(select);
+	this.parent.append(this.table.html);
+
+	// add link for json representation of selected nodes
+	var jsonLink = $('<a href="#" title="Opens a new window containing the selected NodeUrns as JSON">Get JSON representation</a>');
+	jsonLink.click(function(e) {
+		e.preventDefault();
+		var obj = {
+			"nodeUrns" : $.map(t.getSelectedRows(), function(val,i) { return val.id; })
+		}
+		var json = JSON.stringify(obj);
+		var w = window.open();
+		$(w.document.body).html(json);
+	});
+	this.parent.append(jsonLink);
 };
 
 WiseGuiNodeTable.prototype.getSelectedNodes = function () {
