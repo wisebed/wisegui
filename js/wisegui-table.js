@@ -18,23 +18,32 @@ var WiseGuiTableElem = function (data) {
  */
 var WiseGuiTable = function (model, headers, rowProducer, preFilterFun, preSelectFun, showCheckBoxes, showFilterBox, options) {
 
-	this.model = model;
-	this.headers = headers;
-	this.rowProducer = rowProducer;
-	this.preFilterFun = preFilterFun;
-	this.preSelectFun = preSelectFun;
-	this.showCheckBoxes = showCheckBoxes;
-	this.options = options;
+	this.model              = model;
+	this.headers            = headers;
+	this.rowProducer        = rowProducer;
+	this.preFilterFun       = preFilterFun;
+	this.preSelectFun       = preSelectFun;
+	this.showCheckBoxes     = showCheckBoxes;
+	this.options            = options;
 
-	this.html = $("<div></div>");
-	this.table = null;
-	this.filter = null;
-	this.data = [];
+	this.pagination         = this.options && this.options['pagination'];
+	this.paginationOffset   = this.options['paginationOffset'] !== undefined ? this.options['paginationOffset'] : 0;
+	this.paginationAmount   = this.options['paginationAmount'] !== undefined ? this.options['paginationAmount'] : 10;
+
+	this.sortColumn         = this.options && this.options['sortColumn'] !== undefined ? this.options['sortColumn'] : undefined;
+	this.sortOptions        = this.showCheckBoxes ?
+		{ sortList : [[this.options['sortColumn'] + 1, 1]], headers  : { 0 : {sorter : false}} } :
+		{ sortList : [[this.options['sortColumn']    , 1]] };
+
+	this.html               = $("<div></div>");
+	this.table              = null;
+	this.filter             = null;
+	this.data               = [];
 	this.selectionListeners = [];
-	this.filterListeners = [];
+	this.filterListeners    = [];
 
-	this.filter_input = null;
-	this.input_checkbox_th = null;
+	this.filter_input       = null;
+	this.input_checkbox_th  = null;
 
 	if(showFilterBox) {
 		this.lastWorkingFilterExpr = null;
@@ -118,6 +127,7 @@ WiseGuiTable.prototype.generateFilter = function () {
 };
 
 WiseGuiTable.prototype.generateTable = function () {
+	
 	var that = this;
 
 	// Prepare the WiseGuiTableElems
@@ -170,14 +180,66 @@ WiseGuiTable.prototype.generateTable = function () {
 		}
 	);
 
-	/*
-	 * Generate the table body
-	 */
-	var tbody = $('<tbody></tbody>');
+	this.table.append(thead);
+	this.table.append($('<tbody></tbody>'));
+	this.html.append(this.table);
 
-	if(this.rowProducer != null) {
+	if (this.pagination) {
+		
+		this.paginationView = $(
+			  '<div class="pagination pagination-centered">'
+			+ '	<ul>'
+			+ '	</ul>'
+			+ '</div>'
+		);
+		var pages = Math.ceil(this.data.length / this.paginationAmount);
 
-		for ( var i = 0; i < this.data.length; i++) {
+		for (var page=0; page<pages; page++) {
+
+			var li = $('<li data-page="'+page+'"></li>');
+			var a = $('<a href="#">'+(page+1)+'</a>');
+
+			this.paginationView.find('ul').append(li.append(a));
+			var self = this;
+
+			a.data('page', page);
+			a.click(function(e) {
+				e.preventDefault();
+				self.gotoPage($(this).data('page'));
+			});
+		}
+
+		this.html.append(this.paginationView);
+		this.gotoPage(0);
+
+	} else {
+		this.renderTableContents();
+	}
+	
+	if (this.sortColumn !== undefined && this.data.length > 0) {
+		this.table.tablesorter(this.sortOptions);
+	}
+};
+
+WiseGuiTable.prototype.gotoPage = function(page) {
+	this.paginationView.find('li').removeClass('active');
+	this.paginationView.find('li[data-page="'+page+'"]').addClass('active');
+	this.paginationOffset = page * (this.paginationAmount);
+	this.renderTableContents();
+};
+
+WiseGuiTable.prototype.renderTableContents = function() {
+
+	var tbody = this.table.find('tbody');
+	tbody.empty();
+	
+	if (this.rowProducer != null) {
+
+		var offset = this.pagination ? this.paginationOffset : 0;
+		var amount = this.pagination ? this.paginationAmount : this.data.length;
+		var actualAmount = (offset + amount > this.data.length) ? this.data.length : (offset + amount);
+
+		for (var i = offset; i < actualAmount; i++) {
 
 			var data = this.data[i].data;
 		
@@ -192,9 +254,9 @@ WiseGuiTable.prototype.generateTable = function () {
 				var checkbox = $('<input type="checkbox"/>');
 				checkbox.attr("name", i);
 				checkbox.attr("urn", data.id);
-				checkbox.click(function(){
+				checkbox.click(function() {
 					var checked = $(this).is(':checked');
-					that.callSelectionListeners(this.attributes["urn"].nodeValue,!checked);
+					that.callSelectionListeners(this.attributes["urn"].nodeValue, !checked);
 				});
 				data.checkbox = checkbox;
 				var td_checkbox = $('<td></td>');
@@ -215,23 +277,6 @@ WiseGuiTable.prototype.generateTable = function () {
 	if (this.data.length == 0) {
 		var noDataMessage = this.options && this.options['noDataMessage'] ? this.options['noDataMessage'] : 'No data available.';
 		tbody.append($('<tr><td colspan="'+this.headers.length+'">'+noDataMessage+'<td></tr>'));
-	}
-
-	this.table.append(thead);
-	this.table.append(tbody);
-	this.html.append(this.table);
-
-	if (this.options && this.options['sortColumn'] !== undefined && this.data.length > 0) {
-		if(this.showCheckBoxes) {
-			this.table.tablesorter({
-				headers  : { 0 : {sorter:false}},
-				sortList : [[this.options['sortColumn']+1, 0]]
-			});
-		} else {
-			this.table.tablesorter({
-				sortList : [[this.options['sortColumn'], 0]]
-			});
-		}
 	}
 };
 

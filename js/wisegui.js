@@ -504,8 +504,10 @@ function buildPersonalReservationsTable(parent, reservations) {
 	var showCheckBoxes = false;
 	var showFilterBox = false;
 	var options = {
-		'noDataMessage' : 'No reservations found.'
-	}
+		noDataMessage    : 'No reservations found.',
+		pagination       : true,
+		paginationAmount : 10
+	};
 
 	var table = new WiseGuiTable(model, headers, rowProducer, preFilterFun, preSelectFun, showCheckBoxes, showFilterBox, options);
 
@@ -541,9 +543,11 @@ function buildReservationTableInternal(parent, reservations) {
 	var showCheckBoxes = false;
 	var showFilterBox = false;
 	var options = {
-		noDataMessage : 'No reservations found.',
-		sortColumn    : 0
-	}
+		noDataMessage    : 'No reservations found.',
+		sortColumn       : 0,
+		pagination       : true,
+		paginationAmount : 10
+	};
 
 	var table = new WiseGuiTable(model, headers, rowProducer, preFilterFun, preSelectFun, showCheckBoxes, showFilterBox, options);
 
