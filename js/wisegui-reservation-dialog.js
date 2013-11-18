@@ -235,22 +235,17 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 
     var h4_nodes = $("<h4>Select the nodes to reserve</h4>");
 
-    var error = $('<div class="alert alert-error"></div>');
-    var error_close = $('<button type="button" class="close" data-dismiss="alert">×</button>');
-    error_close.click(function() {
-		error.hide();
-	});
-    var error_msg = $('<p></p>');
-    error.append(error_close, $('<p><strong>Error:</strong></p>'), error_msg);
-    error.hide();
-
     var onError = function (msg) {
+
+		dialogBody.prepend($(
+			  '<div class="alert alert-error">'
+			+ '	<a class="close" data-dismiss="alert" href="#">&times;</a>'
+			+ ' <p>'+msg+'</p>'
+			+ '</div>'
+		));
+
 		okButton.removeAttr("disabled");
 		cancelButton.removeAttr("disabled");
-
-    	error_msg.empty();
-    	error_msg.append(msg);
-    	error.show();
     };
 
     var span_start = $('<span>Start: </span>');
@@ -258,7 +253,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
     var span_description = $('<span style="margin-left:10px;">Description: </span>');
 
 	var dialogBody = $('<div class="modal-body reservation-body"/></div>');
-	dialogBody.append(error, span_start, input_date_start, input_time_start);
+	dialogBody.append(span_start, input_date_start, input_time_start);
 	dialogBody.append(span_end, input_date_end, input_time_end);
 	dialogBody.append(span_description, input_desciption);
 	
@@ -322,7 +317,6 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 
 		var callbackError = function(jqXHR, textStatus, errorThrown) {
 			onError(jqXHR.responseText);
-			WiseGui.showAjaxError(jqXHR, textStatus, errorThrown)
 		};
 
 		var callbackDone = function() {
