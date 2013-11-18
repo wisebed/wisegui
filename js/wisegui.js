@@ -182,24 +182,7 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 
 	var reloadMapsTab = function() {
 		mapTabContentDiv.empty();
-		wisebed.getWiseMLAsJSON(
-			null,
-			function(wiseML) {
-				
-				// init description over map
-				if (wiseML.setup && wiseML.setup.description) {
-					var mapDescription = wiseML.setup.description;
-					var mapDescriptionRow = $('<div class="row"><div class="span12">' + mapDescription + '</div></div>');
-					mapTabContentDiv.append(mapDescriptionRow);
-				}
-
-				// init map
-				var mapRow = $('<div class="row"><div class="span12"></div></div>');
-				mapTabContentDiv.append(mapRow);
-				new WiseGuiGoogleMapsView(wiseML, mapRow.find('div').first());
-			},
-			WiseGui.showAjaxError
-		);
+		buildMapsView(mapTabContentDiv);
 	};
 
 	var reloadNodesTab = function() {
@@ -319,6 +302,93 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 	    navigationData.tab = e.target.hash.substring(1);
 	    window.location.hash = $.param(navigationData);
 	});
+}
+
+function buildMapsView(parent) {
+
+	if (testbedDescription.isFederator) {
+		
+		wisebed.getWiseMLAsJSON(null, function(wiseML) {
+		
+			var wiseMLs = {
+				'federated' : wiseML
+			};
+
+			// create tab pane
+			var pills = $(
+				'<div class="tabbable">'
+			  + '	<ul class="nav nav-pills"></ul>'
+			  + '	<div class="tab-content"></div>'
+			  + '</div>'
+			);
+			
+			var headers = pills.find('ul.nav-pills');
+			var contents = pills.find('div.tab-content');
+			
+			var federatedHeader = $('<li><a href="#WiseGuiMapsView-federated">Federated</a></li>');
+			var federatedContent = $('<div class="tab-pane" id="WiseGuiMapsView-federated">Federated</div>');
+
+			headers.append(federatedHeader);
+			contents.append(federatedContent);
+
+			// add a tab for each testbed URN prefix
+			testbedDescription.urnPrefixes.forEach(function(nodeUrnPrefix, index) {
+
+				wiseMLs[nodeUrnPrefix] = JSON.parse(JSON.stringify(wiseML));
+				wiseMLs[nodeUrnPrefix].setup.node = wiseMLs[nodeUrnPrefix].setup.node.filter(function(node) {
+					return node.id.indexOf(nodeUrnPrefix) == 0;
+				});
+				
+				var header = $('<li><a href="#WiseGuiMapsView-'+index+'">'+nodeUrnPrefix+'</a></li>');
+				var content = $('<div class="tab-pane" id="WiseGuiMapsView-'+index+'">'+nodeUrnPrefix+'</div>');
+
+				$(header.find('a').first()).data('nodeUrnPrefix', nodeUrnPrefix);
+				
+				headers.append(header);
+				contents.append(content);
+			});
+
+			pills.find('a').click(function(e) {
+				
+				e.preventDefault();
+				$(this).tab('show');
+
+				var nodeUrnPrefix = $(this).data('nodeUrnPrefix');
+				var tab = $($(this).attr('href'));
+
+				tab.empty();
+
+				// init map
+				var mapRow = $('<div class="row"><div class="span12"></div></div>');
+				tab.append(mapRow);
+				var wiseML = nodeUrnPrefix === undefined ? wiseMLs['federated'] : wiseMLs[nodeUrnPrefix];
+				new WiseGuiGoogleMapsView(wiseML, mapRow.find('div').first());
+			});
+
+			parent.append(pills);
+			pills.find('a').first().click();
+
+		});
+
+	} else {
+
+		wisebed.getWiseMLAsJSON(
+			null,
+			function(wiseML) {
+				// init description over map
+				if (wiseML.setup && wiseML.setup.description) {
+					var mapDescription = wiseML.setup.description;
+					var mapDescriptionRow = $('<div class="row"><div class="span12">' + mapDescription + '</div></div>');
+					parent.append(mapDescriptionRow);
+				}
+				// init map
+				var mapRow = $('<div class="row"><div class="span12"></div></div>');
+				parent.append(mapRow);
+				new WiseGuiGoogleMapsView(wiseML, mapRow.find('div').first());
+			},
+			WiseGui.showAjaxError
+		);
+	}
 }
 
 function buildFederatableReservationTable(parent) {
