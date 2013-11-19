@@ -174,7 +174,7 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 	jsonLink.click(function(e) {
 		e.preventDefault();
 		var obj = {
-			"nodeUrns" : $.map(t.getSelectedRows(), function(val,i) { return val.id; })
+			"nodeUrns" : $.map(that.table.getSelectedRows(), function(val,i) { return val.id; })
 		}
 		var json = JSON.stringify(obj);
 		var w = window.open();

@@ -229,7 +229,7 @@ WiseGuiTable.prototype.gotoPage = function(page) {
 };
 
 WiseGuiTable.prototype.renderTableContents = function() {
-
+	var self = this;
 	var tbody = this.table.find('tbody');
 	tbody.empty();
 	
@@ -256,7 +256,7 @@ WiseGuiTable.prototype.renderTableContents = function() {
 				checkbox.attr("urn", data.id);
 				checkbox.click(function() {
 					var checked = $(this).is(':checked');
-					that.callSelectionListeners(this.attributes["urn"].nodeValue, !checked);
+					self.callSelectionListeners(this.attributes["urn"].nodeValue, !checked);
 				});
 				data.checkbox = checkbox;
 				var td_checkbox = $('<td></td>');
