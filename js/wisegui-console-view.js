@@ -6,6 +6,8 @@
 
 var WiseGuiConsoleView = function(reservation) {
 
+	var id = reservation.experimentId.replace(/=/g, '');
+
 	this.reservation                  = reservation;
 	this.experimentId                 = reservation.experimentId;
 
@@ -19,11 +21,11 @@ var WiseGuiConsoleView = function(reservation) {
 	this.socket                       = null;
 	this.view                         = null;
 
-	this.progressBarId                = 'WiseGuiConsoleView-'+this.experimentId+'-progress-bar';
+	this.progressBarId                = 'WiseGuiConsoleView-progress-bar-'+id;
 	this.progressBar                  = null;
 	this.progressBarSchedule          = undefined;
-	this.statusBadgeId                = 'WiseGuiConsoleView-'+this.experimentId+'-status-badge';
-	this.statusBadgeDetachedId        = 'WiseGuiConsoleView-'+this.experimentId+'-status-badge-detached';
+	this.statusBadgeId                = 'WiseGuiConsoleView-status-badge-'+id;
+	this.statusBadgeDetachedId        = 'WiseGuiConsoleView-status-badge-detached-'+id;
 	this.statusBadge                  = null;
 	this.outputsNumMessagesInput      = null;
 	this.outputsRedrawLimitInput      = null;
