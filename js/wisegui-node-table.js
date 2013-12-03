@@ -90,8 +90,10 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 				data.push('[' + c.x + ',' + c.y + ',' + c.z + ']');
 			} else if (c.x && c.y) {
 				data.push('[' + c.x + ',' + c.y + ',0]');
-			} else {
+			} else if (c.rho && c.phi && c.theta) {
 				data.push(JSON.stringify({rho: c.rho, phi: c.phi, theta: c.theta}));
+			} else {
+				data.push('');
 			}
 
 		} else if (node.position != null && node.position.indoorCoordinates) {
@@ -101,7 +103,7 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 		}
 
 		if(capabilities.length > 0) {
-			data.push(implode(",", capabilities));
+			data.push(capabilities.join("<br/>"));
 		} else {
 			data.push('');
 		}
