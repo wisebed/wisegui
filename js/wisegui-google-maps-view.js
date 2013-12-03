@@ -186,13 +186,7 @@ WiseGuiGoogleMapsView.prototype.addMarker = function(node) {
 	this.infoWindows[node.id].setContent(infoWindowContent);
 
 	var self = this;
-	this.mapSpiderfier.addListener('click', function(marker, event) {
-		for (var nodeUrn in self.infoWindows) {
-			self.infoWindows[nodeUrn].close();
-		}
-		self.infoWindows[marker.urn].open(self.map, marker);
-	});
-
+	
 	this.markersArray.push(marker);
 	this.mapSpiderfier.addMarker(marker);
 	this.markerCluster.addMarker(marker);
@@ -256,6 +250,13 @@ WiseGuiGoogleMapsView.prototype.initMap = function() {
 	this.mapSpiderfier.addListener('unspiderfy', function(markers) {
 		self.markerCluster.repaint();
 	});
+	
+	this.mapSpiderfier.addListener('click', function(marker, event) {
+		for (var nodeUrn in self.infoWindows) {
+			self.infoWindows[nodeUrn].close();
+		}
+		self.infoWindows[marker.urn].open(self.map, marker);
+	});
 };
 
 /**
@@ -269,8 +270,8 @@ WiseGuiGoogleMapsView.prototype.deleteOverlays = function() {
 	});
 
 	this.markersArray = [];
-	this.mapSpiderfier.clearMarkers();
-	this.markerCluster.clearMarkers();
+	//this.mapSpiderfier.clearMarkers();
+	//this.markerCluster.clearMarkers();
 };
 
 /**
