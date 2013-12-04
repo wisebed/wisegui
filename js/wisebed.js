@@ -541,16 +541,19 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 
 	this.getWiseML = function(experimentId, callbackDone, callbackError, jsonOrXml, callbackComplete) {
 
+		var dataType = (!jsonOrXml ? "json" : jsonOrXml);
+		var url = (experimentId ?
+					getBaseUri() + "/experiments/" + encodeURIComponent(experimentId) + "/network." + dataType :
+					getBaseUri() + "/experiments/network." + dataType);
+
 		$.ajax({
-			url      : (experimentId ?
-					getBaseUri() + "/experiments/" + experimentId + "/network" :
-					getBaseUri() + "/experiments/network"),
+			url      : url,
 			cache    : false,
 			context  : document.body,
 			success  : callbackDone,
 			error    : callbackError,
 			complete : callbackComplete,
-			dataType : (!jsonOrXml ? "json" : jsonOrXml),
+			dataType : dataType,
 			xhrFields: { withCredentials: true }
 		});
 	};
