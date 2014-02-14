@@ -473,9 +473,7 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 
 			var requestSuccessCallback = function(d, textStatus, jqXHR){
 
-				// Headers are empty in Cross-Site-Environment
-				//var flashRequestStatusURL = jqXHR.getResponseHeader("Location");
-				var flashRequestStatusURL = jqXHR.responseText;
+				var flashRequestStatusURL = jqXHR.getResponseHeader("Location");
 
 				var schedule = setInterval(function() {
 
