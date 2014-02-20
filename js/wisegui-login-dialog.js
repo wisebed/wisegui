@@ -84,19 +84,6 @@ WiseGuiLoginDialog.prototype.addRowToLoginForm = function(tbody, urnPrefix, user
 
 	var inputUrnPrefix = $('<input type="text" id="urnprefix'+i+'" name="urnprefix'+i+'" value="'+urnPrefix+'" readonly/>');
 	var inputUsername = $('<input type="text" id="username'+i+'" name="username'+i+'" value="'+username+'"/>');
-
-	helpText = 'Please enter your username in the format <strong>username@idphost</strong>. '
-				+ '<br/><br/>'
-				+'If you have registered on <strong>wisebed.eu</strong>, use <strong>yourusername@wisebed1.itm.uni-luebeck.de</strong>.';
-
-	inputUsername.popover({
-		placement : 'bottom',
-		trigger   : 'focus',
-		animation : true,
-		content   : helpText,
-		title     : "Format of the username field"
-	});
-
 	var inputPassword = $('<input type="password" id="password'+i+'" name="password'+i+'" value="'+password+'"/>');
 
 	inputUsername.keyup(function(e) {
@@ -217,7 +204,7 @@ WiseGuiLoginDialog.prototype.buildView = function() {
 	
 	var tdStoreCredentials = $('<td colspan="4"/>');
 	tdStoreCredentials.append(storeCredentials_checkbox);
-	tdStoreCredentials.append("store credentials");
+	tdStoreCredentials.append(" remember");
 	trStoreCredentials.append(tdStoreCredentials);
 	this.storeCredentials_checkbox = storeCredentials_checkbox;
 
