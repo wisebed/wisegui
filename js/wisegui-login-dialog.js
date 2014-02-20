@@ -224,7 +224,7 @@ WiseGuiLoginDialog.prototype.buildView = function() {
 	loginFormTableBody.append(trStoreCredentials);		
 			
 	var trRegister = $('<tr/>');
-	trRegister.append($('<td style="padding-bottom:0px" colspan="4">No account yet? <a href="http://wisebed.eu/site/index.php/register/" target="_blank">Register here!</td>'));
+	trRegister.append($('<td style="padding-bottom:0px" colspan="4">No account yet? <a href="/user_registration" target="_blank">Register here!</td>'));
 
 	loginFormTableBody.append(trRegister);
 };
