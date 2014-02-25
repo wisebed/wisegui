@@ -32,8 +32,8 @@ var WiseGuiTable = function (model, headers, rowProducer, preFilterFun, preSelec
 
 	this.sortColumn         = this.options && this.options['sortColumn'] !== undefined ? this.options['sortColumn'] : undefined;
 	this.sortOptions        = this.showCheckBoxes ?
-		{ sortList : [[this.options['sortColumn'] + 1, 1]], headers  : { 0 : {sorter : false}} } :
-		{ sortList : [[this.options['sortColumn']    , 1]] };
+		{ sortList : [[this.options['sortColumn'] + 1, this.options['sortAsc'] ? 0 : 1]], headers  : { 0 : {sorter : false}} } :
+		{ sortList : [[this.options['sortColumn']    , this.options['sortAsc'] ? 0 : 1]] };
 
 	this.html               = $("<div></div>");
 	this.table              = null;
