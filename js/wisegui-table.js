@@ -12,9 +12,13 @@ var WiseGuiTableElem = function (data) {
 };
 
 /**
- * Model: Object[] headers: String[] rowProducer: fun(obj) -> String[]
- * preFilterFun: fun(obj) -> true | false preSelectFun: fun(obj) -> true | false
- * showCheckBoxes: true | false showFilterBox: true | false
+ * Model: Object[]
+ * headers: String[]
+ * rowProducer: fun(obj) -> String[]
+ * preFilterFun: fun(obj) -> true | false
+ * preSelectFun: fun(obj) -> true | false
+ * showCheckBoxes: true | false
+ * showFilterBox: true | false
  */
 var WiseGuiTable = function (model, headers, rowProducer, preFilterFun, preSelectFun, showCheckBoxes, showFilterBox, options) {
 
@@ -30,10 +34,10 @@ var WiseGuiTable = function (model, headers, rowProducer, preFilterFun, preSelec
 	this.paginationOffset   = this.options['paginationOffset'] !== undefined ? this.options['paginationOffset'] : 0;
 	this.paginationAmount   = this.options['paginationAmount'] !== undefined ? this.options['paginationAmount'] : 10;
 
-	this.sortColumn         = this.options && this.options['sortColumn'] !== undefined ? this.options['sortColumn'] : undefined;
-	this.sortOptions        = this.showCheckBoxes ?
-		{ sortList : [[this.options['sortColumn'] + 1, this.options['sortAsc'] ? 0 : 1]], headers  : { 0 : {sorter : false}} } :
-		{ sortList : [[this.options['sortColumn']    , this.options['sortAsc'] ? 0 : 1]] };
+	this.sortOptions        = {
+		headers : options.sortHeaders || (this.showCheckBoxes ? { 0 : {sorter : false}} : undefined),
+		sortList : [[(this.options.sortColumn || 0) + (this.showCheckBoxes ? 1 : 0), this.options.sortAsc ? 0 : 1]]
+	};
 
 	this.html               = $("<div></div>");
 	this.table              = null;
@@ -127,7 +131,7 @@ WiseGuiTable.prototype.generateFilter = function () {
 };
 
 WiseGuiTable.prototype.generateTable = function () {
-	
+
 	var that = this;
 
 	// Prepare the WiseGuiTableElems
@@ -185,7 +189,7 @@ WiseGuiTable.prototype.generateTable = function () {
 	this.html.append(this.table);
 
 	if (this.pagination) {
-		
+
 		this.paginationView = $(
 			  '<div class="pagination pagination-centered">'
 			+ '	<ul>'
@@ -215,8 +219,8 @@ WiseGuiTable.prototype.generateTable = function () {
 	} else {
 		this.renderTableContents();
 	}
-	
-	if (this.sortColumn !== undefined && this.data.length > 0) {
+
+	if (this.data.length > 0) {
 		this.table.tablesorter(this.sortOptions);
 	}
 };
@@ -232,7 +236,7 @@ WiseGuiTable.prototype.renderTableContents = function() {
 	var self = this;
 	var tbody = this.table.find('tbody');
 	tbody.empty();
-	
+
 	if (this.rowProducer != null) {
 
 		var offset = this.pagination ? this.paginationOffset : 0;
@@ -242,7 +246,7 @@ WiseGuiTable.prototype.renderTableContents = function() {
 		for (var i = offset; i < actualAmount; i++) {
 
 			var data = this.data[i].data;
-		
+
 			var row = null;
 			if(this.rowProducer != null) {
 				row = this.rowProducer.bind(data)(data);

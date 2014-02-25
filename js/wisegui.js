@@ -498,7 +498,7 @@ function buildPersonalReservationsTable(parent, reservations) {
 		}));
 
 		return rowData;
-	}
+	};
 	var preFilterFun = null;
 	var preSelectFun = null;
 	var showCheckBoxes = false;
