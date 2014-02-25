@@ -90,10 +90,10 @@ WiseGuiTable.prototype.generateFilter = function () {
 	});
 	this.filter_input = filter_input;
 
-	var helpTooltipIsVisable = false;
+	var helpTooltipIsVisible = false;
 	img_help.click(function() {
-		img_help.popover(helpTooltipIsVisable ? 'hide' : 'show');
-		helpTooltipIsVisable = !helpTooltipIsVisable;
+		img_help.popover(helpTooltipIsVisible ? 'hide' : 'show');
+		helpTooltipIsVisible = !helpTooltipIsVisible;
 	});
 
 	var helpText = '<h3>Normal mode</h3>';
