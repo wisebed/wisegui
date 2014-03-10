@@ -70,7 +70,7 @@ WiseGuiNavigationView.prototype.buildView = function() {
 	this.secondaryMenu.append(
 			  '<li class="WiseGuiNavReservationsButton"><a href="#">Make Reservation</a></li>'
 			+ '<li class="WiseGuiNavLogoutButton"><a href="#">Logout</a></li>'
-			+ '<li class="WiseGuiNavLoginButton"><a href="#">Login</a></li>');
+			+ '<li class="WiseGuiNavLoginButton"><a href="#">Login / Register</a></li>');
 
 	this.reservationsButtonLi = this.secondaryMenu.find('li.WiseGuiNavReservationsButton').first();
 	this.reservationsButton   = this.reservationsButtonLi.find('a').first();
