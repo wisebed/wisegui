@@ -84,9 +84,9 @@ WiseGuiNavigationView.prototype.buildView = function() {
 	this.logoutButtonLi.hide();
 	this.reservationsButtonLi.hide();
 
-	// bind actions to buttons
 	var self = this;
 
+	// bind actions to buttons
 	this.overviewButton.bind('click', function(e) {
 		e.preventDefault();
 		if (getNavigationData().experimentId) {
@@ -110,8 +110,6 @@ WiseGuiNavigationView.prototype.buildView = function() {
 	});
 
 	// bind to login and logout events
-	var self = this;
-
 	$(window).bind('wisegui-logged-in', function() {
 		self.loginButtonLi.hide();
 		self.logoutButtonLi.show();

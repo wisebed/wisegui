@@ -85,7 +85,7 @@ var WiseGui = new function() {
 
 function checkLoggedIn(callback) {
 	wisebed.isLoggedIn(callback, WiseGui.showAjaxError);
-};
+}
 
 function doLogin(loginData) {
 
@@ -100,12 +100,12 @@ function doLogin(loginData) {
 	};
 
 	var callbackDone = function() {
-		$(window).trigger('wisegui-logged-in', {loginData : self.loginData});
+		$(window).trigger('wisegui-logged-in', { loginData : self.loginData });
 		$(window).trigger('hashchange');
 	};
 
 	wisebed.login(loginData, callbackDone, callbackError);
-};
+}
 
 function doLogout() {
 
@@ -121,7 +121,7 @@ function doLogout() {
 
 	wisebed.logout(callbackOK, callbackError);
 	
-};
+}
 
 function wiseMLNullFilter(key,value) {
 	if (value == null || value === undefined || (value instanceof Array && value.length == 0)) {
@@ -129,7 +129,7 @@ function wiseMLNullFilter(key,value) {
 	} else {
 		return value;
 	}
-};
+}
 
 function loadTestbedDetailsContainer(navigationData, parentDiv) {
 
@@ -469,7 +469,7 @@ function buildMyReservationTable(parent) {
 
 	parent.empty();
 	parent.append(pills);
-};
+}
 
 function buildPersonalReservationsTable(parent, reservations) {
 
@@ -728,7 +728,7 @@ $(function () {
 	$('#WiseGuiContainer').append(notificationsViewer.view);
 	$('.modal').modal({ keyboard: true });
 
-	$(window).bind('wisegui-logged-in', function()  { isLoggedIn = true;  });
+	$(window).bind('wisegui-logged-in',  function() { isLoggedIn = true;  });
 	$(window).bind('wisegui-logged-out', function() { isLoggedIn = false; });
 
 	if (eventWebSocket === undefined) {
