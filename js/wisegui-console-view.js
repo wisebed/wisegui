@@ -58,7 +58,12 @@ WiseGuiConsoleView.prototype.buildView = function() {
 			+ '			<span id="' + this.statusBadgeDetachedId + '" class="badge badge-important" style="display: none;">Loading...</span>'
 			+ '		</div>'
 			+ '		<div class="span4">'
-			+ '			<div class="btn-toolbar btn-toolbar2  pull-right">'
+			+ '			<div class="btn-toolbar btn-toolbar2 pull-right">'
+			+ '				<div class="btn-group">'
+			+ '					<button id="download-log" class="btn" title="Download Log"><i class="icon-download"></i></button>'
+			+ '				</div>'
+			+ '			</div>'
+			+ '			<div class="btn-toolbar btn-toolbar2 pull-right">'
 			+ '				<div class="btn-group">'
 			+ '					<button id="pause-output" class="btn" data-toggle="button" title="Pause receiving messages"><i class="icon-pause"></i></button>'
 			+ '				</div>'
@@ -184,6 +189,7 @@ WiseGuiConsoleView.prototype.buildView = function() {
 	this.outputsColumnDropdown        = this.view.find('#column-dropdown');
 	this.outputsViewDropdown          = this.view.find('#view-dropdown');
 	this.outputsMakePrintableCheckbox = this.view.find('#make-printable');
+	this.outputsDownloadButton        = this.view.find('.btn#download-log');
 
 	WiseGui.bindToReservationState(this.view.find('button'), this.experimentId);
 
@@ -376,6 +382,11 @@ WiseGuiConsoleView.prototype.buildView = function() {
 	});
 
 	this.outputsFilterNodeSelectionDialog.onReady(function() {self.updateOutputsFilterNodesButton()});
+
+	this.outputsDownloadButton.click(function(e) {
+		var url = wisebedBaseUrl + '/events/' + self.reservation.experimentId + '.json';
+		window.open(url, '_blank');
+	});
 };
 
 WiseGuiConsoleView.prototype.redrawOutput = function() {

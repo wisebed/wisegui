@@ -475,7 +475,7 @@ function buildPersonalReservationsTable(parent, reservations) {
 
 	var nop = function(event){ event.preventDefault(); };
 
-	var headers = ['From', 'Until', 'Testbed Prefix(es)', 'Nodes', 'Description', ''];
+	var headers = ['From', 'Until', 'Testbed Prefix(es)', 'Nodes', 'Description', '', ''];
 	var model = reservations;
 	var rowProducer = function(reservation) {
 		
@@ -493,8 +493,12 @@ function buildPersonalReservationsTable(parent, reservations) {
 		));
 		rowData.push(reservation.description);
 		rowData.push($('<a class="btn btn-primary">Open</a>').bind('click', reservation, function(e) {
-			e.preventDefault();
-			navigateTo(e.data.experimentId);
+				e.preventDefault();
+				navigateTo(e.data.experimentId);
+		}));
+		rowData.push($('<button class="btn" title="Download Log"><i class="icon-download"></i> Log</button>').bind('click', reservation, function(e) {
+				var url = wisebedBaseUrl + '/events/' + e.data.experimentId + '.json';
+				window.open(url, '_blank');
 		}));
 
 		return rowData;
