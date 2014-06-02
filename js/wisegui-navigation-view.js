@@ -70,7 +70,7 @@ WiseGuiNavigationView.prototype.buildView = function() {
 	this.secondaryMenu.append(
 			  '<li class="WiseGuiNavReservationsButton"><a href="#">Make Reservation</a></li>'
 			+ '<li class="WiseGuiNavLogoutButton"><a href="#">Logout</a></li>'
-			+ '<li class="WiseGuiNavLoginButton"><a href="#">Login</a></li>');
+			+ '<li class="WiseGuiNavLoginButton"><a href="#">Login / Register</a></li>');
 
 	this.reservationsButtonLi = this.secondaryMenu.find('li.WiseGuiNavReservationsButton').first();
 	this.reservationsButton   = this.reservationsButtonLi.find('a').first();
@@ -84,9 +84,9 @@ WiseGuiNavigationView.prototype.buildView = function() {
 	this.logoutButtonLi.hide();
 	this.reservationsButtonLi.hide();
 
-	// bind actions to buttons
 	var self = this;
 
+	// bind actions to buttons
 	this.overviewButton.bind('click', function(e) {
 		e.preventDefault();
 		if (getNavigationData().experimentId) {
@@ -110,8 +110,6 @@ WiseGuiNavigationView.prototype.buildView = function() {
 	});
 
 	// bind to login and logout events
-	var self = this;
-
 	$(window).bind('wisegui-logged-in', function() {
 		self.loginButtonLi.hide();
 		self.logoutButtonLi.show();

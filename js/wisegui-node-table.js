@@ -121,7 +121,9 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 		this.showCheckboxes,
 		this.showFilter,
 		{
-			sortColumn       : 1
+			sortColumn  : 1,
+			sortAsc     : true,
+			sortHeaders : { 0 : {sorter : false}}
 		}
 	);
 

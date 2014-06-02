@@ -283,3 +283,7 @@ table thead tr .headerSortDown {
     -moz-border-radius-bottomright: 4px;
     -moz-border-radius-topright: 4px;    
 }
+
+.popover-inner {
+	width: 400px;
+}

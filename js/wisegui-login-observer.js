@@ -11,7 +11,6 @@
  */
 
 var WiseGuiLoginObserver = function() {
-	this.isObserving = false;
 	this.loginData   = undefined;
 	this.schedule    = undefined;
 	this.interval    = 10 * 60 * 1000;
@@ -37,7 +36,6 @@ WiseGuiLoginObserver.prototype.renewLogin = function() {
 
 WiseGuiLoginObserver.prototype.startObserving = function() {
 
-	this.isObserving = true;
 	var self = this;
 
 	$(window).bind('wisegui-logged-in', function(e, data) {
@@ -52,7 +50,7 @@ WiseGuiLoginObserver.prototype.startObserving = function() {
 		if (self.schedule !== undefined) {
 			console.log('WiseGuiLoginObserver stopping observation');
 			window.clearInterval(self.schedule);
-			this.schedule = undefined;
+			self.schedule = undefined;
 		}
 	});
 
@@ -63,7 +61,6 @@ WiseGuiLoginObserver.prototype.startObserving = function() {
 
 WiseGuiLoginObserver.prototype.stopObserving = function() {
 	console.log('WiseGuiLoginObserver.stopObserving()');
-	this.isObserving = false;
 	if (this.schedule !== undefined) {
 		window.clearInterval(this.schedule);
 	}

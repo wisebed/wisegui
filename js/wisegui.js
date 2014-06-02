@@ -85,7 +85,7 @@ var WiseGui = new function() {
 
 function checkLoggedIn(callback) {
 	wisebed.isLoggedIn(callback, WiseGui.showAjaxError);
-};
+}
 
 function doLogin(loginData) {
 
@@ -100,12 +100,12 @@ function doLogin(loginData) {
 	};
 
 	var callbackDone = function() {
-		$(window).trigger('wisegui-logged-in', {loginData : self.loginData});
+		$(window).trigger('wisegui-logged-in', { loginData : self.loginData });
 		$(window).trigger('hashchange');
 	};
 
 	wisebed.login(loginData, callbackDone, callbackError);
-};
+}
 
 function doLogout() {
 
@@ -121,7 +121,7 @@ function doLogout() {
 
 	wisebed.logout(callbackOK, callbackError);
 	
-};
+}
 
 function wiseMLNullFilter(key,value) {
 	if (value == null || value === undefined || (value instanceof Array && value.length == 0)) {
@@ -129,7 +129,7 @@ function wiseMLNullFilter(key,value) {
 	} else {
 		return value;
 	}
-};
+}
 
 function loadTestbedDetailsContainer(navigationData, parentDiv) {
 
@@ -469,13 +469,13 @@ function buildMyReservationTable(parent) {
 
 	parent.empty();
 	parent.append(pills);
-};
+}
 
 function buildPersonalReservationsTable(parent, reservations) {
 
 	var nop = function(event){ event.preventDefault(); };
 
-	var headers = ['From', 'Until', 'Testbed Prefix(es)', 'Nodes', 'Description', ''];
+	var headers = ['From', 'Until', 'Testbed Prefix(es)', 'Nodes', 'Description', '', ''];
 	var model = reservations;
 	var rowProducer = function(reservation) {
 		
@@ -493,12 +493,16 @@ function buildPersonalReservationsTable(parent, reservations) {
 		));
 		rowData.push(reservation.description);
 		rowData.push($('<a class="btn btn-primary">Open</a>').bind('click', reservation, function(e) {
-			e.preventDefault();
-			navigateTo(e.data.experimentId);
+				e.preventDefault();
+				navigateTo(e.data.experimentId);
+		}));
+		rowData.push($('<button class="btn" title="Download Log"><i class="icon-download"></i> Log</button>').bind('click', reservation, function(e) {
+				var url = wisebedBaseUrl + '/events/' + e.data.experimentId + '.json';
+				window.open(url, '_blank');
 		}));
 
 		return rowData;
-	}
+	};
 	var preFilterFun = null;
 	var preSelectFun = null;
 	var showCheckBoxes = false;
@@ -728,7 +732,7 @@ $(function () {
 	$('#WiseGuiContainer').append(notificationsViewer.view);
 	$('.modal').modal({ keyboard: true });
 
-	$(window).bind('wisegui-logged-in', function()  { isLoggedIn = true;  });
+	$(window).bind('wisegui-logged-in',  function() { isLoggedIn = true;  });
 	$(window).bind('wisegui-logged-out', function() { isLoggedIn = false; });
 
 	if (eventWebSocket === undefined) {

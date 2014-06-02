@@ -208,12 +208,15 @@ WiseGuiLoginDialog.prototype.buildView = function() {
 	trStoreCredentials.append(tdStoreCredentials);
 	this.storeCredentials_checkbox = storeCredentials_checkbox;
 
-	loginFormTableBody.append(trStoreCredentials);		
-			
-	var trRegister = $('<tr/>');
-	trRegister.append($('<td style="padding-bottom:0px" colspan="4">No account yet? <a href="/user_registration" target="_blank">Register here!</td>'));
+	loginFormTableBody.append(trStoreCredentials);
 
-	loginFormTableBody.append(trRegister);
+
+	loginFormTableBody.append($(''
+			+ '<tr>'
+			+ '	<td style="padding-bottom: 0" colspan="4">'
+			+ '		No account yet? <a href="/user_registration" target="_blank">Register here!'
+			+ '	</td>'
+			+ '</tr>'));
 };
 
 WiseGuiLoginDialog.prototype.startLogin= function() {
@@ -227,7 +230,7 @@ WiseGuiLoginDialog.prototype.startLogin= function() {
 			localStorage[this.loginFormRows[i].inputUrnPrefix.value+'_pass'] = this.loginFormRows[i].inputPassword.value;
 		}
 	} else {
-		for (var j=0; i<this.loginFormRows.length; j++) {
+		for (var j=0; j<this.loginFormRows.length; j++) {
 			localStorage.removeItem(this.loginFormRows[j].inputUrnPrefix.value+'_user');
 			localStorage.removeItem(this.loginFormRows[j].inputUrnPrefix.value+'_pass');
 		}
