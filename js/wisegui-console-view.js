@@ -191,7 +191,7 @@ WiseGuiConsoleView.prototype.buildView = function() {
 	this.outputsMakePrintableCheckbox = this.view.find('#make-printable');
 	this.outputsDownloadButton        = this.view.find('.btn#download-log');
 
-	WiseGui.bindToReservationState(this.view.find('button'), this.experimentId);
+	WiseGui.bindToReservationState(this.view.find('button:not(#download-log)'), this.experimentId);
 
 	var now = moment();
 	var interval = undefined;
