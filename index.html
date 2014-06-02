@@ -1,5 +1,3 @@
-<%@ page import="de.uniluebeck.itm.tr.iwsn.portal.PortalServerConfig" %>
-<%@ page import="de.uniluebeck.itm.tr.iwsn.portal.WiseGuiServiceConfig" %>
 <!DOCTYPE html >
 <html>
 <head>
@@ -19,7 +17,7 @@
 	<script type="text/javascript" src="js/lib/base64_decode.js"></script>
 
 	<script type="text/javascript" src="js/lib/moment-2.3.1.js"></script>
-	
+
 	<script type="text/javascript" src="js/lib/jquery-1.7.1.js"></script>
 	<script type="text/javascript" src="js/lib/jquery.ba-bbq-1.2.1.min.js"></script>
 	<script type="text/javascript" src="js/lib/jquery.cookie-1.0.0.js"></script>
@@ -51,8 +49,8 @@
 
 	<script type="text/javascript">
 
-		var wisebedWebSocketBaseUrl = 'ws://' + window.location.host + '<%= getServletConfig().getInitParameter(WiseGuiServiceConfig.WEBSOCKET_CONTEXT_PATH) %>';
-		var wisebedBaseUrl = window.location.origin + '<%= getServletConfig().getInitParameter(WiseGuiServiceConfig.REST_API_CONTEXT_PATH) %>';
+		var wisebedWebSocketBaseUrl = 'ws://' + window.location.host + '/ws/v1.0';
+		var wisebedBaseUrl = window.location.origin + '/rest/v1.0';
 
 	</script>
 
@@ -84,7 +82,7 @@
 </head>
 
 <body>
-	<div id="WiseGuiContainer" class="container"></div>
+<div id="WiseGuiContainer" class="container"></div>
 </body>
 
 </html>
