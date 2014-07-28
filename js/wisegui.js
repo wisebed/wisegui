@@ -719,8 +719,11 @@ function connectEventWebSocket() {
 	console.log('EventWebSocket: trying to connect');
 
 	var onOpen = function() {
+		
 		console.log('EventWebSocket: connection established');
+		eventWebSocketState = 'connected';
 		$(window).trigger(EVENT_EVENTWEBSOCKET_CONNECTED);
+
 		if (eventWebSocketSchedule !== undefined) {
 			console.log('EventWebSocket: cancelling reconnection schedule')
 			window.clearInterval(eventWebSocketSchedule);
@@ -728,9 +731,17 @@ function connectEventWebSocket() {
 		}
 	};
 
-	var onClosed = function() {
-		console.log('EventWebSocket: connection closed');
-		$(window).trigger(EVENT_EVENTWEBSOCKET_DISCONNECTED);
+	var onClosed = function(closeEvent) {
+		
+		console.log(eventWebSocket.readyState);
+		console.log(closeEvent);
+
+		if (eventWebSocketState == 'connected') {
+			console.log('EventWebSocket: connection closed');
+			$(window).trigger(EVENT_EVENTWEBSOCKET_DISCONNECTED);
+			eventWebSocketState = 'disconnected';
+		}
+
 		if (eventWebSocketSchedule === undefined) {
 			console.log('EventWebSocket: scheduling reconnect every 5 seconds');
 			eventWebSocketSchedule = window.setInterval(connectEventWebSocket, 5000);
@@ -742,6 +753,29 @@ function connectEventWebSocket() {
 
 	eventWebSocket = new wisebed.EventWebSocket(onAttached, onDetached, onOpen, onClosed);
 
+	$(window).bind(EVENT_EVENTWEBSOCKET_DISCONNECTED, function() {
+
+		var disconnectionModal = $(
+			  '<div class="modal hide" id="WiseGuiDisconnectionModal">'
+			+ '	<div class="modal-header">'
+			+ '		<button type="button" class="close" data-dismiss="modal">×</button>'
+			+ '		<h3>Connection Lost...</h3>'
+			+ '	</div>'
+			+ '	<div class="modal-body">'
+			+ '		<p>WiseGui is currently offline as it lost the connection to the testbeds portal server. Trying to reconnect every 5 seconds...</p>'
+			+ '	</div>'
+			+ '</div>'
+		);
+		
+		$(document.body).append(disconnectionModal);
+		disconnectionModal.modal('show');
+
+		$(window).bind(EVENT_EVENTWEBSOCKET_CONNECTED, function() {
+			$('#WiseGuiDisconnectionModal').modal('hide');
+			$('#WiseGuiDisconnectionModal').remove();
+		})
+	});
+
 }
 
 // some event constants
@@ -749,6 +783,8 @@ var EVENT_EVENTWEBSOCKET_CONNECTED    = 'wisegui-eventwebsocket-connected';
 var EVENT_EVENTWEBSOCKET_DISCONNECTED = 'wisegui-eventwebsocket-disconnected';
 var EVENT_DEVICES_ATTACHED            = 'wisegui-devices-attached-event';
 var EVENT_DEVICES_DETACHED            = 'wisegui-devices-detached-event';
+var EVENT_LOGGED_IN                   = 'wisegui-logged-in';
+var EVENT_LOGGED_OUT                  = 'wisegui-logged-out';
 
 var wisebed                = new Wisebed(wisebedBaseUrl, wisebedWebSocketBaseUrl);
 
@@ -760,8 +796,11 @@ var reservationObserver    = new WiseGuiReservationObserver();
 var notificationsViewer    = new WiseGuiNotificationsViewer();
 
 var testbedDescription     = null;
+
 var eventWebSocket         = undefined;
 var eventWebSocketSchedule = undefined;
+var eventWebSocketState    = 'disconnected';
+
 var isLoggedIn             = false;
 
 $(function () {
@@ -769,8 +808,8 @@ $(function () {
 	$('#WiseGuiContainer').append(notificationsViewer.view);
 	$('.modal').modal({ keyboard: true });
 
-	$(window).bind('wisegui-logged-in',  function() { isLoggedIn = true;  });
-	$(window).bind('wisegui-logged-out', function() { isLoggedIn = false; });
+	$(window).bind(EVENT_LOGGED_IN,  function() { isLoggedIn = true;  });
+	$(window).bind(EVENT_LOGGED_OUT, function() { isLoggedIn = false; });
 
 	connectEventWebSocket();
 
