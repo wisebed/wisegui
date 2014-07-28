@@ -720,6 +720,7 @@ function connectEventWebSocket() {
 
 	var onOpen = function() {
 		console.log('EventWebSocket: connection established');
+		$(window).trigger(EVENT_EVENTWEBSOCKET_CONNECTED);
 		if (eventWebSocketSchedule !== undefined) {
 			console.log('EventWebSocket: cancelling reconnection schedule')
 			window.clearInterval(eventWebSocketSchedule);
@@ -729,20 +730,25 @@ function connectEventWebSocket() {
 
 	var onClosed = function() {
 		console.log('EventWebSocket: connection closed');
+		$(window).trigger(EVENT_EVENTWEBSOCKET_DISCONNECTED);
 		if (eventWebSocketSchedule === undefined) {
 			console.log('EventWebSocket: scheduling reconnect every 5 seconds');
 			eventWebSocketSchedule = window.setInterval(connectEventWebSocket, 5000);
 		}
 	};
 
-	eventWebSocket = new wisebed.EventWebSocket(
-		function(devicesAttachedEvent) {$(window).trigger('wisegui-devices-attached-event', devicesAttachedEvent);},
-		function(devicesDetachedEvent) {$(window).trigger('wisegui-devices-detached-event', devicesDetachedEvent);},
-		onOpen,
-		onClosed
-	);
+	var onAttached = function(devicesAttachedEvent) { $(window).trigger(EVENT_DEVICES_ATTACHED, devicesAttachedEvent); };
+	var onDetached = function(devicesDetachedEvent) { $(window).trigger(EVENT_DEVICES_DETACHED, devicesDetachedEvent); };
+
+	eventWebSocket = new wisebed.EventWebSocket(onAttached, onDetached, onOpen, onClosed);
 
 }
+
+// some event constants
+var EVENT_EVENTWEBSOCKET_CONNECTED    = 'wisegui-eventwebsocket-connected';
+var EVENT_EVENTWEBSOCKET_DISCONNECTED = 'wisegui-eventwebsocket-disconnected';
+var EVENT_DEVICES_ATTACHED            = 'wisegui-devices-attached-event';
+var EVENT_DEVICES_DETACHED            = 'wisegui-devices-detached-event';
 
 var wisebed                = new Wisebed(wisebedBaseUrl, wisebedWebSocketBaseUrl);
 
