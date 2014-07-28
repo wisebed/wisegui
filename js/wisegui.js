@@ -714,18 +714,49 @@ function onHashChange(e) {
 	$(window).trigger('wisegui-navigation-event', navigationData);
 }
 
-var wisebed              = new Wisebed(wisebedBaseUrl, wisebedWebSocketBaseUrl);
+function connectEventWebSocket() {
 
-var navigationContainer  = undefined;
-var contentContainers    = {};
+	console.log('EventWebSocket: trying to connect');
 
-var loginObserver        = new WiseGuiLoginObserver();
-var reservationObserver  = new WiseGuiReservationObserver();
-var notificationsViewer  = new WiseGuiNotificationsViewer();
+	var onOpen = function() {
+		console.log('EventWebSocket: connection established');
+		if (eventWebSocketSchedule !== undefined) {
+			console.log('EventWebSocket: cancelling reconnection schedule')
+			window.clearInterval(eventWebSocketSchedule);
+			eventWebSocketSchedule = undefined;
+		}
+	};
 
-var testbedDescription   = null;
-var eventWebSocket       = undefined;
-var isLoggedIn           = false;
+	var onClosed = function() {
+		console.log('EventWebSocket: connection closed');
+		if (eventWebSocketSchedule === undefined) {
+			console.log('EventWebSocket: scheduling reconnect every 5 seconds');
+			eventWebSocketSchedule = window.setInterval(connectEventWebSocket, 5000);
+		}
+	};
+
+	eventWebSocket = new wisebed.EventWebSocket(
+		function(devicesAttachedEvent) {$(window).trigger('wisegui-devices-attached-event', devicesAttachedEvent);},
+		function(devicesDetachedEvent) {$(window).trigger('wisegui-devices-detached-event', devicesDetachedEvent);},
+		onOpen,
+		onClosed
+	);
+
+}
+
+var wisebed                = new Wisebed(wisebedBaseUrl, wisebedWebSocketBaseUrl);
+
+var navigationContainer    = undefined;
+var contentContainers      = {};
+
+var loginObserver          = new WiseGuiLoginObserver();
+var reservationObserver    = new WiseGuiReservationObserver();
+var notificationsViewer    = new WiseGuiNotificationsViewer();
+
+var testbedDescription     = null;
+var eventWebSocket         = undefined;
+var eventWebSocketSchedule = undefined;
+var isLoggedIn             = false;
 
 $(function () {
 
@@ -735,14 +766,7 @@ $(function () {
 	$(window).bind('wisegui-logged-in',  function() { isLoggedIn = true;  });
 	$(window).bind('wisegui-logged-out', function() { isLoggedIn = false; });
 
-	if (eventWebSocket === undefined) {
-		eventWebSocket = new wisebed.EventWebSocket(
-			function(devicesAttachedEvent) {$(window).trigger('wisegui-devices-attached-event', devicesAttachedEvent);},
-			function(devicesDetachedEvent) {$(window).trigger('wisegui-devices-detached-event', devicesDetachedEvent);},
-			function() { console.log('EventWebSocket connection established'); },
-			function() { console.log('EventWebSocket connection closed'); eventWebSocket = undefined; }
-		);
-	}
+	connectEventWebSocket();
 
 	wisebed.getTestbedDescription(
 		function(td) {
