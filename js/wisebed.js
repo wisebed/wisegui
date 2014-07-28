@@ -122,7 +122,7 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 			} else if (event.type == 'devicesDetached') {
 				self.onDevicesDetached(event);
 			} else {
-				console.log("Received unknown event over event bus: " + event);
+				console.log("Received unknown event over event bus: " + JSON.stringify(event));
 			}
 		};
 		this.socket.onopen  = function(event) { self.onOpen(event);  };
