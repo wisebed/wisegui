@@ -447,9 +447,10 @@ function buildMyReservationTable(parent) {
 			!past ? moment() : null,
 			 past ? moment() : null,
 			function(reservations) {
-				buildPersonalReservationsTable(!past ? currentAndFutureDiv : pastDiv, reservations);
+				buildPersonalReservationsTable(!past ? currentAndFutureDiv : pastDiv, reservations, past);
 			},
-			WiseGui.showAjaxError
+			WiseGui.showAjaxError,
+			true
 		);
 	}
 
@@ -471,11 +472,11 @@ function buildMyReservationTable(parent) {
 	parent.append(pills);
 }
 
-function buildPersonalReservationsTable(parent, reservations) {
+function buildPersonalReservationsTable(parent, reservations, past) {
 
 	var nop = function(event){ event.preventDefault(); };
 
-	var headers = ['From', 'Until', 'Testbed Prefix(es)', 'Nodes', 'Description', '', ''];
+	var headers = ['From', 'Until', 'Testbed Prefix(es)', 'Nodes', 'Description', '', '', ''];
 	var model = reservations;
 	var rowProducer = function(reservation) {
 		
@@ -500,6 +501,18 @@ function buildPersonalReservationsTable(parent, reservations) {
 				var url = wisebedBaseUrl + '/events/' + e.data.experimentId + '.json';
 				window.open(url, '_blank');
 		}));
+        if (!past) {
+            rowData.push($('<a class="btn btn-danger">Delete</a>').bind('click', reservation, function(e) {
+                    e.preventDefault();
+                    wisebed.reservations.delete(
+                    	e.data.experimentId,
+                    	function() { alert('deleted!'); },
+                    	WiseGui.showAjaxError
+                    	);
+            }));
+        } else {
+        	rowData.push(reservation.cancelled ? '<span class="label label-important">Cancelled</span>' : '&nbsp;');
+        }
 
 		return rowData;
 	};
@@ -584,7 +597,8 @@ function buildReservationTable(parent) {
 			function(reservations) {
 				buildReservationTableInternal(!past ? currentAndFutureDiv : pastDiv, reservations);
 			},
-			WiseGui.showAjaxError
+			WiseGui.showAjaxError,
+			true
 		);
 	}
 

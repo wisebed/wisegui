@@ -14,6 +14,7 @@ var WisebedPublicReservationData = function(prd) {
 	
 	this.from = moment(prd.from);
 	this.to = moment(prd.to);
+	this.cancelled = prd.cancelled ? moment(prd.cancelled) : undefined;
 	this.nodeUrns = prd.nodeUrns;
 	this.nodeUrnPrefixes = [];
 	
@@ -32,6 +33,7 @@ var WisebedConfidentialReservationData = function(crd) {
 	this.description = crd.description;
 	this.from = moment(crd.from);
 	this.to = moment(crd.to);
+	this.cancelled = crd.cancelled ? moment(crd.cancelled) : undefined;
 	this.nodeUrns = crd.nodeUrns;
 	this.nodeUrnPrefixes = [];
 	this.options = crd.options;
@@ -54,6 +56,7 @@ var WisebedReservation = function(confidentialReservationDataList) {
 	this.description = '';
 	this.from = null;
 	this.to = null;
+	this.cancelled = null;
 	this.nodeUrns = [];
 	this.nodeUrnPrefixes = [];
 	this.confidentialReservationDataList = [];
@@ -68,6 +71,7 @@ var WisebedReservation = function(confidentialReservationDataList) {
 		if (crd.description && crd.description != '') { self.descriptions.push(crd.description); }
 		if (self.from == null || crd.from >= self.from) { self.from = crd.from; }
 		if (self.to   == null || crd.to   <= self.to  ) { self.to   = crd.to;   }
+		if (self.cancelled == null || crd.cancelled <= self.cancelled) { self.cancelled = crd.cancelled; }
 		crd.nodeUrns.forEach(function(nodeUrn) {
 			self.nodeUrns.push(nodeUrn);
 			var nodeUrnPrefix = nodeUrn.substring(0, nodeUrn.lastIndexOf(':') + 1);
@@ -197,10 +201,11 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 		/**
 		 * returns a list of WisebedReservation objects
 		 */
-		this.getPersonal = function(from, to, callbackDone, callbackError) {
+		this.getPersonal = function(from, to, callbackDone, callbackError, showCancelled) {
 			var queryUrl = getBaseUri() + "/reservations/personal?" +
 					(from ? ("from=" + from.toISOString() + "&") : "") +
-					(to ? ("to="+to.toISOString() + "&") : "");
+					(to ? ("to="+to.toISOString() + "&") : "") +
+					(to ? ("showCancelled="+ showCancelled + "&") : "");
 			$.ajax({
 				url       : queryUrl,
 				success   : function(crdList, textStatus, jqXHR) {
@@ -218,10 +223,11 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 		/**
 		 * returns a list of WisebedPublicReservationData objects
 		 */
-		this.getPublic = function(from, to, callbackDone, callbackError) {
+		this.getPublic = function(from, to, callbackDone, callbackError, showCancelled) {
 			var queryUrl = getBaseUri() + "/reservations/public?" +
 					(from ? ("from=" + from.toISOString() + "&") : "") +
-					(to ? ("to="+to.toISOString() + "&") : "");
+					(to ? ("to=" + to.toISOString() + "&") : "") +
+					(to ? ("showCancelled=" + showCancelled + "&") : "");
 			$.ajax({
 				url       : queryUrl,
 				success   : function(prdList, textStatus, jqXHR) {
@@ -320,6 +326,19 @@ var Wisebed = function(baseUri, webSocketBaseUri) {
 				xhrFields   : { withCredentials: true }
 			});
 
+		};
+        
+        this.delete = function(experimentId, callbackDone, callbackError) {
+			var queryUrl = getBaseUri() + "/reservations/byExperimentId/" + experimentId;
+			$.ajax({
+                type      : 'DELETE',
+				url       : queryUrl,
+				success   : callbackDone,
+				error     : callbackError,
+				context   : document.body,
+				dataType  : "json",
+				xhrFields : { withCredentials: true }
+			});
 		};
 
 		this.equals = function(res1, res2) {
