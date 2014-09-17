@@ -493,26 +493,86 @@ function buildPersonalReservationsTable(parent, reservations, past) {
 			+ '</div>'
 		));
 		rowData.push(reservation.description);
-		rowData.push($('<a class="btn btn-primary">Open</a>').bind('click', reservation, function(e) {
+		var openButton = $('<a class="btn btn-primary">Open</a>').bind('click', reservation, function(e) {
 				e.preventDefault();
-				navigateTo(e.data.experimentId);
-		}));
+				if (openButton.attr('disabled') != 'disabled') {
+					navigateTo(e.data.experimentId);
+				}
+		});
+		if (reservation.finalized) {
+			openButton.attr('disabled', 'disabled');
+		}
+		rowData.push(openButton);
 		rowData.push($('<button class="btn" title="Download Log"><i class="icon-download"></i> Log</button>').bind('click', reservation, function(e) {
 				var url = wisebedBaseUrl + '/events/' + e.data.experimentId + '.json';
 				window.open(url, '_blank');
 		}));
-        if (!past) {
-            rowData.push($('<a class="btn btn-danger">Delete</a>').bind('click', reservation, function(e) {
-                    e.preventDefault();
-                    wisebed.reservations.delete(
-                    	e.data.experimentId,
-                    	function() { alert('deleted!'); },
-                    	WiseGui.showAjaxError
-                    	);
-            }));
-        } else {
-        	rowData.push(reservation.cancelled ? '<span class="label label-important">Cancelled</span>' : '&nbsp;');
-        }
+        
+    	var cancelButton = undefined;
+        var cancelledLabel = undefined;
+    	var finalizedLabel = undefined;
+
+    	if (reservation.cancelled) {
+    		cancelledLabel = $('<span class="label label-important">Cancelled</span><br/><span class="label label-important">' + reservation.cancelled.format("YYYY-MM-DD HH:mm:ss") + '</span>');
+    		cancelledLabel.popover({
+    			placement : 'top',
+				title   : 'Cancelled Reservation',
+				content : '<p>This reservation has been <b>cancelled</b>.</p><p>A reservation ends '+
+				 'either because the end of the reservaiton time span has been reached or because it has '+
+				 'been cancelled. Due to network delays or temporary network disconnections in the testbed '+
+				 'backend node outputs might still arrive delayed. After a couple of minutes after the '+
+				 'last delayed node output was received the reservation is finalized, i.e. it is '+
+				 'guaranteed that there will not be any more outputs attached to the reservations log.</p>'
+			});
+    	}
+
+    	if (reservation.finalized) {
+    		finalizedLabel = $('<span class="label label-info">Finalized</span>');
+			finalizedLabel.popover({
+				placement : 'top',
+				title   : 'Finalized Reservation',
+				content : '<p>This reservation has been <b>finalized</b>.</p><p>A reservation ends '+
+				 'either because the end of the reservaiton time span has been reached or because it has '+
+				 'been cancelled. Due to network delays or temporary network disconnections in the testbed '+
+				 'backend node outputs might still arrive delayed. After a couple of minutes after the '+
+				 'last delayed node output was received the reservation is finalized, i.e. it is '+
+				 'guaranteed that there will not be any more outputs attached to the reservations log.</p>'
+			});
+		}
+
+		if (!reservation.cancelled && !reservation.finalized && !past) {
+			cancelButton = $('<a class="btn btn-danger">Cancel</a>').bind('click', reservation, function(e) {
+	                e.preventDefault();
+	                wisebed.reservations.delete(
+	                	e.data.experimentId,
+	                	function() { 
+	                		cancelButton.popover('hide');
+	                		$(window).trigger('hashchange');
+	                	},
+	                	WiseGui.showAjaxError
+	                	);
+	        });
+			cancelButton.popover({
+				placement : 'top',
+				title   : 'Cancelling Reservations',
+				content : 'Cancelling a reservation will free the resources bound to the reservation so that '
+					+ 'e.g. other users can reserve the nodes. If a reservation gets cancelled while it is '
+					+ 'active all reservation events (such as node outputs) until the cancellation will still '
+					+ 'be persisted in the reservation log and available for download.'
+			})
+		}
+
+		if (reservation.cancelled && reservation.finalized) {
+			rowData.push($('<span/>').append(cancelledLabel).append(' ').append(finalizedLabel));
+		} else if (reservation.cancelled) {
+			rowData.push(cancelledLabel);
+		} else if (reservation.finalized) {
+			rowData.push(finalizedLabel);
+		} else if (!past) {
+			rowData.push(cancelButton);
+		} else {
+			rowData.push('&nbsp;');
+		}
 
 		return rowData;
 	};
@@ -536,7 +596,7 @@ function buildReservationTableInternal(parent, reservations) {
 
 	var nop = function(event){ event.preventDefault(); };
 
-	var headers = ['From', 'Until', 'Testbed Prefix(es)', 'Nodes'];
+	var headers = ['From', 'Until', 'Testbed Prefix(es)', 'Nodes', ' '];
 	var model = reservations;
 	var rowProducer = function(reservation) {
 		
@@ -552,6 +612,28 @@ function buildReservationTableInternal(parent, reservations) {
 			+ ' <div class="collapse" id="wisegui-personal-reservation-nodes-'+rand+'-'+i+'">'+reservation.nodeUrns.join("<br/>")+'</div>'
 			+ '</div>'
 		));
+
+		var cancelledLabel = undefined;
+		
+		if (reservation.cancelled) {
+			cancelledLabel = $('<span class="label label-important">Cancelled</span><br/><span class="label label-important">' + reservation.cancelled.format("YYYY-MM-DD HH:mm:ss") + '</span>');
+    		cancelledLabel.popover({
+    			placement : 'top',
+				title   : 'Cancelled Reservation',
+				content : '<p>This reservation has been <b>cancelled</b>.</p><p>A reservation ends '+
+				 'either because the end of the reservaiton time span has been reached or because it has '+
+				 'been cancelled. Due to network delays or temporary network disconnections in the testbed '+
+				 'backend node outputs might still arrive delayed. After a couple of minutes after the '+
+				 'last delayed node output was received the reservation is finalized, i.e. it is '+
+				 'guaranteed that there will not be any more outputs attached to the reservations log.</p>'
+			});
+		}
+
+		if (reservation.cancelled) {
+			rowData.push(cancelledLabel);
+		} else {
+			rowData.push('&nbsp;');
+		}
 
 		return rowData;
 	}
@@ -604,7 +686,7 @@ function buildReservationTable(parent) {
 
 	pills.find('a[href="#WiseGuiPublicReservationsCurrentFuture"]').click(function(e) {
 		e.preventDefault();
-		loadPublicReservations(false);
+		loadPublicReservations(true);
 		$(this).tab('show');
 	});
 

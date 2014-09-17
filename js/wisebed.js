@@ -15,6 +15,7 @@ var WisebedPublicReservationData = function(prd) {
 	this.from = moment(prd.from);
 	this.to = moment(prd.to);
 	this.cancelled = prd.cancelled ? moment(prd.cancelled) : undefined;
+	this.finalized = prd.finalized ? moment(prd.finalized) : undefined;
 	this.nodeUrns = prd.nodeUrns;
 	this.nodeUrnPrefixes = [];
 	
@@ -34,6 +35,7 @@ var WisebedConfidentialReservationData = function(crd) {
 	this.from = moment(crd.from);
 	this.to = moment(crd.to);
 	this.cancelled = crd.cancelled ? moment(crd.cancelled) : undefined;
+	this.finalized = crd.finalized ? moment(crd.finalized) : undefined;
 	this.nodeUrns = crd.nodeUrns;
 	this.nodeUrnPrefixes = [];
 	this.options = crd.options;
@@ -57,6 +59,7 @@ var WisebedReservation = function(confidentialReservationDataList) {
 	this.from = null;
 	this.to = null;
 	this.cancelled = null;
+	this.finalized = null;
 	this.nodeUrns = [];
 	this.nodeUrnPrefixes = [];
 	this.confidentialReservationDataList = [];
@@ -68,10 +71,21 @@ var WisebedReservation = function(confidentialReservationDataList) {
 
 	confidentialReservationDataList.forEach(function(confidentialReservationData) {
 		var crd = new WisebedConfidentialReservationData(confidentialReservationData);
-		if (crd.description && crd.description != '') { self.descriptions.push(crd.description); }
-		if (self.from == null || crd.from >= self.from) { self.from = crd.from; }
-		if (self.to   == null || crd.to   <= self.to  ) { self.to   = crd.to;   }
-		if (self.cancelled == null || crd.cancelled <= self.cancelled) { self.cancelled = crd.cancelled; }
+		if (crd.description && crd.description != '') {
+			self.descriptions.push(crd.description);
+		}
+		if (self.from == null || crd.from >= self.from) {
+			self.from = crd.from;
+		}
+		if (self.to   == null || crd.to   <= self.to  ) {
+			self.to = crd.to;
+		}
+		if (self.cancelled == null || crd.cancelled <= self.cancelled) {
+			self.cancelled = crd.cancelled;
+		}
+		if (self.finalized == null || crd.finalized <= self.finalized) {
+			self.finalized = crd.finalized;
+		}
 		crd.nodeUrns.forEach(function(nodeUrn) {
 			self.nodeUrns.push(nodeUrn);
 			var nodeUrnPrefix = nodeUrn.substring(0, nodeUrn.lastIndexOf(':') + 1);
