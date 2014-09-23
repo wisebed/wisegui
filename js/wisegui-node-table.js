@@ -195,6 +195,12 @@ WiseGuiNodeTable.prototype.getSelectedNodes = function () {
 	return ids;
 };
 
+WiseGuiNodeTable.prototype.setSelectedNodes = function (nodeUrnArr) {
+	this.table.setSelectedRows(function(rowData) {
+		return _.contains(nodeUrnArr, rowData.id);
+	});
+};
+
 WiseGuiNodeTable.prototype.applyFilter = function (fn) {
 	this.table.setFilterFun(fn);
 };

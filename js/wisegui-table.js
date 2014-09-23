@@ -324,6 +324,23 @@ WiseGuiTable.prototype.getSelectedRows = function () {
 	return selected;
 };
 
+WiseGuiTable.prototype.setSelectedRows = function (selectionCallback) {
+
+	var that = this;
+
+	if(this.data != null && this.table != null) {
+		this.table.find("input").each(function() {
+			var checkbox = $(this);
+			var name = $(this).attr('name');
+			// Ignore the checkbox from the header, which doesn't have any name
+			if(typeof(name) != "undefined") {
+				var index = parseInt(name);
+				checkbox.prop('checked', selectionCallback(that.data[index].data));
+			}
+		});
+	}
+};
+
 WiseGuiTable.prototype.setFilterFun = function (fn) {
 
 	this.preFilterFun = fn;

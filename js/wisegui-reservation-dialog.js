@@ -349,7 +349,15 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 		e.data.hide();
 	});
 
+	var nodeSelectionSaveButton = new WiseGuiNodeSelectionSaveButton(function() {
+		return that.table.getSelectedNodes();
+	});
+
+	var nodeSelectionLoadButton = new WiseGuiNodeSelectionLoadButton(function(selection) {
+		that.table.setSelectedNodes(selection);
+	})
+
 	var dialogFooter = $('<div class="modal-footer"/>');
-	dialogFooter.append(okButton, cancelButton);
+	dialogFooter.append(nodeSelectionLoadButton.view, nodeSelectionSaveButton.view, okButton, cancelButton);
 	this.view.append(dialogHeader, dialogBody, dialogFooter);
 };
