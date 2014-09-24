@@ -259,14 +259,16 @@ WiseGuiFlashView.prototype.addConfiguration = function(conf) {
 		);
 
 		nodeSelectionButton.attr('disabled', true);
+		nodeSelectionDialog.dialogDiv.on('hidden', function() {
+			nodeSelectionButton.attr('disabled', false);
+		});
 		nodeSelectionDialog.show(
 			function(nodeUrns) {
 				nodeSelectionButton.attr('disabled', false);
 				configuration.config.nodeUrns = nodeUrns;
 				nodeSelectionButton.html((nodeUrns.length == 1 ? '1 node selected' : (nodeUrns.length + ' nodes selected')));
-			}, function() {
-				nodeSelectionButton.attr('disabled', false);
-			}
+			},
+			function() {}
 		);
 	});
 
