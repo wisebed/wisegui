@@ -61,26 +61,12 @@ WiseGuiFlashView.prototype.buildView = function() {
 	var self = this;
 
 	// bind actions for flash tab buttons
-	this.addSetButton.bind('click', self, function(e) {
-		self.addConfiguration();
-	});
-
-	this.removeSetButton.bind('click', self, function(e) {
-		self.removeConfiguration();
-	});
-
-	this.loadConfigurationButton.bind('click', self, function(e) {
-		self.loadConfiguration(self.loadConfigurationButton);
-	});
-
-	this.saveConfigurationButton.bind('click', self, function(e) {
-		self.saveConfiguration();
-	});
-
-	this.flashButton.bind('click', self, function(e) {
-		self.executeFlashNodes();
-	});
-
+	this.addSetButton.bind('click', this.addConfiguration.bind(this));
+	this.removeSetButton.bind('click', this.removeConfiguration.bind(this));
+	this.loadConfigurationButton.bind('click', this.loadConfiguration.bind(this, this.loadConfigurationButton));
+	this.saveConfigurationButton.bind('click', this.saveConfiguration.bind(this));
+	this.flashButton.bind('click', this.executeFlashNodes.bind(this));
+	
 	this.addConfiguration();
 
 	WiseGui.bindToReservationState(this.view.find('button'), this.experimentId);
