@@ -287,3 +287,18 @@ table thead tr .headerSortDown {
 .popover-inner {
 	width: 400px;
 }
+
+.modalmodal {
+	z-index: 1000000;
+}
+
+div.wisegui-option-selection-dialog {
+	position: absolute;
+	top: 200px;
+	width: 400px;
+	margin: 0 0 0 -200px;
+}
+
+div.wisegui-option-selection-dialog select {
+	width: 350px;
+}
