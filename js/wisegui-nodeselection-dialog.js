@@ -97,6 +97,12 @@ WiseGuiNodeSelectionDialog.prototype.constructDialogInternal = function(wiseML) 
 		this.setSelection(this.getSelection());
 	}
 
+	this.nodeSelectionSaveButton = new WiseGuiNodeSelectionSaveButton(this.table.getSelectedNodes.bind(this.table));
+	this.nodeSelectionLoadButton = new WiseGuiNodeSelectionLoadButton(this.table.setSelectedNodes.bind(this.table));
+	
+	this.dialogDiv.find('.modal-footer').prepend(this.nodeSelectionSaveButton.view);
+	this.dialogDiv.find('.modal-footer').prepend(this.nodeSelectionLoadButton.view);
+
 	// Cancel clicked
 	this.dialogDiv.find('.modal-cancel').first().bind(
 			'click',

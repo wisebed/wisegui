@@ -90,7 +90,8 @@ var WiseGuiOptionSelectionDialog = function(options, selectedCallback, cancelled
 	}
 
 	// configure button actions
-	loadButton.on('click', function() {
+	loadButton.on('click', function(e) {
+		e.preventDefault();
 		if (!loadButton.attr('disabled')) {
 			selectedCallback(self.selected);
 			dialog.modal('hide');
