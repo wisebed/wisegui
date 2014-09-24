@@ -36,11 +36,6 @@ var WiseGuiNodeSelectionLoadButton = function(selectionCallback) {
 			self.view.removeAttr('disabled');
 		} else {
 			self.view.attr('disabled', 'disabled');
-			self.view.tooltip({
-				title : 'No saved node selections available yet! (Saved selections are not '
-					+ 'synchronized with your account on the server but are stored in your Browsers local storage)',
-				delay : 100
-			});
 		}
 	};
 
