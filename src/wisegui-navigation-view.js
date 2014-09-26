@@ -24,61 +24,61 @@ var WiseGuiNavigationView = function() {
 WiseGuiNavigationView.prototype.buildView = function() {
 
 	this.view = $(
-			  '<div class="navbar">'
-			+ '		<div class="navbar-inner">'
-			+ '			<div class="container">'
-			+ '				<ul class="nav"/>'
-			+ '				<ul class="nav secondary-nav pull-right">'
-			+ '					<li class="WiseGuiNavAboutButton">'
-			+ '						<a href="#" data-toggle="modal" data-target="#aboutModal">About</a>'
-			+ '				</li>'
-			+ '				</ul>'
-			+ '			</div>'
-			+ '		</div>'
-			+ '	</div>'
-			+ '	<div id="aboutModal" class="modal hide">'
-			+ '		<div class="modal-header">'
-			+ ' 		<h1>About WiseGui</h1>'
-			+ '		</div>'
-			+ '		<div class="modal-body">'
-			+ '			This is an open-source project published under the terms of the BSD license. Sources are freely available from'
-			+ '			<a href="https://github.com/wisebed/wisegui" target="_blank">github.com/wisebed/wisegui</a>.'
-			+ ' 		<br/>'
-			+ ' 		<br/>'
-		    + '         <h3>Troubleshooting</h3>'
-		    + '         If you experience any issues with this software please file a bug report at '
-		    + '         <a href="https://github.com/wisebed/wisegui/issues" target="_blank">github.com/wisebed/wisegui/issues</a>.'
-		    + '         Please include the versioning information below.<br/>'
-		    + '         <br/>'
-		    + '         <h3>Backend Version Information</h3>'
-		    + '         <table class="table table-striped table-condensed">'
-		    + '             <tr>'
-    		+ '                 <td>Application Name:</td>'
-		    + '                 <td>'+testbedDescription.appName+'</td>'
-		    + '             </tr>'
-		    + '             <tr>'
-		    + '                 <td>Application Version:</td>'
-		    + '                 <td>'+testbedDescription.appVersion+'</td>'
-		    + '             </tr>'
-		    + '             <tr>'
-		    + '                 <td>Application Build:</td>'
-		    + '                 <td>'+testbedDescription.appBuild+'</td>'
-		    + '             </tr>'
-		    + '             <tr>'
-		    + '                 <td>Application Branch:</td>'
-		    + '                 <td>'+testbedDescription.appBranch+'</td>'
-		    + '             </tr>'
-		    + '         </table>'
-			+ '			&copy; <a href="http://www.itm.uni-luebeck.de/people/bimschas/" target="_blank">Daniel Bimschas</a>,'
-			+ '			<a href="http://www.itm.uni-luebeck.de/people/ebers/" target="_blank">Sebastian Ebers</a>,'
-			+ '			<a href="http://www.itm.uni-luebeck.de/people/pfisterer/" target="_blank">Dennis Pfisterer</a>,'
-			+ '			<a href="http://www.itm.uni-luebeck.de/people/boldt/" target="_blank">Dennis Boldt</a>,'
-			+ '			<a href="http://www.itm.uni-luebeck.de/people/massel/" target="_blank">Florian Massel</a>,'
-			+ '			Philipp Abraham<br/>'
-			+ '		</div>'
-			+ '		<div class="modal-footer">'
-			+ '		</div>'
-			+ '	</div>'
+			'<div class="navbar">' +
+			'		<div class="navbar-inner">' +
+			'			<div class="container">' +
+			'				<ul class="nav"/>' +
+			'				<ul class="nav secondary-nav pull-right">' +
+			'					<li class="WiseGuiNavAboutButton">' +
+			'						<a href="#" data-toggle="modal" data-target="#aboutModal">About</a>' +
+			'					</li>' +
+			'				</ul>' +
+			'			</div>' +
+			'		</div>' +
+			'	</div>' +
+			'	<div id="aboutModal" class="modal hide">' +
+			'		<div class="modal-header">' +
+			' 		<h1>About WiseGui</h1>' +
+			'		</div>' +
+			'		<div class="modal-body">' +
+			'			This is an open-source project published under the terms of the BSD license. Sources are freely available from' +
+			'			<a href="https://github.com/wisebed/wisegui" target="_blank">github.com/wisebed/wisegui</a>.' +
+			' 		<br/>' +
+			' 		<br/>' +
+		    '         <h3>Troubleshooting</h3>' +
+		    '         If you experience any issues with this software please file a bug report at ' +
+		    '         <a href="https://github.com/wisebed/wisegui/issues" target="_blank">github.com/wisebed/wisegui/issues</a>.' +
+		    '         Please include the versioning information below.<br/>' +
+		    '         <br/>' +
+		    '         <h3>Backend Version Information</h3>' +
+		    '         <table class="table table-striped table-condensed">' +
+		    '             <tr>' +
+    		'                 <td>Application Name:</td>' +
+		    '                 <td>'+testbedDescription.appName+'</td>' +
+		    '             </tr>' +
+		    '             <tr>' +
+		    '                 <td>Application Version:</td>' +
+		    '                 <td>'+testbedDescription.appVersion+'</td>' +
+		    '             </tr>' +
+		    '             <tr>' +
+		    '                 <td>Application Build:</td>' +
+		    '                 <td>'+testbedDescription.appBuild+'</td>' +
+		    '             </tr>' +
+		    '             <tr>' +
+		    '                 <td>Application Branch:</td>' +
+		    '                 <td>'+testbedDescription.appBranch+'</td>' +
+		    '             </tr>' +
+		    '         </table>' +
+			'			&copy; <a href="http://www.itm.uni-luebeck.de/people/bimschas/" target="_blank">Daniel Bimschas</a>,' +
+			'			<a href="http://www.itm.uni-luebeck.de/people/ebers/" target="_blank">Sebastian Ebers</a>,' +
+			'			<a href="http://www.itm.uni-luebeck.de/people/pfisterer/" target="_blank">Dennis Pfisterer</a>,' +
+			'			<a href="http://www.itm.uni-luebeck.de/people/boldt/" target="_blank">Dennis Boldt</a>,' +
+			'			<a href="http://www.itm.uni-luebeck.de/people/massel/" target="_blank">Florian Massel</a>,' +
+			'			Philipp Abraham<br/>' +
+			'		</div>' +
+			'		<div class="modal-footer">' +
+			'		</div>' +
+			'	</div>'
 	);
 
 	this.primaryMenu   = this.view.find('ul.nav:not(ul.secondary-nav)').first();
@@ -91,9 +91,9 @@ WiseGuiNavigationView.prototype.buildView = function() {
 	this.overviewButton           = this.overviewButtonLi.find('a').first();
 
 	this.secondaryMenu.append(
-			  '<li class="WiseGuiNavReservationsButton"><a href="#">Make Reservation</a></li>'
-			+ '<li class="WiseGuiNavLogoutButton"><a href="#">Logout</a></li>'
-			+ '<li class="WiseGuiNavLoginButton"><a href="#">Login / Register</a></li>');
+			  '<li class="WiseGuiNavReservationsButton"><a href="#">Make Reservation</a></li>' +
+			'<li class="WiseGuiNavLogoutButton"><a href="#">Logout</a></li>' +
+			'<li class="WiseGuiNavLoginButton"><a href="#">Login / Register</a></li>');
 
 	this.reservationsButtonLi = this.secondaryMenu.find('li.WiseGuiNavReservationsButton').first();
 	this.reservationsButton   = this.reservationsButtonLi.find('a').first();
