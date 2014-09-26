@@ -21,28 +21,29 @@ var WiseGuiSendView = function(reservation) {
 WiseGuiSendView.prototype.buildView = function() {
 
 	this.view = $(
-			  '<div class="row">'
-			+ '	<button class="btn WiseGuiSendViewSelectNodesButton span2">Select Nodes</button>'
-			+ '	<div class="span2">'
-			+ '		<select class="WiseGuiSendViewModeSelect span2">'
-			+ '			<option value="binary">Binary</option>'
-			+ '			<option value="ascii">ASCII</option>'
-			+ '		</select>'
-			+ '	</div>'
-			+ '	<div class="span4">'
-			+ '		<input type="text" class="WiseGuiSendViewMessageInput span4"/>'
-			+ '	</div>'
-			+ '	<div class="span2">'
-			+ '		<button class="btn btn-primary WiseGuiSendViewSendButton span2">Send message</button><br/>'
-			+ '	</div>'
-			+ '</div>'
-			+ '<div class="row">'
-			+ '	<div class="offset4 span8">'
-			+ '		<div class="inputs-list">'
-			+ '			<label class="checkbox inline"><input class="WiseGuiSendViewLineFeedCheckbox" type="checkbox"> always append line feed</label>'
-			+ '		</div>'
-			+ '	</div>'
-			+ '</div>');
+			'<div class="row">' +
+			'	<button class="btn WiseGuiSendViewSelectNodesButton span2">Select Nodes</button>' +
+			'	<div class="span2">' +
+			'		<select class="WiseGuiSendViewModeSelect span2">' +
+			'			<option value="binary">Binary</option>' +
+			'			<option value="ascii">ASCII</option>' +
+			'		</select>' +
+			'	</div>' +
+			'	<div class="span4">' +
+			'		<input type="text" class="WiseGuiSendViewMessageInput span4"/>' +
+			'	</div>' +
+			'	<div class="span2">' +
+			'		<button class="btn btn-primary WiseGuiSendViewSendButton span2">Send message</button><br/>' +
+			'	</div>' +
+			'</div>' +
+			'<div class="row">' +
+			'	<div class="offset4 span8">' +
+			'		<div class="inputs-list">' +
+			'			<label class="checkbox inline"><input class="WiseGuiSendViewLineFeedCheckbox" type="checkbox"> always append line feed</label>' +
+			'		</div>' +
+			'	</div>' +
+			'</div>'
+	);
 
 	this.nodeSelectionButton = this.view.find('button.WiseGuiSendViewSelectNodesButton').first();
 	this.modeSelect          = this.view.find('select.WiseGuiSendViewModeSelect').first();
@@ -79,11 +80,11 @@ WiseGuiSendView.prototype.buildView = function() {
 	this.messageInput.popover({
 		placement : 'bottom',
 		trigger   : 'manual',
-		animation   : true,
-		content   : 'The message must consist of comma-separated bytes in base_10 (no prefix), base_2 (prefix 0b) or base_16 (prefix 0x).<br/>'
-				+ '<br/>'
-				+ 'Example: <code>0x0A,0x1B,0b11001001,40,80</code>',
-		title     : "Message Format"
+		animation : true,
+		content   : 'The message must consist of comma-separated bytes in base_10 (no prefix), base_2 (prefix 0b) or base_16 (prefix 0x).<br/>' +
+					'<br/>' +
+					'Example: <code>0x0A,0x1B,0b11001001,40,80</code>',
+		title     : 'Message Format'
 	});
 	
 	this.messageInput.focusin(function() {
@@ -117,7 +118,7 @@ WiseGuiSendView.prototype.send = function(targetNodeUrns, payloadBase64) {
 };
 
 WiseGuiSendView.prototype.isMessageInputValid = function() {
-	return this.parseMessagePayloadBase64() != null;
+	return this.parseMessagePayloadBase64() !== null;
 };
 
 WiseGuiSendView.prototype.isMessageNodesSelectionValid = function() {
@@ -184,7 +185,7 @@ WiseGuiSendView.prototype.parseMessagePayloadBase64 = function() {
 			this.parseByteArrayFromString(messageString) :
 			this.parseByteArrayFromAsciiString(messageString);
 
-	return messageBytes == null ? null : base64_encode(messageBytes);
+	return messageBytes === null ? null : base64_encode(messageBytes);
 };
 
 WiseGuiSendView.prototype.getMode = function() {
@@ -193,11 +194,11 @@ WiseGuiSendView.prototype.getMode = function() {
 
 WiseGuiSendView.prototype.parseByteArrayFromAsciiString = function(messageString) {
 
-	if (messageString == null || messageString == '') {
+	if (messageString === null || messageString === '') {
 		return null;
 	}
 
-	var messageBytes = new Array();
+	var messageBytes = [];
 	for(var i = 0; i < messageString.length; i++) {
 		messageBytes[i] = messageString.charCodeAt(i);
 	}
@@ -216,17 +217,17 @@ WiseGuiSendView.prototype.parseByteArrayFromString = function(messageString) {
 
 		var radix = 10;
 
-		if (splitMessage[i].indexOf("0x") == 0) {
+		if (splitMessage[i].indexOf("0x") === 0) {
 
 			radix = 16;
 			splitMessage[i] = splitMessage[i].replace("0x","");
 
-		} else if (splitMessage[i].indexOf("0b") == 0) {
+		} else if (splitMessage[i].indexOf("0b") === 0) {
 
 			radix = 2;
 			splitMessage[i] = splitMessage[i].replace("0b","");
 
-			if (/^(0|1)*$/.exec(splitMessage[i]) == null) {
+			if (/^(0|1)*$/.exec(splitMessage[i]) === null) {
 				return null;
 			}
 
@@ -239,7 +240,7 @@ WiseGuiSendView.prototype.parseByteArrayFromString = function(messageString) {
 		}
 	}
 
-	if (messageBytes.length == 0) {
+	if (messageBytes.length === 0) {
 		return null;
 	}
 
