@@ -57,14 +57,14 @@ WiseGuiGoogleMapsView.prototype.parse = function() {
 	} else {
 		var c = this.wiseml.setup.origin.outdoorCoordinates;
 		this.origin = new Coordinate(
-				(c.latitude == null ? undefined : c.latitude),
-				(c.longitude == null ? undefined : c.longitude),
-				(c.x == null ? undefined : c.x),
-				(c.y == null ? undefined : c.y),
-				(c.z == null ? undefined : c.z),
-				(c.phi == null ? undefined : c.phi),
-				(c.theta == null ? undefined : c.theta),
-				(c.rho == null ? undefined : c.rho)
+				(c.latitude === null ? undefined : c.latitude),
+				(c.longitude === null ? undefined : c.longitude),
+				(c.x === null ? undefined : c.x),
+				(c.y === null ? undefined : c.y),
+				(c.z === null ? undefined : c.z),
+				(c.phi === null ? undefined : c.phi),
+				(c.theta === null ? undefined : c.theta),
+				(c.rho === null ? undefined : c.rho)
 		);
 	}
 
@@ -123,13 +123,14 @@ WiseGuiGoogleMapsView.prototype.buildView = function(parentDiv) {
 		// Adjust map
 		this.setBounds();
 	} else {
-		this.view = $('<div class="gMap" style="height:500px;">'
-			+ '<span class="label label-warning">Map View Not Available</span>'
-			+ '<p>'
-			+ 'The testbed meta data does not contain any information about the testbeds location or the location '
-			+ 'of the nodes therein. Therefore the map can not be rendered.'
-			+ '</p>'
-			+ '</div>');
+		this.view = $(
+			'<div class="gMap" style="height:500px;">' +
+			'	<span class="label label-warning">Map View Not Available</span>' +
+			'	<p>' +
+			'		The testbed meta data does not contain any information about the testbeds location or the location ' +
+			'		of the nodes therein. Therefore the map can not be rendered.' +
+			'	</p>' +
+			'</div>');
 		parentDiv.append(this.view);
 	}
 };
@@ -173,16 +174,16 @@ WiseGuiGoogleMapsView.prototype.addMarker = function(node) {
 
 	this.infoWindows[node.id] = new google.maps.InfoWindow();
 	this.infoWindowRenderer = function(key,value) {
-		if (value == null || value === undefined) {
+		if (value === null || value === undefined) {
 			return undefined;
 		} else {
 			return value;
 		}
 	};
 
-	var infoWindowContent = '<h5>' + node.id + '</h5>'
-					+ (JSON.stringify(node.c, this.infoWindowRenderer, '  ').replace(/\n/g, "<br/>") + '</br>')
-					+ (node.desc ? node.desc + '</br>' : '');
+	var infoWindowContent = '<h5>' + node.id + '</h5>' +
+					(JSON.stringify(node.c, this.infoWindowRenderer, '  ').replace(/\n/g, "<br/>") + '</br>') +
+					(node.desc ? node.desc + '</br>' : '');
 	this.infoWindows[node.id].setContent(infoWindowContent);
 
 	var self = this;
