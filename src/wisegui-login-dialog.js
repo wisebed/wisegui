@@ -127,22 +127,23 @@ WiseGuiLoginDialog.prototype.buildView = function() {
 
 	var dialogHeader = $('<div class="modal-header"><h3>Login</h3></div>');
 
-	var dialogBody = $('<div class="modal-body WiseGuiLoginDialog"/>'
-			+ '		<form id="WiseGuiLoginDialogForm">'
-			+ '		<table class="table" id="WiseGuiLoginDialogFormTable">'
-			+ '			<thead>'
-			+ '				<tr>'
-			+ '					<th>Testbed</th>'
-			+ '					<th>URN Prefix</th>'
-			+ '					<th>Username</th>'
-			+ '					<th>Password</th>'
-			+ '				</tr>'
-			+ '			</thead>'
-			+ '			<tbody>'
-			+ '			</tbody>'
-			+ '		</table>'
-			+ '		</form>'
-			+ '	</div>');
+	var dialogBody = $(
+		'<div class="modal-body WiseGuiLoginDialog"/>' +
+		'		<form id="WiseGuiLoginDialogForm">' +
+		'		<table class="table" id="WiseGuiLoginDialogFormTable">' +
+		'			<thead>' +
+		'				<tr>' +
+		'					<th>Testbed</th>' +
+		'					<th>URN Prefix</th>' +
+		'					<th>Username</th>' +
+		'					<th>Password</th>' +
+		'				</tr>' +
+		'			</thead>' +
+		'			<tbody>' +
+		'			</tbody>' +
+		'		</table>' +
+		'		</form>' +
+		'	</div>');
 
 	this.okButton = $('<input class="btn btn-primary" value="OK" style="width:25px;text-align:center;">');
 	this.cancelButton = $('<input class="btn" value="Cancel" style="width:45px;text-align:center;">');
@@ -163,20 +164,21 @@ WiseGuiLoginDialog.prototype.buildView = function() {
 	var urnPrefixes = testbedDescription.urnPrefixes;
 
 	for (var i=0; i<urnPrefixes.length; i++) {
-		var user = (localStorage[urnPrefixes[i]+'_user'] != undefined) ? localStorage[urnPrefixes[i]+'_user'] : '';
-		var pass = (localStorage[urnPrefixes[i]+'_pass'] != undefined) ? localStorage[urnPrefixes[i]+'_pass'] : '';
+		var user = (localStorage[urnPrefixes[i]+'_user'] !== undefined) ? localStorage[urnPrefixes[i]+'_user'] : '';
+		var pass = (localStorage[urnPrefixes[i]+'_pass'] !== undefined) ? localStorage[urnPrefixes[i]+'_pass'] : '';
 		this.addRowToLoginForm(loginFormTableBody, urnPrefixes[i], user, pass );
 	}
 
 	
-	var helpTextLocalStorage = 'Select this check box, log in and your credentials are stored <strong>unencrypted</strong> in your browser (HTML5 local storage). '
-		+ '<br/><br/>'
-		+'Unselect the check box and log in to delete previously stored credentials.';
+	var helpTextLocalStorage = 'Select this check box, log in and your credentials are stored ' +
+		'<strong>unencrypted</strong> in your browser (HTML5 local storage). <br/>' +
+		'<br/>' +
+		'Uncheck the check box and log in to delete previously stored credentials.';
 
 	var trStoreCredentials = $('<tr/>');
 	var storeCredentials_checkbox;
 	
-	if(localStorage[this.loginFormRows[0].inputUrnPrefix.value+'_user'] != undefined){
+	if(localStorage[this.loginFormRows[0].inputUrnPrefix.value+'_user'] !== undefined){
 		storeCredentials_checkbox = $('<input type="checkbox" style="margin:3px" checked="checked">');
 	}else{
 		storeCredentials_checkbox = $('<input type="checkbox" style="margin:3px" ">');
@@ -211,12 +213,13 @@ WiseGuiLoginDialog.prototype.buildView = function() {
 	loginFormTableBody.append(trStoreCredentials);
 
 
-	loginFormTableBody.append($(''
-			+ '<tr>'
-			+ '	<td style="padding-bottom: 0" colspan="4">'
-			+ '		No account yet? <a href="/user_registration" target="_blank">Register here!'
-			+ '	</td>'
-			+ '</tr>'));
+	loginFormTableBody.append($(
+			'<tr>' + 
+			'	<td style="padding-bottom: 0" colspan="4">' +
+			'		No account yet? <a href="/user_registration" target="_blank">Register here!' +
+			'	</td>' +
+			'</tr>')
+	);
 };
 
 WiseGuiLoginDialog.prototype.startLogin= function() {
