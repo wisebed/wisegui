@@ -23,7 +23,7 @@ WiseGuiReservationDialog.prototype.show = function() {
 WiseGuiReservationDialog.prototype.buildView = function() {
 
 	Array.prototype.diff = function(a) {
-	    return this.filter(function(i) {return !(a.indexOf(i) > -1);});
+	    return this.filter(function(i) { return a.indexOf(i) <= -1; });
 	};
 
 	var that = this;
@@ -68,14 +68,15 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 	var p_nodes = $("<p></p>");
 
 	var tabs = $(
-			  '<ul class="nav nav-tabs">'
-			+ '	<li class="active"><a href="#WiseGuiTestbedMakeReservationList" data-toggle="tab">List</a></li>'
-			+ '	<li><a href="#WiseGuiTestbedMakeReservationMap" data-toggle="tab">Map</a></li>'
-			+ '</ul>'
-			+ '<div class="tab-content">'
-			+ '	<div class="tab-pane active" id="WiseGuiTestbedMakeReservationList"></div>'
-			+ '	<div class="tab-pane" id="WiseGuiTestbedMakeReservationMap"></div>'
-			+ '</div>');	
+			'<ul class="nav nav-tabs">' +
+			'	<li class="active"><a href="#WiseGuiTestbedMakeReservationList" data-toggle="tab">List</a></li>' +
+			'	<li><a href="#WiseGuiTestbedMakeReservationMap" data-toggle="tab">Map</a></li>' +
+			'</ul>' +
+			'<div class="tab-content">' +
+			'	<div class="tab-pane active" id="WiseGuiTestbedMakeReservationList"></div>' +
+			'	<div class="tab-pane" id="WiseGuiTestbedMakeReservationMap"></div>' +
+			'</div>'
+	);
 	
 	tabs.find('#WiseGuiTestbedMakeReservationList').append(p_nodes);
 
@@ -110,7 +111,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 		that.mapsView = new WiseGuiGoogleMapsView(wiseML, tabs.find('#WiseGuiTestbedMakeReservationMap'));
 		var mapsView = that.mapsView;
 
-		if (mapsView.map != null) {
+		if (mapsView.map !== null) {
 
 			mapsView.map.enableKeyDragZoom();
 			mapsView.map.selectedURNs = [];
@@ -151,7 +152,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 	            });
 				
 				//loop over selected urns and insert them to model if necessary
-				$.each(urns, function(index, urn) {
+				$.each(urns, function(idx, urn) {
 					var index = mapsView.map.selectedURNs.indexOf(urn);
 					if(index == -1) {
 						if (!deselect) {
@@ -191,7 +192,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 	            
 	            // get nodes that have been (de-)selected
 	            mapsView.markersArray.forEach(function(marker) {
-	            	if (bounds.contains(marker.getPosition()) && marker.getMap() != null) {
+	            	if (bounds.contains(marker.getPosition()) && marker.getMap() !== null) {
 	                    if (marker.getIcon() == ICON_DESELECTED) {
 	                    	selectedURNs.push(marker.urn);
 	                    } else {
@@ -238,10 +239,10 @@ WiseGuiReservationDialog.prototype.buildView = function() {
     var onError = function (msg) {
 
 		dialogBody.prepend($(
-			  '<div class="alert alert-error">'
-			+ '	<a class="close" data-dismiss="alert" href="#">&times;</a>'
-			+ ' <p>'+msg+'</p>'
-			+ '</div>'
+			'<div class="alert alert-error">' +
+			'	<a class="close" data-dismiss="alert" href="#">&times;</a>' +
+			' <p>'+msg+'</p>' +
+			'</div>'
 		));
 
 		okButton.removeAttr("disabled");
@@ -355,7 +356,7 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 
 	var nodeSelectionLoadButton = new WiseGuiNodeSelectionLoadButton(function(selection) {
 		that.table.setSelectedNodes(selection);
-	})
+	});
 
 	var dialogFooter = $('<div class="modal-footer"/>');
 	dialogFooter.append(nodeSelectionLoadButton.view, nodeSelectionSaveButton.view, okButton, cancelButton);
