@@ -23,33 +23,33 @@ var WiseGuiFlashView = function(reservation) {
 
 WiseGuiFlashView.prototype.buildView = function() {
 	this.view = $(
-		  '<div class="row">'
-		+ '	<div class="span3">'
-		+ '		<button class="btn WiseGuiFlashViewAddSetButton"> + </button>'
-		+ '		<button class="btn WiseGuiFlashViewRemoveSetButton"> - </button>'
-		+ '		<button class="btn WiseGuiFlashViewLoadConfigurationButton">Load</button>'
-		+ '		<button class="btn WiseGuiFlashViewSaveConfigurationButton">Save</button>'
-		+ '	</div>'
-		+ '	<div class="span3">'
-		+ '		<button class="btn btn-primary WiseGuiFlashViewFlashButton span2">Flash</button>'
-		+ '	</div>'
-		+ '</div>'
-		+ '<div class="row">'
-		+ '	<div class="span12">'
-		+ '		<table class="table table-striped">'
-		+ '			<thead>'
-		+ '				<tr>'
-		+ '					<th>Set</th>'
-		+ '					<th>Selected Nodes</th>'
-		+ '					<th>Image File</th>'
-		+ '					<th class="span5"></th>'
-		+ '				</tr>'
-		+ '			</thead>'
-		+ '			<tbody>'
-		+ '			</tbody>'
-		+ '		</table>'
-		+ '	</div>'
-		+ '</div>');
+		'<div class="row">' +
+		'	<div class="span3">' +
+		'		<button class="btn WiseGuiFlashViewAddSetButton"> + </button>' +
+		'		<button class="btn WiseGuiFlashViewRemoveSetButton"> - </button>' +
+		'		<button class="btn WiseGuiFlashViewLoadConfigurationButton">Load</button>' +
+		'		<button class="btn WiseGuiFlashViewSaveConfigurationButton">Save</button>' +
+		'	</div>' +
+		'	<div class="span3">' +
+		'		<button class="btn btn-primary WiseGuiFlashViewFlashButton span2">Flash</button>' +
+		'	</div>' +
+		'</div>' +
+		'<div class="row">' +
+		'	<div class="span12">' +
+		'		<table class="table table-striped">' +
+		'			<thead>' +
+		'				<tr>' +
+		'					<th>Set</th>' +
+		'					<th>Selected Nodes</th>' +
+		'					<th>Image File</th>' +
+		'					<th class="span5"></th>' +
+		'				</tr>' +
+		'			</thead>' +
+		'			<tbody>' +
+		'			</tbody>' +
+		'		</table>' +
+		'	</div>' +
+		'</div>');
 
 	this.addSetButton            = this.view.find('button.WiseGuiFlashViewAddSetButton').first();
 	this.removeSetButton         = this.view.find('button.WiseGuiFlashViewRemoveSetButton').first();
@@ -121,7 +121,7 @@ WiseGuiFlashView.prototype.loadConfiguration = function(button) {
 				dialog.hide();
 				button.removeAttr("disabled");
 
-				if(data == null) {
+				if(data === null) {
 					return;
 				}
 
@@ -206,16 +206,13 @@ WiseGuiFlashView.prototype.addConfiguration = function(conf) {
 
 	if(typeof(conf) == "object") {
 		// Set the image
-		if(conf.image != null) {
+		if(conf.image !== null) {
 			configuration.config.image = conf.image;
 			var blob = this.dataURItoBlob(configuration.config.image);
-			imageFileInfoLabel.append(
-					'<strong>' + blob.name + '</strong> (' + (blob.type || 'n/a') + ')<br/>'
-					+ blob.size + ' bytes'
-			);
+			imageFileInfoLabel.append('<strong>' + blob.name + '</strong> (' + (blob.type || 'n/a') + ')<br/>' + blob.size + ' bytes');
 		}
 		// Set the node URNs
-		if(conf.nodeUrns != null) {
+		if(conf.nodeUrns !== null) {
 
 			var checkNodes = function(data) {
 
@@ -290,8 +287,7 @@ WiseGuiFlashView.prototype.addConfiguration = function(conf) {
 			configuration.config.image = imageFileReader.result;
 			imageFileInfoLabel.empty();
 			imageFileInfoLabel.append(
-					'<strong>' + imageFile.name + '</strong> (' + (imageFile.type || 'n/a') + ')<br/>'
-					+ imageFile.size + ' bytes'
+					'<strong>' + imageFile.name + '</strong> (' + (imageFile.type || 'n/a') + ')<br/>' + imageFile.size + ' bytes'
 
 					// last modified: ' +
 					// imageFile.lastModifiedDate.toLocaleDateString()
@@ -408,7 +404,7 @@ WiseGuiLoadConfigurationDialog.prototype.buildView = function() {
 		var files = document.getElementById('input_file').files;
 		var f = files[0];
 
-		if(f != "") {
+		if(f !== "") {
 			var fileReader = new FileReader();
 			fileReader.onloadend = function(progressEvent) {
 				try {
