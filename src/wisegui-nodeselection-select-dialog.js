@@ -29,13 +29,13 @@ var WiseGuiNodeSelectionSelectDialog = function(selectionCallback) {
 	if (!nodeSelections) {
 		
 		dialogBody.append('<p><span class="label label-warning">No saved node selections available!</span></p>');
-		dialogBody.append('<p>Node selections are stored in the Browsers "localStorage" object and are not '
-			+ 'synchronized with your user account on the testbed servers.');
+		dialogBody.append('<p>Node selections are stored in the Browsers "localStorage" object and are not ' +
+			'synchronized with your user account on the testbed servers.');
 		
 	} else {
 
 		var select = $('<select/>');
-		for (name in nodeSelections) {
+		for (var name in nodeSelections) {
 			select.append($("<option></option>").attr("value", name).text(name));
 		}
 		dialogBody.append(select);
@@ -46,7 +46,7 @@ var WiseGuiNodeSelectionSelectDialog = function(selectionCallback) {
 			} else {
 				loadButton.attr('disabled', 'disabled');
 			}
-		})
+		});
 	}
 
 	// configure button actions
@@ -60,5 +60,5 @@ var WiseGuiNodeSelectionSelectDialog = function(selectionCallback) {
 
 	this.show = function() {
 		dialog.modal('show');
-	}
-}
+	};
+};
