@@ -9,7 +9,7 @@
 if (!($.fn.exists)) {
 	$.fn.exists = function () {
 		return this.length !== 0;
-	}
+	};
 }
 
 var WiseGuiNodeSelectionLoadButton = function(selectionCallback) {
@@ -41,7 +41,7 @@ var WiseGuiNodeSelectionLoadButton = function(selectionCallback) {
 
 	this.updateEnabledState = function() {
 		var savedSelection = window.localStorage.getItem("wisegui.nodeselections");
-		this.enable(savedSelection != null && savedSelection !== undefined);
+		this.enable(savedSelection !== null && savedSelection !== undefined);
 	};
 
 	$(window).bind('wisegui-nodeselection-storage-changed', function (e) {
