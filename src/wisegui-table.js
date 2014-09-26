@@ -30,9 +30,9 @@ var WiseGuiTable = function (model, headers, rowProducer, preFilterFun, preSelec
 	this.showCheckBoxes     = showCheckBoxes;
 	this.options            = options;
 
-	this.pagination         = this.options && this.options['pagination'];
-	this.paginationOffset   = this.options['paginationOffset'] !== undefined ? this.options['paginationOffset'] : 0;
-	this.paginationAmount   = this.options['paginationAmount'] !== undefined ? this.options['paginationAmount'] : 10;
+	this.pagination         = this.options && this.options.pagination;
+	this.paginationOffset   = this.options.paginationOffset !== undefined ? this.options.paginationOffset : 0;
+	this.paginationAmount   = this.options.paginationAmount !== undefined ? this.options.paginationAmount : 10;
 
 	this.sortOptions        = {
 		headers : options.sortHeaders || (this.showCheckBoxes ? { 0 : {sorter : false}} : undefined),
@@ -161,13 +161,13 @@ WiseGuiTable.prototype.generateTable = function () {
 
 		input_checkbox_th.click(function() {
 			var checked = $(this).is(':checked');
-			if(that.table != null) {
+			if(that.table !== null) {
 				// .find("input")
 				var inputs = that.table.find('tr:visible').find('input:checkbox');
 				inputs.each(function(index, input) {
 					$(this).attr('checked', checked);
 					if(index>0) // first checkbox does not belong to a specific node and has no urn
-					that.callSelectionListeners(input.attributes["urn"].nodeValue,!checked);
+					that.callSelectionListeners(input.attributes.urn.nodeValue,!checked);
 				});
 			}
 		});
@@ -191,12 +191,14 @@ WiseGuiTable.prototype.generateTable = function () {
 	if (this.pagination) {
 
 		this.paginationView = $(
-			  '<div class="pagination pagination-centered">'
-			+ '	<ul>'
-			+ '	</ul>'
-			+ '</div>'
+			'<div class="pagination pagination-centered">' +
+			'	<ul>' +
+			'	</ul>' +
+			'</div>'
 		);
 		var pages = Math.ceil(this.data.length / this.paginationAmount);
+
+		var self = this;
 
 		for (var page=0; page<pages; page++) {
 
@@ -204,9 +206,9 @@ WiseGuiTable.prototype.generateTable = function () {
 			var a = $('<a href="#">'+(page+1)+'</a>');
 
 			this.paginationView.find('ul').append(li.append(a));
-			var self = this;
-
+			
 			a.data('page', page);
+			/*jshint loopfunc:true */
 			a.click(function(e) {
 				e.preventDefault();
 				self.gotoPage($(this).data('page'));
@@ -237,7 +239,7 @@ WiseGuiTable.prototype.renderTableContents = function() {
 	var tbody = this.table.find('tbody');
 	tbody.empty();
 
-	if (this.rowProducer != null) {
+	if (this.rowProducer !== null) {
 
 		var offset = this.pagination ? this.paginationOffset : 0;
 		var amount = this.pagination ? this.paginationAmount : this.data.length;
@@ -248,7 +250,7 @@ WiseGuiTable.prototype.renderTableContents = function() {
 			var data = this.data[i].data;
 
 			var row = null;
-			if(this.rowProducer != null) {
+			if(this.rowProducer !== null) {
 				row = this.rowProducer.bind(data)(data);
 			}
 
@@ -258,10 +260,11 @@ WiseGuiTable.prototype.renderTableContents = function() {
 				var checkbox = $('<input type="checkbox"/>');
 				checkbox.attr("name", i);
 				checkbox.attr("urn", data.id);
+				/*jshint loopfunc:true */
 				checkbox.click(function() {
-					var checked = $(this).is(':checked');
-					self.callSelectionListeners(this.attributes["urn"].nodeValue, !checked);
-				});
+						var checked = $(this).is(':checked');
+						self.callSelectionListeners(this.attributes.urn.nodeValue, !checked);
+					});
 				data.checkbox = checkbox;
 				var td_checkbox = $('<td></td>');
 				td_checkbox.append(checkbox);
@@ -278,8 +281,8 @@ WiseGuiTable.prototype.renderTableContents = function() {
 		}
 	}
 
-	if (this.data.length == 0) {
-		var noDataMessage = this.options && this.options['noDataMessage'] ? this.options['noDataMessage'] : 'No data available.';
+	if (this.data.length === 0) {
+		var noDataMessage = this.options && this.options.noDataMessage ? this.options.noDataMessage : 'No data available.';
 		tbody.append($('<tr><td colspan="'+this.headers.length+'">'+noDataMessage+'<td></tr>'));
 	}
 };
@@ -311,7 +314,7 @@ WiseGuiTable.prototype.getSelectedRows = function () {
 	var that = this;
 
 	var selected = [];
-	if(this.data != null && this.table != null) {
+	if(this.data !== null && this.table !== null) {
 		this.table.find("input:checked").each(function() {
 			var name = $(this).attr('name');
 			// Ignore the checkbox from the header, which doesn't have any name
@@ -328,7 +331,7 @@ WiseGuiTable.prototype.setSelectedRows = function (selectionCallback) {
 
 	var that = this;
 
-	if(this.data != null && this.table != null) {
+	if(this.data !== null && this.table !== null) {
 		this.table.find("input").each(function() {
 			var checkbox = $(this);
 			var name = $(this).attr('name');
@@ -349,15 +352,17 @@ WiseGuiTable.prototype.setFilterFun = function (fn) {
 		var d = this.data[i];
 		d.isVisible = true; // Reset
 
-		if(fn != null && typeof(fn) == "function") {
+		if(fn !== null && typeof(fn) == "function") {
 			d.isVisible = d.isVisible && fn.bind(d.data)(d.data);
-		} else if(fn != null && typeof(fn) == "string" && fn.length > 0 && this.filter_checkbox.is(':checked')) {
+		} else if(fn !== null && typeof(fn) == "string" && fn.length > 0 && this.filter_checkbox.is(':checked')) {
 			// Filter
 			var errorOccured = false;
 
+			/*jshint loopfunc:true */
 			var fil = function(e) {
 				ret = true;
 				try {
+					/*jshint evil:true */
 					ret = eval(fn);
 				} catch (ex) {
 					errorOccured = true;
@@ -365,7 +370,8 @@ WiseGuiTable.prototype.setFilterFun = function (fn) {
 				}
 
 				if(typeof(ret) != "boolean") {
-					if(that.lastWorkingFilterExpr != null) {
+					if(that.lastWorkingFilterExpr !== null) {
+						/*jshint evil:true */
 						ret = eval(that.lastWorkingFilterExpr);
 					} else {
 						return true;
@@ -386,8 +392,8 @@ WiseGuiTable.prototype.setFilterFun = function (fn) {
 		}
 
 		// Simple filter
-		if(fn != null && typeof(fn) == "string" && fn.length > 0 && !this.filter_checkbox.is(':checked')) {
-			if(this.rowProducer != null) {
+		if(fn !== null && typeof(fn) == "string" && fn.length > 0 && !this.filter_checkbox.is(':checked')) {
+			if(this.rowProducer !== null) {
 				var row = this.rowProducer(d.data);
 				if(implode(" ", row).toLowerCase().indexOf(fn.toLowerCase()) < 0) {
 					d.isVisible = false;
@@ -406,10 +412,10 @@ WiseGuiTable.prototype.setFilterFun = function (fn) {
 		this.input_checkbox_th.attr('checked', false);
 	}
 	var urns = [];
-	for ( var i = 0; i < this.data.length; i++) {
-		var d = this.data[i];
-		if(d.isVisible==true){
-			urns.push(d.data.id);}
+	for ( var j = 0; j < this.data.length; j++) {
+		var e = this.data[j];
+		if(e.isVisible === true){
+			urns.push(e.data.id);}
 		}
 	this.callFilterListeners(urns);
 };
@@ -421,7 +427,7 @@ WiseGuiTable.prototype.setSelectFun = function (fn) {
 	for ( var i = 0; i < this.data.length; i++) {
 		var data = this.data[i].data;
 		var bool = false;
-		if(fn != null) {
+		if(fn !== null) {
 			bool = fn.bind(data)(data);
 		}
 		var checkbox = this.data[i].row.find('input:checkbox');
