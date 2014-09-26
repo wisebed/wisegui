@@ -28,10 +28,11 @@ var WiseGuiNotificationsViewer = function() {
 				}
 				this.count = 0;
 				self.button.find('#notifications-counter').removeClass(
-						  ' badge-info'
-						+ ' badge-success'
-						+ ' badge-warning'
-						+ ' badge-important');
+						'badge-info ' +
+						'badge-success ' +
+						'badge-warning ' +
+						'badge-important '
+				);
 			}
 	};
 	this.buildView();
@@ -82,9 +83,9 @@ WiseGuiNotificationsViewer.prototype.updateCounter = function() {
 
 WiseGuiNotificationsViewer.prototype.showAlert = function(alert) {
 	var alertDiv = $(
-			  '<div class="alert alert-'+alert.severity+'">'
-			+ '<button class="close" data-dismiss="alert">&times;</button>'
-			+ '</div>'
+			'<div class="alert alert-'+alert.severity+'">' +
+			'<button class="close" data-dismiss="alert">&times;</button>' +
+			'</div>'
 	);
 	alertDiv.append(alert.message);
 	this.history.append(alertDiv);
@@ -93,11 +94,11 @@ WiseGuiNotificationsViewer.prototype.showAlert = function(alert) {
 
 WiseGuiNotificationsViewer.prototype.showBlockAlert = function(alert) {
 	var blockAlertDiv = $(
-			  '<div class="alert block-message alert-' + alert.severity + '">'
-			+ '	<button class="close" data-dismiss="alert">x</button>'
-			+ '	<div class="alert-actions">'
-			+ '	</div>'
-			+ '</div>'
+			'<div class="alert block-message alert-' + alert.severity + '">' +
+			'	<button class="close" data-dismiss="alert">x</button>' +
+			'	<div class="alert-actions">' +
+			'	</div>' +
+			'</div>'
 	);
 	if (alert.message instanceof Array) {
 		for (var i=0; i<alert.message.length; i++) {
@@ -108,8 +109,8 @@ WiseGuiNotificationsViewer.prototype.showBlockAlert = function(alert) {
 	}
 	var actionsDiv = blockAlertDiv.find('.alert-actions');
 	if (alert.actions) {
-		for (var i=0; i<alert.actions.length; i++) {
-			actionsDiv.append(alert.actions[i]);
+		for (var j=0; j<alert.actions.length; j++) {
+			actionsDiv.append(alert.actions[j]);
 			actionsDiv.append(' ');
 		}
 	}
@@ -140,21 +141,21 @@ WiseGuiNotificationsViewer.prototype.flash = function(div) {
 WiseGuiNotificationsViewer.prototype.buildView = function() {
 	
 	this.view = $(
-			  '<div class="WiseGuiNotificationsContainer">'
-			+ '	<div id="WiseGuiNotificationsHistory"/>'
-			+ '	<div id="WiseGuiNotificationsRoster">'
-			+ ' 	<div id="notification-flash" class="span11">&nbsp;</div>'
-			+ '		<div class="span1" id="WiseGuiNotificationsButton">'
-			+ '			<div class="btn-group">'
-			+ '				<a class="btn btn-mini" id="roster-btn" href="#" title="show old notifications"><span class="badge" id="notifications-counter">0</span></a>'
-			+ '				<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#" title="remove all notifications"><span>&#9650;</span></a>'
-			+ '				<ul class="dropdown-menu" id="roster-dropdown">'
-			+ '					<li><a id="roster-clear" href="#">Clear</a></li>'
-			+ '				</ul>'
-			+ '			</div>'
-			+ '		</div>'
-			+ '	</div>'
-			+ '</div>'
+			'<div class="WiseGuiNotificationsContainer">' +
+			'	<div id="WiseGuiNotificationsHistory"/>' +
+			'	<div id="WiseGuiNotificationsRoster">' +
+			' 	<div id="notification-flash" class="span11">&nbsp;</div>' +
+			'		<div class="span1" id="WiseGuiNotificationsButton">' +
+			'			<div class="btn-group">' +
+			'				<a class="btn btn-mini" id="roster-btn" href="#" title="show old notifications"><span class="badge" id="notifications-counter">0</span></a>' +
+			'				<a class="btn btn-mini dropdown-toggle" data-toggle="dropdown" href="#" title="remove all notifications"><span>&#9650;</span></a>' +
+			'				<ul class="dropdown-menu" id="roster-dropdown">' +
+			'					<li><a id="roster-clear" href="#">Clear</a></li>' +
+			'				</ul>' +
+			'			</div>' +
+			'		</div>' +
+			'	</div>' +
+			'</div>'
 	);
 
 	this.history = this.view.find('#WiseGuiNotificationsHistory');
