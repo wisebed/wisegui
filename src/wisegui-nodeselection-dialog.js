@@ -16,22 +16,28 @@ var WiseGuiNodeSelectionDialog = function(experimentId, headerHtml, bodyHtml, pr
 
 	this.dialogDiv = $('<div id="'+this.dialogDivId+'" class="modal hide WiseGuiNodeSelectionDialog"></div>');
 
-	var bodyHeader = $('	<div class="modal-header">'
-			+ '		<h3>' + headerHtml + '</h3>'
-			+ '	</div>');
+	var bodyHeader = $(
+		'<div class="modal-header">' +
+		'	<h3>' + headerHtml + '</h3>' +
+		'</div>'
+	);
 
-	var body = $('	<div class="modal-body">'
-			+ '		<p>' + bodyHtml + '</p>'
-			+ '	</div>');
+	var body = $(
+		'<div class="modal-body">' +
+		'	<p>' + bodyHtml + '</p>' +
+		'</div>'
+	);
 
 	var imgAjaxLoader = $('<img class="ajax-loader" width="32" height="32"/>');
 	imgAjaxLoader.attr("src", "img/ajax-loader-big.gif");
 	body.append(imgAjaxLoader);
 
-	var bodyFooter = $(' <div class="modal-footer">'
-			+ '		<a class="modal-cancel btn">Cancel</a>'
-			+ '		<a class="modal-ok btn btn-primary">OK</a>'
-			+ '	</div>');
+	var bodyFooter = $(
+		'<div class="modal-footer">' +
+		'	<a class="modal-cancel btn">Cancel</a>' +
+		'	<a class="modal-ok btn btn-primary">OK</a>' +
+		'</div>'
+	);
 
 	this.dialogDiv.append(bodyHeader, body, bodyFooter);
 
@@ -55,7 +61,7 @@ var WiseGuiNodeSelectionDialog = function(experimentId, headerHtml, bodyHtml, pr
 };
 
 WiseGuiNodeSelectionDialog.prototype.setSelection = function(nodeUrns) {
-	if (nodeUrns != null && nodeUrns.length > 0) {
+	if (nodeUrns !== null && nodeUrns.length > 0) {
 		window.localStorage.setItem(this.storageKeyPrefix + this.experimentId, nodeUrns.join(","));
 		this.table.applySelected(function(data) { return nodeUrns.indexOf(data.id) > -1; });
 	} else {
@@ -66,7 +72,7 @@ WiseGuiNodeSelectionDialog.prototype.setSelection = function(nodeUrns) {
 
 WiseGuiNodeSelectionDialog.prototype.getSelection = function() {
 	var nodeUrnsString = window.localStorage.getItem(this.storageKeyPrefix + this.experimentId);
-	return nodeUrnsString == null ? [] : nodeUrnsString.split(",");
+	return nodeUrnsString === null ? [] : nodeUrnsString.split(",");
 };
 
 WiseGuiNodeSelectionDialog.prototype.areSomeSelected = function() {
