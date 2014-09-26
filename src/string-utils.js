@@ -1,4 +1,4 @@
-var StringUtils = new function() {
+var StringUtils = function() {
 	
 	var startsWith = function (str, patt) {
 		return str.slice(0, patt.length) == patt;
@@ -41,7 +41,7 @@ var StringUtils = new function() {
 		replacements[i] = String.fromCharCode(i & 0xFF);
 	}
 	replacements[0x7f] = "[DEL]";
-	for (var i = 128; i < 256; i++) {
+	for (i = 128; i < 256; i++) {
 		var hex = (i).toString(16);
 		var paddedHex = ("00" + hex).substring(hex.length);
 		replacements[i] = "[0x" + paddedHex + "]";
@@ -120,5 +120,4 @@ var StringUtils = new function() {
 	this.toBinaryString = function(str) {
 		return toXstring(str, 2).join(' ');
 	};
-	
 };
