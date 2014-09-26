@@ -45,28 +45,29 @@ WiseGuiReservationView.prototype.buildView = function() {
 	this.view.append(this.consoleView.view);
 
 	this.view.append(
-			  ' <div class="WiseGuiReservationViewControls"><h2>Controls</h2></div>'
-			+ '	 <div>'
-			+ '		<ul class="nav nav-tabs">'
-			+ '			<li class="active"    ><a href="#'+this.flashDivId+'">Flash</a></li>'
-			+ '			<li                   ><a href="#'+this.resetDivId+'">Reset</a></li>'
-			+ '			<li                   ><a href="#'+this.sendDivId+'">Send Message</a></li>'
-			+ '			<li                   ><a href="#'+this.scriptingEditorDivId+'">Scripting Editor</a></li>'
-			+ '			<li                   ><a href="#'+this.scriptingOutputDivId+'">Scripting Output</a></li>'
-			+ '         <li class="pull-right"><a href="#'+this.wisemlXmlDivId+'">WiseML (XML)</a></li>'
-			+ '         <li class="pull-right"><a href="#'+this.wisemlJsonDivId+'">WiseML (JSON)</a></li>'
-			+ '		</ul>'
-			+ '		<div class="tab-content">'
-			+ '			<div class="active tab-pane WiseGuiConsoleViewFlashControl" id="'+this.flashDivId+'"></div>'
-			+ '			<div class="       tab-pane WiseGuiConsoleViewResetControl" id="'+this.resetDivId+'"></div>'
-			+ '			<div class="       tab-pane WiseGuiConsoleViewSendControl" id="'+this.sendDivId+'"/>'
-			+ '			<div class="       tab-pane WiseGuiConsoleViewScriptingControl" id="'+this.scriptingEditorDivId+'"/>'
-			+ '			<div class="       tab-pane WiseGuiConsoleViewScriptingOutputTab" id="'+this.scriptingOutputDivId+'"/>'
-			+ '			<div class="       tab-pane WiseGuiConsoleViewWisemlXmlTab" id="'+this.wisemlXmlDivId+'"/>'
-			+ '			<div class="       tab-pane WiseGuiConsoleViewWisemlJsonTab" id="'+this.wisemlJsonDivId+'"/>'
-			+ '		</div>'
-			+ '	</div>'
-			+ '</div>');
+			' <div class="WiseGuiReservationViewControls"><h2>Controls</h2></div>' +
+			'	 <div>' +
+			'		<ul class="nav nav-tabs">' +
+			'			<li class="active"    ><a href="#'+this.flashDivId+'">Flash</a></li>' +
+			'			<li                   ><a href="#'+this.resetDivId+'">Reset</a></li>' +
+			'			<li                   ><a href="#'+this.sendDivId+'">Send Message</a></li>' +
+			'			<li                   ><a href="#'+this.scriptingEditorDivId+'">Scripting Editor</a></li>' +
+			'			<li                   ><a href="#'+this.scriptingOutputDivId+'">Scripting Output</a></li>' +
+			'			<li class="pull-right"><a href="#'+this.wisemlXmlDivId+'">WiseML (XML)</a></li>' +
+			'			<li class="pull-right"><a href="#'+this.wisemlJsonDivId+'">WiseML (JSON)</a></li>' +
+			'		</ul>' +
+			'		<div class="tab-content">' +
+			'			<div class="active tab-pane WiseGuiConsoleViewFlashControl" id="'+this.flashDivId+'"></div>' +
+			'			<div class="       tab-pane WiseGuiConsoleViewResetControl" id="'+this.resetDivId+'"></div>' +
+			'			<div class="       tab-pane WiseGuiConsoleViewSendControl" id="'+this.sendDivId+'"/>' +
+			'			<div class="       tab-pane WiseGuiConsoleViewScriptingControl" id="'+this.scriptingEditorDivId+'"/>' +
+			'			<div class="       tab-pane WiseGuiConsoleViewScriptingOutputTab" id="'+this.scriptingOutputDivId+'"/>' +
+			'			<div class="       tab-pane WiseGuiConsoleViewWisemlXmlTab" id="'+this.wisemlXmlDivId+'"/>' +
+			'			<div class="       tab-pane WiseGuiConsoleViewWisemlJsonTab" id="'+this.wisemlJsonDivId+'"/>' +
+			'		</div>' +
+			'	</div>' +
+			'</div>'
+	);
 	
 	// attach views
 	this.flashView = new WiseGuiFlashView(this.reservation);
