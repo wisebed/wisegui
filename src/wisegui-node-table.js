@@ -26,7 +26,7 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 		connectionStatus[nodeUrn].append(new WiseGuiNodeStatusIcon(nodeUrn).view);
 	});
 
-	if(nodeUrns.length == 0){
+	if(nodeUrns.length === 0){
 		console.warn("No sensor nodes found");
 		return;
 	}
@@ -69,7 +69,7 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 		var data = [];
 		var capabilities = [];
 
-		if(node.capability != null) {
+		if(node.capability !== null) {
 			for(var j = 0; j < node.capability.length; j++) {
 				parts = explode(":", node.capability[j].name);
 				capabilities[j] = parts[parts.length-1];
@@ -80,12 +80,12 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 		data.push(node.id);
 		data.push(node.nodeType);
 
-		if (node.position != null && node.position.outdoorCoordinates) {
+		if (node.position !== null && node.position.outdoorCoordinates) {
 
 			var c = node.position.outdoorCoordinates;
 
 			if (c.latitude && c.longitude) {
-				data.push('(' + c.latitude + ',' + c.longitude+ ')')
+				data.push('(' + c.latitude + ',' + c.longitude+ ')');
 			} else if (c.x && c.y && c.z) {
 				data.push('[' + c.x + ',' + c.y + ',' + c.z + ']');
 			} else if (c.x && c.y) {
@@ -96,7 +96,7 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 				data.push('');
 			}
 
-		} else if (node.position != null && node.position.indoorCoordinates) {
+		} else if (node.position !== null && node.position.indoorCoordinates) {
 			data.push(JSON.stringify(node.position.indoorCoordinates));
 		} else {
 			data.push('');
@@ -179,7 +179,7 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 		e.preventDefault();
 		var obj = {
 			"nodeUrns" : $.map(that.table.getSelectedRows(), function(val,i) { return val.id; })
-		}
+		};
 		var json = JSON.stringify(obj);
 		var w = window.open();
 		$(w.document.body).html(json);
