@@ -3,10 +3,10 @@ var WiseGuiOptionSelectionDialog = function(options, selectedCallback, cancelled
 
 	var self = this;
 
-	dialogOptions['title'] = dialogOptions['title'] || 'Please Select';
-	dialogOptions['cancelButtonLabel'] = dialogOptions['cancelButtonLabel'] || 'Cancel';
-	dialogOptions['selectButtonLabel'] = dialogOptions['selectButtonLabel'] || 'Select';
-	dialogOptions['textbox'] = dialogOptions['textbox'] || false;
+	dialogOptions.title = dialogOptions.title || 'Please Select';
+	dialogOptions.cancelButtonLabel = dialogOptions.cancelButtonLabel || 'Cancel';
+	dialogOptions.selectButtonLabel = dialogOptions.selectButtonLabel || 'Select';
+	dialogOptions.textbox = dialogOptions.textbox || false;
 	
 	this.cancelled = false;
 	this.selected = undefined;
@@ -16,14 +16,14 @@ var WiseGuiOptionSelectionDialog = function(options, selectedCallback, cancelled
 		'<div class="modal hide wisegui-option-selection-dialog" id="myModal">' +
 		'	<div class="modal-header">' +
 		'		<button type="button" class="close" data-dismiss="modal">×</button>' +
-		'		<h3>'+dialogOptions['title']+'</h3>' +
+		'		<h3>' + dialogOptions.title +'</h3>' +
 		'	</div>' +
 		'	<div class="modal-body">' +
 		'		<form><fieldset></fieldset></form>' +
 		'	</div>' +
 		'	<div class="modal-footer">' +
-		'		<a href="#" class="btn btn-cancel" data-dismiss="modal">'+dialogOptions['cancelButtonLabel']+'</a>' +
-		'		<a href="#" class="btn btn-primary btn-select" disabled="disabled">'+dialogOptions['selectButtonLabel']+'</a>' +
+		'		<a href="#" class="btn btn-cancel" data-dismiss="modal">' + dialogOptions.cancelButtonLabel + '</a>' +
+		'		<a href="#" class="btn btn-primary btn-select" disabled="disabled">' + dialogOptions.selectButtonLabel + '</a>' +
 		'	</div>' +
 		'</div>');
 	dialog.modal({
@@ -39,7 +39,7 @@ var WiseGuiOptionSelectionDialog = function(options, selectedCallback, cancelled
 	var cancelButton = dialog.find('a.btn-cancel');
 	
 	var select = $('<select>').append('<option/>');
-	for (name in options) {
+	for (var name in options) {
 		select.append($("<option></option>").attr("value", name).text(name));
 	}
 	var selectLabel = $('<label class="control-label" for="'+textId+'">Choose an existing</label>');
@@ -58,7 +58,7 @@ var WiseGuiOptionSelectionDialog = function(options, selectedCallback, cancelled
 	select.trigger('change');
 
 	// set up textbox for creating a "new selection" if configured
-	if (dialogOptions['textbox']) {
+	if (dialogOptions.textbox) {
 		var textId = 'wisegui_option_selection_dialog_text_' + Math.floor(Math.random() * 100000);
 		var text = $('<input type="text" id="'+textId+'"/>');
 		text.on('keyup', function(e) {
@@ -115,5 +115,5 @@ var WiseGuiOptionSelectionDialog = function(options, selectedCallback, cancelled
 
 	this.show = function() {
 		dialog.modal('show');
-	}
-}
+	};
+};
