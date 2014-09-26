@@ -22,14 +22,15 @@ var WiseGuiResetView = function(reservation) {
 WiseGuiResetView.prototype.buildView = function() {
 
  	this.view = $(
- 		  '<div class="row">'
-		+ '	<div class="span4">'
-		+ '		<button class="btn WiseGuiResetViewNodeSelectionButton span4">Select Nodes</button>'
-		+ '	</div>'
-		+ '	<div class="span4">'
-		+ '		<button class="btn btn-primary WiseGuiResetViewResetButton span4" disabled>Reset Nodes</button>'
-		+ '	</div>'
-		+ '</div>');
+ 		'<div class="row">' +
+		'	<div class="span4">' +
+		'		<button class="btn WiseGuiResetViewNodeSelectionButton span4">Select Nodes</button>' +
+		'	</div>' +
+		'	<div class="span4">' +
+		'		<button class="btn btn-primary WiseGuiResetViewResetButton span4" disabled>Reset Nodes</button>' +
+		'	</div>' +
+		'</div>'
+	);
 
  	this.resetNodeSelectionButton = this.view.find('button.WiseGuiResetViewNodeSelectionButton').first();
 	this.resetResetButton         = this.view.find('button.WiseGuiResetViewResetButton').first();
@@ -57,7 +58,7 @@ WiseGuiResetView.prototype.buildView = function() {
 
 WiseGuiResetView.prototype.updateResetSelectNodeUrns = function() {
 	this.resetSelectedNodeUrns = this.resetNodeSelectionDialog.getSelection();
-	this.setResetButtonDisabled(this.resetSelectedNodeUrns.length == 0);
+	this.setResetButtonDisabled(this.resetSelectedNodeUrns.length === 0);
 	this.resetNodeSelectionButton.html((this.resetSelectedNodeUrns.length == 1 ?
 			'1 node selected' :
 			this.resetSelectedNodeUrns.length + ' nodes selected'
@@ -75,7 +76,7 @@ WiseGuiResetView.prototype.showResetNodeSelectionDialog = function() {
 				self.setResetSelectNodesButtonDisabled(false);
 
 				// TODO: Refactor, also used in addFlashConfiguration
-				if(self.resetSelectedNodeUrns != null && self.resetSelectedNodeUrns.length > 0) {
+				if(self.resetSelectedNodeUrns !== null && self.resetSelectedNodeUrns.length > 0) {
 					preSelected = function(data) {
 						var nodeids = self.resetSelectedNodeUrns;
 						for(var i = 0; i < nodeids.length; i++) {
