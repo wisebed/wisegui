@@ -14,14 +14,16 @@ var WiseGuiOperationProgressView = function(nodeUrns, operationMaxValue, success
 
 	for (var i=0; i<nodeUrns.length; i++) {
 
-		var row = $('<table>'
-				+ '	<tr>'
-				+ '	<td class="span1 nodUrnTd">'+nodeUrns[i]+'</td>'
-				+ '	<td class="span4 progressTd"><progress value="0" min="0" max="'+operationMaxValue+'"/></td>'
-				+ '	<td class="span1 statusTd"></td>'
-				+ '	<td class="span6 messageTd"></td>'
-				+ '	</tr>'
-				+ '</table>');
+		var row = $(
+			'<table>' +
+			'	<tr>' +
+			'	<td class="span1 nodUrnTd">'+nodeUrns[i]+'</td>' +
+			'	<td class="span4 progressTd"><progress value="0" min="0" max="'+operationMaxValue+'"/></td>' +
+			'	<td class="span1 statusTd"></td>' +
+			'	<td class="span6 messageTd"></td>' +
+			'	</tr>' +
+			'</table>'
+		);
 
 		this.contents[nodeUrns[i]] = {
 			row         : row,
