@@ -46,134 +46,134 @@ var WiseGuiConsoleView = function(reservation) {
 
 WiseGuiConsoleView.prototype.buildView = function() {
 	this.view = $(
-			  '<div class="WiseGuiConsoleViewDiv">'
-			+ '	<div class="row">'
-			+ '		<div class="span5">'
-			+ '			<span><b>start:</b> ' + this.reservation.from.format("YYYY-MM-DD HH:mm:ss") + '</b></span>'
-			+ '			<span class="pull-right"><b>end:</b> ' + this.reservation.to.format("YYYY-MM-DD HH:mm:ss") + '</span>'
-			+ '			<div id="' + this.progressBarId+ '" class="progress"><div class="bar" style="width: 0%;"></div></div>'
-			+ '		</div>'
-			+ '		<div class="span3">'
-			+ '			<span id="' + this.statusBadgeId + '" class="badge">Loading...</span>'
-			+ '			<span id="' + this.statusBadgeDetachedId + '" class="badge badge-important" style="display: none;">Loading...</span>'
-			+ '		</div>'
-			+ '		<div class="span4">'
-			+ '			<div class="btn-toolbar btn-toolbar2 pull-right">'
-			+ '				<div class="btn-group">'
-			+ '					<button id="download-log" class="btn" title="Download Log"><i class="icon-download"></i></button>'
-			+ '				</div>'
-			+ '			</div>'
-			+ '			<div class="btn-toolbar btn-toolbar2 pull-right">'
-			+ '				<div class="btn-group">'
-			+ '					<button id="pause-output" class="btn" data-toggle="button" title="Pause receiving messages"><i class="icon-pause"></i></button>'
-			+ '				</div>'
-			+ '				<div class="btn-group">'
-			+ '					<button id="clear-output" class="btn" title="Clear output"><i class="icon-remove"></i></button>'
-			+ '				</div>'
-			+ '				<div class="btn-group">'			
-			+ '					<button id="output-view" data-toggle="dropdown" class="btn dropdown-toggle" title="Change shown columns">'
-			+ '						<i class="icon-th"></i>&nbsp;<span class="caret"</span>'
-			+ '					</button>'
-			+ '					<ul id="column-dropdown" class="dropdown-menu">'
-			+ '						<li><strong>Show Columns:</strong></li>'
-			+ '						<li>'
-			+ '							<label class="radio">'
-			+ '								<input type="checkbox" data-col="time" checked>'
-			+ '									Timestamp'
-			+ '							</label>'
-	    	+ '						</li>'	
-			+ '						<li>'
-			+ '							<label class="radio">'
-			+ '								<input type="checkbox" data-col="urn" checked>'
-			+ '									Node URN'
-			+ '							</label>'
-	    	+ '						</li>'
-			+ '						<li>'
-			+ '							<label class="radio">'
-			+ '								<input type="checkbox" data-col="message" checked>'
-			+ '									Message'
-			+ '							</label>'
-			+ '						</li>'
-			+ '					</ul>'
-			+ '				</div>'
-			+ '				<div class="btn-group">'			
-			+ '					<button id="output-view" data-toggle="dropdown" class="btn dropdown-toggle" title="Change view options">'
-			+ '						<i class="icon-eye-open"></i>&nbsp;<span class="caret"</span>'
-			+ '					</button>'
-			+ '					<ul class="dropdown-menu" id="view-dropdown">'
-			+ '						<li><strong>Format ouput as:</strong></li>'
-			+ '						<li>'
-			+ '							<label class="radio">'
-			+ '								<input type="radio" name="viewRadio" id="optionsRadios1" value="ascii" checked>'
-			+ '									ASCII'
-			+ '							</label>'
-			+ '						</li>'	
-			+ '						<li>'
-			+ '							<label class="radio">'
-			+ '								<input type="radio" name="viewRadio" id="optionsRadios1" value="hex">'
-			+ '									Hex'
-			+ '							</label>'
-			+ '						</li>'
-			+ '						<li>'
-			+ '							<label class="radio">'
-			+ '								<input type="radio" name="viewRadio" id="optionsRadios1" value="decimal">'
-			+ '									Decimal'
-			+ '							</label>'
-			+ '						</li>'
-			+ '						<li>'
-			+ '							<label class="radio">'
-			+ '								<input type="radio" name="viewRadio" id="optionsRadios1" value="binary">'
-			+ '									Binary'
-			+ '							</label>'
-			+ '						</li>'
-			+ '						<li>'
-			+ '							<label class="checkbox" title="Show non-printable chars in ASCII mode: e.g. 0x00 gets [NUL]">'
-			+ '								<input id="make-printable" checked type="checkbox">non-printables</input>'
-			+ '							</label>'
-			+ '						</li>'
-			+ '					</ul>'
-			+ '				</div>'
-			+ '				<div class="btn-group">'
-			+ '					<button id="filter-nodes" class="btn" title="Filter output for nodes."><i class="icon-filter"></i></button>'
-			+ '				</div>'
-			+ '				<div class="btn-group">'
-			+ '					<button class="btn dropdown-toggle" data-toggle="dropdown" title="Show output options.">'
-			+ '						<i class="icon-wrench"></i>&nbsp;<span class="caret"</span>'
-			+ '					</button>'
-			+ '					<ul id="options-dropdown" class="dropdown-menu">'
-			+ '						<li>'
-			+ '							<form class="form-inline">'
-			+ '								<label class="checkbox">'
-			+ '									<input id="auto-scroll" checked="checked" type="checkbox">auto scroll</input>'
-			+ '								</label>'
-			+ '							</form>'
-			+ '						</li>'	
-			+ '						<li>'
-			+ '							<form class="form-inline">'
-			+ '								<label title="press enter to save">'
-			+ '									Show <input type="text" value="'+this.outputsNumMessages+'" id="num-outputs" style="width: 30px; height: 10px;"> messages'
-			+ '								</label>'
-			+ '							</form>'
-			+ '						</li>'
-			+ '						<li>'
-			+ '							<form class="form-inline">'
-			+ '								<label title="Incresing helps if your browser freezes due to too many messages. Press enter to save.">'
-			+ '									Redraw at most every <input type="text" value="'+this.outputsRedrawLimit+'" id="redraw-limit" style="width: 30px; height: 10px;"> ms'
-			+ '								</label>'
-			+ '							</form>'
-			+ '						</li>'
-			+ '					</ul>'
-			+ '				</div>'
-			+ '			</div>'
-			+ '		</div>'
-			+ '	</div>'
-			+ '	<div class="row">'
-			+ '		<div class="span12"><div class="well WiseGuiConsoleViewOutputsWell" style="height:300px; overflow:auto;">'
-			+ '			<table class="table WiseGuiConsoleViewOutputsTable">'
-			+ '				<tbody></tbody>'
-			+ '			</table>'
-			+ '		</div></div>'
-			+ '	</div>');
+			'<div class="WiseGuiConsoleViewDiv">' +
+			'	<div class="row">' +
+			'		<div class="span5">' +
+			'			<span><b>start:</b> ' + this.reservation.from.format("YYYY-MM-DD HH:mm:ss") + '</b></span>' +
+			'			<span class="pull-right"><b>end:</b> ' + this.reservation.to.format("YYYY-MM-DD HH:mm:ss") + '</span>' +
+			'			<div id="' + this.progressBarId+ '" class="progress"><div class="bar" style="width: 0%;"></div></div>' +
+			'		</div>' +
+			'		<div class="span3">' +
+			'			<span id="' + this.statusBadgeId + '" class="badge">Loading...</span>' +
+			'			<span id="' + this.statusBadgeDetachedId + '" class="badge badge-important" style="display: none;">Loading...</span>' +
+			'		</div>' +
+			'		<div class="span4">' +
+			'			<div class="btn-toolbar btn-toolbar2 pull-right">' +
+			'				<div class="btn-group">' +
+			'					<button id="download-log" class="btn" title="Download Log"><i class="icon-download"></i></button>' +
+			'				</div>' +
+			'			</div>' +
+			'			<div class="btn-toolbar btn-toolbar2 pull-right">' +
+			'				<div class="btn-group">' +
+			'					<button id="pause-output" class="btn" data-toggle="button" title="Pause receiving messages"><i class="icon-pause"></i></button>' +
+			'				</div>' +
+			'				<div class="btn-group">' +
+			'					<button id="clear-output" class="btn" title="Clear output"><i class="icon-remove"></i></button>' +
+			'				</div>' +
+			'				<div class="btn-group">' +
+			'					<button id="output-view" data-toggle="dropdown" class="btn dropdown-toggle" title="Change shown columns">' +
+			'						<i class="icon-th"></i>&nbsp;<span class="caret"</span>' +
+			'					</button>' +
+			'					<ul id="column-dropdown" class="dropdown-menu">' +
+			'						<li><strong>Show Columns:</strong></li>' +
+			'						<li>' +
+			'							<label class="radio">' +
+			'								<input type="checkbox" data-col="time" checked>' +
+			'									Timestamp' +
+			'							</label>' +
+	    	'						</li>' +
+			'						<li>' +
+			'							<label class="radio">' +
+			'								<input type="checkbox" data-col="urn" checked>' +
+			'									Node URN' +
+			'							</label>' +
+	    	'						</li>' +
+			'						<li>' +
+			'							<label class="radio">' +
+			'								<input type="checkbox" data-col="message" checked>' +
+			'									Message' +
+			'							</label>' +
+			'						</li>' +
+			'					</ul>' +
+			'				</div>' +
+			'				<div class="btn-group">' +
+			'					<button id="output-view" data-toggle="dropdown" class="btn dropdown-toggle" title="Change view options">' +
+			'						<i class="icon-eye-open"></i>&nbsp;<span class="caret"</span>' +
+			'					</button>' +
+			'					<ul class="dropdown-menu" id="view-dropdown">' +
+			'						<li><strong>Format ouput as:</strong></li>' +
+			'						<li>' +
+			'							<label class="radio">' +
+			'								<input type="radio" name="viewRadio" id="optionsRadios1" value="ascii" checked>' +
+			'									ASCII' +
+			'							</label>' +
+			'						</li>' +
+			'						<li>' +
+			'							<label class="radio">' +
+			'								<input type="radio" name="viewRadio" id="optionsRadios1" value="hex">' +
+			'									Hex' +
+			'							</label>' +
+			'						</li>' +
+			'						<li>' +
+			'							<label class="radio">' +
+			'								<input type="radio" name="viewRadio" id="optionsRadios1" value="decimal">' +
+			'									Decimal' +
+			'							</label>' +
+			'						</li>' +
+			'						<li>' +
+			'							<label class="radio">' +
+			'								<input type="radio" name="viewRadio" id="optionsRadios1" value="binary">' +
+			'									Binary' +
+			'							</label>' +
+			'						</li>' +
+			'						<li>' +
+			'							<label class="checkbox" title="Show non-printable chars in ASCII mode: e.g. 0x00 gets [NUL]">' +
+			'								<input id="make-printable" checked type="checkbox">non-printables</input>' +
+			'							</label>' +
+			'						</li>' +
+			'					</ul>' +
+			'				</div>' +
+			'				<div class="btn-group">' +
+			'					<button id="filter-nodes" class="btn" title="Filter output for nodes."><i class="icon-filter"></i></button>' +
+			'				</div>' +
+			'				<div class="btn-group">' +
+			'					<button class="btn dropdown-toggle" data-toggle="dropdown" title="Show output options.">' +
+			'						<i class="icon-wrench"></i>&nbsp;<span class="caret"</span>' +
+			'					</button>' +
+			'					<ul id="options-dropdown" class="dropdown-menu">' +
+			'						<li>' +
+			'							<form class="form-inline">' +
+			'								<label class="checkbox">' +
+			'									<input id="auto-scroll" checked="checked" type="checkbox">auto scroll</input>' +
+			'								</label>' +
+			'							</form>' +
+			'						</li>' +
+			'						<li>' +
+			'							<form class="form-inline">' +
+			'								<label title="press enter to save">' +
+			'									Show <input type="text" value="'+this.outputsNumMessages+'" id="num-outputs" style="width: 30px; height: 10px;"> messages' +
+			'								</label>' +
+			'							</form>' +
+			'						</li>' +
+			'						<li>' +
+			'							<form class="form-inline">' +
+			'								<label title="Incresing helps if your browser freezes due to too many messages. Press enter to save.">' +
+			'									Redraw at most every <input type="text" value="'+this.outputsRedrawLimit+'" id="redraw-limit" style="width: 30px; height: 10px;"> ms' +
+			'								</label>' +
+			'							</form>' +
+			'						</li>' +
+			'					</ul>' +
+			'				</div>' +
+			'			</div>' +
+			'		</div>' +
+			'	</div>' +
+			'	<div class="row">' +
+			'		<div class="span12"><div class="well WiseGuiConsoleViewOutputsWell" style="height:300px; overflow:auto;">' +
+			'			<table class="table WiseGuiConsoleViewOutputsTable">' +
+			'				<tbody></tbody>' +
+			'			</table>' +
+			'		</div></div>' +
+			'	</div>');
 
 	var self = this;
 	this.progressBar                  = this.view.find('#'+this.progressBarId).first();
@@ -194,8 +194,8 @@ WiseGuiConsoleView.prototype.buildView = function() {
 	WiseGui.bindToReservationState(this.view.find('button:not(#download-log)'), this.experimentId);
 
 	var now = moment();
-	var interval = undefined;
-	var statusBadgeInterval = undefined;
+	var interval;
+	var statusBadgeInterval;
 	var status = 'pending';
 	var devicesDetached = [];
 
@@ -223,7 +223,7 @@ WiseGuiConsoleView.prototype.buildView = function() {
 				self.statusBadgeDetached.data('tooltip', false);
 				self.statusBadgeDetached.tooltip({title: devicesDetached.join('<br/>'), placement:'bottom' });
 
-			} else if (self.statusBadgeDetached != null) {
+			} else if (self.statusBadgeDetached !== null) {
 
 				self.statusBadgeDetached.empty();
 				self.statusBadgeDetached.tooltip('hide');
@@ -236,7 +236,7 @@ WiseGuiConsoleView.prototype.buildView = function() {
 			self.statusBadge.removeClass('badge-info badge-success').addClass('badge-warning');
 			self.statusBadge.append('Reservation ended ' + self.reservation.to.from(moment()));
 		}
-	}
+	};
 
 	updateStatusBadge();
 	statusBadgeInterval = window.setInterval(updateStatusBadge, 5000);
@@ -381,7 +381,7 @@ WiseGuiConsoleView.prototype.buildView = function() {
 		);
 	});
 
-	this.outputsFilterNodeSelectionDialog.onReady(function() {self.updateOutputsFilterNodesButton()});
+	this.outputsFilterNodeSelectionDialog.onReady(function() {self.updateOutputsFilterNodesButton(); });
 
 	this.outputsDownloadButton.click(function(e) {
 		var url = wisebedBaseUrl + '/events/' + self.reservation.experimentId + '.json';
@@ -482,7 +482,7 @@ WiseGuiConsoleView.prototype.onWebSocketMessageEvent = function(event) {
 
 		// append new message if in whitelist or whitelist empty
 		var outputsFilterNodes = self.getOutputsFilterNodes();
-		if (outputsFilterNodes.length == 0 || outputsFilterNodes.indexOf(message.sourceNodeUrn) > -1) {
+		if (outputsFilterNodes.length === 0 || outputsFilterNodes.indexOf(message.sourceNodeUrn) > -1) {
 			self.outputs[self.outputs.length] = message;
 			// queue throttled redraw (keeps GUI responsive)
 			setTimeout(function(){ self.throttledRedraw(); }, 5);
