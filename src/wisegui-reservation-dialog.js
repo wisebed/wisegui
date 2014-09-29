@@ -1,3 +1,5 @@
+var WiseGuiNodeTable = require('./wisegui-node-table.js');
+
 /**
  * #################################################################
  * WiseGuiReservationDialog
@@ -362,3 +364,5 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 	dialogFooter.append(nodeSelectionLoadButton.view, nodeSelectionSaveButton.view, okButton, cancelButton);
 	this.view.append(dialogHeader, dialogBody, dialogFooter);
 };
+
+module.exports = WiseGuiReservationDialog;

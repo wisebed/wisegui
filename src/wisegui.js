@@ -1,6 +1,8 @@
-var WiseGui = new function() {
+var WiseGuiNodeTable = require('./wisegui-node-table.js');
 
-	this.showAlert = function(message, severity) {
+global.WiseGui = {
+
+	showAlert : function(message, severity) {
 		$(window).trigger('wisegui-notification',
 				{
 					type     : 'alert',
@@ -8,14 +10,20 @@ var WiseGui = new function() {
 					message  : message
 				}
 		);
-	};
-
-	this.showWarningAlert = function(message) { this.showAlert(message, 'warning'); };
-	this.showErrorAlert   = function(message) { this.showAlert(message, 'error'  ); };
-	this.showSuccessAlert = function(message) { this.showAlert(message, 'success'); };
-	this.showInfoAlert    = function(message) { this.showAlert(message, 'info'   ); };
-
-	this.showBlockAlert = function(message, actions, severity) {
+	},
+	showWarningAlert : function(message) {
+		WiseGui.showAlert(message, 'warning');
+	},
+	showErrorAlert : function(message) {
+		WiseGui.showAlert(message, 'error');
+	},
+	showSuccessAlert : function(message) {
+		WiseGui.showAlert(message, 'success');
+	},
+	showInfoAlert : function(message) {
+		WiseGui.showAlert(message, 'info');
+	},
+	showBlockAlert : function(message, actions, severity) {
 		$(window).trigger('wisegui-notification',
 				{
 					type     : 'block-alert',
@@ -24,29 +32,35 @@ var WiseGui = new function() {
 					actions  : actions
 				}
 		);
-	};
-
-	this.showWarningBlockAlert = function(message, actions) { this.showBlockAlert(message, actions, 'warning'); };
-	this.showErrorBlockAlert   = function(message, actions) { this.showBlockAlert(message, actions, 'error'  ); };
-	this.showSuccessBlockAlert = function(message, actions) { this.showBlockAlert(message, actions, 'success'); };
-	this.showInfoBlockAlert    = function(message, actions) { this.showBlockAlert(message, actions, 'info'   ); };
-
-	var self = this;
-	this.showAjaxError = function(jqXHR, textStatus, errorThrown) {
+	},
+	showWarningBlockAlert : function(message, actions) {
+		WiseGui.showBlockAlert(message, actions, 'warning');
+	},
+	showErrorBlockAlert : function(message, actions) {
+		WiseGui.showBlockAlert(message, actions, 'error');
+	},
+	showSuccessBlockAlert : function(message, actions) {
+		WiseGui.showBlockAlert(message, actions, 'success');
+	},
+	showInfoBlockAlert : function(message, actions) {
+		WiseGui.showBlockAlert(message, actions, 'info');
+	},
+	showAjaxError : function(jqXHR, textStatus, errorThrown) {
 		console.log(jqXHR);
-		var message = $('<h2>Error while loading data!</h2>'
-				+ '<h3>jqXHR</h3>'
-				+ (jqXHR.readyState ? ('readyState = ' + jqXHR.readyState + '<br/>') : '')
-				+ (jqXHR.status ? ('status = ' + jqXHR.status + '<br/>') : '')
-				+ (jqXHR.responseText ? ('responseText = <pre>' + jqXHR.responseText + '</pre><br/>') : '')
-				+ '<h3>textStatus</h3>'
-				+ '<pre>'+textStatus+'</pre>'
-				+ '<h3>errorThrown</h3>'
-				+ '<pre>'+errorThrown+'</pre>');
-		self.showErrorBlockAlert(message);
-	};
-
-	this.bindToReservationState = function(elems, experimentId) {
+		var message = $(
+			'<h2>Error while loading data!</h2>' +
+			'<h3>jqXHR</h3>' +
+			(jqXHR.readyState ? ('readyState = ' + jqXHR.readyState + '<br/>') : '') +
+			(jqXHR.status ? ('status = ' + jqXHR.status + '<br/>') : '') +
+			(jqXHR.responseText ? ('responseText = <pre>' + jqXHR.responseText + '</pre><br/>') : '') +
+			'<h3>textStatus</h3>' +
+			'<pre>'+textStatus+'</pre>' +
+			'<h3>errorThrown</h3>' +
+			'<pre>'+errorThrown+'</pre>'
+		);
+		WiseGui.showErrorBlockAlert(message);
+	},
+	bindToReservationState : function(elems, experimentId) {
 
 		$.each(elems, function(index,e) {
 
@@ -74,20 +88,14 @@ var WiseGui = new function() {
 		});
 
 		return elems;
-	};
+	}
 };
 
-/**
- * #################################################################
- * Global Functions
- * #################################################################
- */
-
-function checkLoggedIn(callback) {
+global.checkLoggedIn = function(callback) {
 	wisebed.isLoggedIn(callback, WiseGui.showAjaxError);
-}
+};
 
-function doLogin(loginData) {
+global.doLogin = function(loginData) {
 
 	var self = this;
 
@@ -105,9 +113,9 @@ function doLogin(loginData) {
 	};
 
 	wisebed.login(loginData, callbackDone, callbackError);
-}
+};
 
-function doLogout() {
+global.doLogout = function() {
 
 	var callbackOK = function() {
 		$(window).trigger('wisegui-logged-out');
@@ -121,17 +129,17 @@ function doLogout() {
 
 	wisebed.logout(callbackOK, callbackError);
 	
-}
+};
 
-function wiseMLNullFilter(key,value) {
-	if (value == null || value === undefined || (value instanceof Array && value.length == 0)) {
+global.wiseMLNullFilter = function(key,value) {
+	if (value === null || value === undefined || (value instanceof Array && value.length === 0)) {
 		return undefined;
 	} else {
 		return value;
 	}
-}
+};
 
-function loadTestbedDetailsContainer(navigationData, parentDiv) {
+global.loadTestbedDetailsContainer = function(navigationData, parentDiv) {
 
 	parentDiv.append($('<h2 class="WiseGuiTestbedTitle">'+testbedDescription.name+'</h2>'));
 
@@ -145,24 +153,25 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 	var wiseMLJSONTabDivId              = 'WiseGuiTestbedDetailsWiseMLJSON';
 
 	var tabs = $(
-			  '<ul class="nav nav-tabs" id="'+tabsId+'">'
-			+ '	<li class="active"    ><a href="#'+mapTabDivId+'">Map</a></li>'
-			+ '	<li                   ><a href="#'+nodesTabDivId+'">Nodes</a></li>'
-			+ '	<li                   ><a href="#'+reservationsTabDivId+'">All Reservations</a></li>'
-			+ '	<li                   ><a href="#'+myReservationsTabDivId+'">My Reservations</a></li>'
-			+ '	<li                   ><a href="#'+federatableReservationsTabDivId+'">Federatable Reservations</a></li>'
-			+ '	<li class="pull-right"><a href="#'+wiseMLXMLTabDivId+'">WiseML (XML)</a></li>'
-			+ '	<li class="pull-right"><a href="#'+wiseMLJSONTabDivId+'">WiseML (JSON)</a></li>'
-			+ '</ul>'
-			+ '<div class="tab-content">'
-			+ '	<div class="tab-pane active" id="'+mapTabDivId+'"/>'
-			+ '	<div class="tab-pane       " id="'+nodesTabDivId+'"/>'
-			+ '	<div class="tab-pane       " id="'+reservationsTabDivId+'"/>'
-			+ '	<div class="tab-pane       " id="'+myReservationsTabDivId+'"/>'
-			+ '	<div class="tab-pane       " id="'+federatableReservationsTabDivId+'"/>'
-			+ ' <div class="tab-pane       " id="'+wiseMLXMLTabDivId+'"/>'
-			+ '	<div class="tab-pane       " id="'+wiseMLJSONTabDivId+'"/>'
-			+ '</div>');
+			'<ul class="nav nav-tabs" id="'+tabsId+'">' +
+			'	<li class="active"    ><a href="#'+mapTabDivId+'">Map</a></li>' +
+			'	<li                   ><a href="#'+nodesTabDivId+'">Nodes</a></li>' +
+			'	<li                   ><a href="#'+reservationsTabDivId+'">All Reservations</a></li>' +
+			'	<li                   ><a href="#'+myReservationsTabDivId+'">My Reservations</a></li>' +
+			'	<li                   ><a href="#'+federatableReservationsTabDivId+'">Federatable Reservations</a></li>' +
+			'	<li class="pull-right"><a href="#'+wiseMLXMLTabDivId+'">WiseML (XML)</a></li>' +
+			'	<li class="pull-right"><a href="#'+wiseMLJSONTabDivId+'">WiseML (JSON)</a></li>' +
+			'</ul>' +
+			'<div class="tab-content">' +
+			'	<div class="tab-pane active" id="'+mapTabDivId+'"/>' +
+			'	<div class="tab-pane       " id="'+nodesTabDivId+'"/>' +
+			'	<div class="tab-pane       " id="'+reservationsTabDivId+'"/>' +
+			'	<div class="tab-pane       " id="'+myReservationsTabDivId+'"/>' +
+			'	<div class="tab-pane       " id="'+federatableReservationsTabDivId+'"/>' +
+			' <div class="tab-pane       " id="'+wiseMLXMLTabDivId+'"/>' +
+			'	<div class="tab-pane       " id="'+wiseMLJSONTabDivId+'"/>' +
+			'</div>'
+	);
 
 	var mapTabContentDiv                     = tabs.find('#'+mapTabDivId).first();
 	var nodesTabContentDiv                   = tabs.find('#'+nodesTabDivId).first();
@@ -172,7 +181,6 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 	var wiseMLXMLTabContentDiv               = tabs.find('#'+wiseMLXMLTabDivId).first();
 	var wiseMLJSONTabContentDiv              = tabs.find('#'+wiseMLJSONTabDivId).first();
 
-	var myReservationsTab                    = tabs.find('a[href="#'+mapTabDivId+'"]').first();
 	var myReservationsTab                    = tabs.find('a[href="#'+myReservationsTabDivId+'"]').first();
 	var federatableReservationsTab           = tabs.find('a[href="#'+federatableReservationsTabDivId+'"]').first();
 
@@ -220,8 +228,8 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 		wisebed.getWiseMLAsXML(
 				null,
 				function(wiseML) {
-					wiseMLXMLTabContentDiv.append($('<pre class="WiseGuiTestbedDetailsWiseMLXML">'+new XMLSerializer().serializeToString(wiseML).replace(/</g,"&lt;")+'</pre>'));
-					wiseMLXMLTabContentDiv.append($('<a href="'+wisebedBaseUrl + '/experiments/network.xml" target="_blank" class="btn btn-primary pull-right">Download</a>'));
+					wiseMLXMLTabContentDiv.append($('<pre class="WiseGuiTestbedDetailsWiseMLXML">' + wiseML.replace(/</g,"&lt;") + '</pre>'));
+					wiseMLXMLTabContentDiv.append($('<a href="' + wisebedBaseUrl + '/experiments/network.xml" target="_blank" class="btn btn-primary pull-right">Download</a>'));
 				},
 				WiseGui.showAjaxError
 		);
@@ -232,8 +240,8 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 		wisebed.getWiseMLAsJSON(
 				null,
 				function(wiseML) {
-					wiseMLJSONTabContentDiv.append($('<pre class="WiseGuiTestbedDetailsWiseMLJSON">'+JSON.stringify(wiseML, wiseMLNullFilter, '  ')+'</pre>'));
-					wiseMLJSONTabContentDiv.append($('<a href="'+wisebedBaseUrl + '/experiments/network.json" target="_blank" class="btn btn-primary pull-right">Download</a>'));
+					wiseMLJSONTabContentDiv.append($('<pre class="WiseGuiTestbedDetailsWiseMLJSON">' + JSON.stringify(wiseML, wiseMLNullFilter, '  ') + '</pre>'));
+					wiseMLJSONTabContentDiv.append($('<a href="' + wisebedBaseUrl + '/experiments/network.json" target="_blank" class="btn btn-primary pull-right">Download</a>'));
 				},
 				WiseGui.showAjaxError
 		);
@@ -256,7 +264,7 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 			if (reloadFunction) {
 				reloadFunction();
 			}
-		} else if (navigationData.nav == 'overview' && navigationData.tab == '') {
+		} else if (navigationData.nav == 'overview' && navigationData.tab === '') {
 			reloadMapsTab();
 		}
 	});
@@ -302,9 +310,9 @@ function loadTestbedDetailsContainer(navigationData, parentDiv) {
 	    navigationData.tab = e.target.hash.substring(1);
 	    window.location.hash = $.param(navigationData);
 	});
-}
+};
 
-function buildMapsView(parent) {
+global.buildMapsView = function(parent) {
 
 	if (testbedDescription.isFederator) {
 		
@@ -316,10 +324,10 @@ function buildMapsView(parent) {
 
 			// create tab pane
 			var pills = $(
-				'<div class="tabbable">'
-			  + '	<ul class="nav nav-pills"></ul>'
-			  + '	<div class="tab-content"></div>'
-			  + '</div>'
+					'<div class="tabbable">' +
+					'	<ul class="nav nav-pills"></ul>' +
+					'	<div class="tab-content"></div>' +
+					'</div>'
 			);
 			
 			var headers = pills.find('ul.nav-pills');
@@ -336,7 +344,7 @@ function buildMapsView(parent) {
 
 				wiseMLs[nodeUrnPrefix] = JSON.parse(JSON.stringify(wiseML));
 				wiseMLs[nodeUrnPrefix].setup.node = wiseMLs[nodeUrnPrefix].setup.node.filter(function(node) {
-					return node.id.indexOf(nodeUrnPrefix) == 0;
+					return node.id.indexOf(nodeUrnPrefix) === 0;
 				});
 				
 				var header = $('<li><a href="#WiseGuiMapsView-'+index+'">'+nodeUrnPrefix+'</a></li>');
@@ -361,7 +369,7 @@ function buildMapsView(parent) {
 				// init map
 				var mapRow = $('<div class="row"><div class="span12"></div></div>');
 				tab.append(mapRow);
-				var wiseML = nodeUrnPrefix === undefined ? wiseMLs['federated'] : wiseMLs[nodeUrnPrefix];
+				var wiseML = nodeUrnPrefix === undefined ? wiseMLs.federated : wiseMLs[nodeUrnPrefix];
 				new WiseGuiGoogleMapsView(wiseML, mapRow.find('div').first());
 			});
 
@@ -389,19 +397,19 @@ function buildMapsView(parent) {
 			WiseGui.showAjaxError
 		);
 	}
-}
+};
 
-function buildFederatableReservationTable(parent) {
+global.buildFederatableReservationTable = function(parent) {
 	
 	var pills = $(
-			'<div class="tabbable">'
-		  + '	<ul class="nav nav-pills">'
-		  + '		<li class="active"><a href="#WiseGuiFederatableReservationsCurrentFuture">Current and Upcoming</a></li>'
-		  + '	</ul>'
-		  + '	<div class="tab-content">'
-		  + '		<div class="tab-pane active" id="WiseGuiFederatableReservationsCurrentFuture"></div>'
-		  + '	</div>'
-		  + '</div>'
+			'<div class="tabbable">' +
+			'	<ul class="nav nav-pills">' +
+			'		<li class="active"><a href="#WiseGuiFederatableReservationsCurrentFuture">Current and Upcoming</a></li>' +
+			'	</ul>' +
+			'	<div class="tab-content">' +
+			'		<div class="tab-pane active" id="WiseGuiFederatableReservationsCurrentFuture"></div>' +
+			'	</div>' +
+			'</div>'
 	);
 
 	pills.find('a').click(function(e) {
@@ -422,21 +430,21 @@ function buildFederatableReservationTable(parent) {
 		},
 		WiseGui.showAjaxError
 	);
-}
+};
 
-function buildMyReservationTable(parent) {
+global.buildMyReservationTable = function(parent) {
 
 	var pills = $(
-			'<div class="tabbable">'
-		  + '	<ul class="nav nav-pills">'
-		  + '		<li class="active"><a href="#WiseGuiMyReservationsCurrentFuture">Current and Upcoming</a></li>'
-		  + '		<li               ><a href="#WiseGuiMyReservationsPast">Past</a></li>'
-		  + '	</ul>'
-		  + '	<div class="tab-content">'
-		  + '		<div class="tab-pane active" id="WiseGuiMyReservationsCurrentFuture"></div>'
-		  + '		<div class="tab-pane"        id="WiseGuiMyReservationsPast"></div>'
-		  + '	</div>'
-		  + '</div>'
+			'<div class="tabbable">' +
+			'	<ul class="nav nav-pills">' +
+			'		<li class="active"><a href="#WiseGuiMyReservationsCurrentFuture">Current and Upcoming</a></li>' +
+			'		<li               ><a href="#WiseGuiMyReservationsPast">Past</a></li>' +
+			'	</ul>' +
+			'	<div class="tab-content">' +
+			'		<div class="tab-pane active" id="WiseGuiMyReservationsCurrentFuture"></div>' +
+			'		<div class="tab-pane"        id="WiseGuiMyReservationsPast"></div>' +
+			'	</div>' +
+			'</div>'
 	);
 
 	var currentAndFutureDiv = pills.find('#WiseGuiMyReservationsCurrentFuture');
@@ -452,7 +460,7 @@ function buildMyReservationTable(parent) {
 			WiseGui.showAjaxError,
 			true
 		);
-	}
+	};
 
 	pills.find('a[href="#WiseGuiMyReservationsCurrentFuture"]').click(function(e) {
 		e.preventDefault();
@@ -470,9 +478,9 @@ function buildMyReservationTable(parent) {
 
 	parent.empty();
 	parent.append(pills);
-}
+};
 
-function buildPersonalReservationsTable(parent, reservations, past) {
+global.buildPersonalReservationsTable = function(parent, reservations, past) {
 
 	var nop = function(event){ event.preventDefault(); };
 
@@ -487,10 +495,10 @@ function buildPersonalReservationsTable(parent, reservations, past) {
 		rowData.push($('<a href="#" rel="tooltip" title="'+reservation.to.toISOString()+'">' + reservation.to.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop));
 		rowData.push(reservation.nodeUrnPrefixes.join("<br/>"));
 		rowData.push($(
-			  '<div>'
-			+ '	<a href="javascript:;" data-target="#wisegui-personal-reservation-nodes-'+rand+'-'+i+'" data-toggle="collapse">'+reservation.nodeUrns.length+' nodes</a>'
-			+ ' <div class="collapse" id="wisegui-personal-reservation-nodes-'+rand+'-'+i+'">'+reservation.nodeUrns.join("<br/>")+'</div>'
-			+ '</div>'
+				'<div>' +
+				'	<a href="javascript:;" data-target="#wisegui-personal-reservation-nodes-'+rand+'" data-toggle="collapse">'+reservation.nodeUrns.length+' nodes</a>' +
+				'	<div class="collapse" id="wisegui-personal-reservation-nodes-'+rand+'">'+reservation.nodeUrns.join("<br/>")+'</div>' +
+				'</div>'
 		));
 		rowData.push(reservation.description);
 		var openButton = $('<a class="btn btn-primary">Open</a>').bind('click', reservation, function(e) {
@@ -508,9 +516,9 @@ function buildPersonalReservationsTable(parent, reservations, past) {
 				window.open(url, '_blank');
 		}));
         
-    	var cancelButton = undefined;
-        var cancelledLabel = undefined;
-    	var finalizedLabel = undefined;
+    	var cancelButton;
+        var cancelledLabel;
+    	var finalizedLabel;
 
     	if (reservation.cancelled) {
     		cancelledLabel = $('<span class="label label-important">Cancelled</span><br/><span class="label label-important">' + reservation.cancelled.format("YYYY-MM-DD HH:mm:ss") + '</span>');
@@ -555,11 +563,11 @@ function buildPersonalReservationsTable(parent, reservations, past) {
 			cancelButton.popover({
 				placement : 'top',
 				title   : 'Cancelling Reservations',
-				content : 'Cancelling a reservation will free the resources bound to the reservation so that '
-					+ 'e.g. other users can reserve the nodes. If a reservation gets cancelled while it is '
-					+ 'active all reservation events (such as node outputs) until the cancellation will still '
-					+ 'be persisted in the reservation log and available for download.'
-			})
+				content : 'Cancelling a reservation will free the resources bound to the reservation so that ' +
+					'e.g. other users can reserve the nodes. If a reservation gets cancelled while it is ' +
+					'active all reservation events (such as node outputs) until the cancellation will still ' +
+					'be persisted in the reservation log and available for download.'
+			});
 		}
 
 		if (reservation.cancelled && reservation.finalized) {
@@ -590,9 +598,9 @@ function buildPersonalReservationsTable(parent, reservations, past) {
 
 	parent.empty();
 	parent.append(table.html);
-}
+};
 
-function buildReservationTableInternal(parent, reservations) {
+global.buildReservationTableInternal = function(parent, reservations) {
 
 	var nop = function(event){ event.preventDefault(); };
 
@@ -607,13 +615,13 @@ function buildReservationTableInternal(parent, reservations) {
 		rowData.push($('<a href="#" rel="tooltip" title="'+reservation.to.toISOString()+'">' + reservation.to.format("YYYY-MM-DD HH:mm:ss") + '</a>').tooltip('show').click(nop));
 		rowData.push(reservation.nodeUrnPrefixes.join("<br/>"));
 		rowData.push($(
-			  '<div>'
-			+ '	<a href="javascript:;" data-target="#wisegui-personal-reservation-nodes-'+rand+'-'+i+'" data-toggle="collapse">'+reservation.nodeUrns.length+' nodes</a>'
-			+ ' <div class="collapse" id="wisegui-personal-reservation-nodes-'+rand+'-'+i+'">'+reservation.nodeUrns.join("<br/>")+'</div>'
-			+ '</div>'
+				'<div>' +
+				'	<a href="javascript:;" data-target="#wisegui-personal-reservation-nodes-'+rand+'" data-toggle="collapse">'+reservation.nodeUrns.length+' nodes</a>' +
+				'	<div class="collapse" id="wisegui-personal-reservation-nodes-'+rand+'">'+reservation.nodeUrns.join("<br/>")+'</div>' +
+				'</div>'
 		));
 
-		var cancelledLabel = undefined;
+		var cancelledLabel;
 		
 		if (reservation.cancelled) {
 			cancelledLabel = $('<span class="label label-important">Cancelled</span><br/><span class="label label-important">' + reservation.cancelled.format("YYYY-MM-DD HH:mm:ss") + '</span>');
@@ -636,7 +644,8 @@ function buildReservationTableInternal(parent, reservations) {
 		}
 
 		return rowData;
-	}
+	};
+
 	var preFilterFun = null;
 	var preSelectFun = null;
 	var showCheckBoxes = false;
@@ -652,21 +661,21 @@ function buildReservationTableInternal(parent, reservations) {
 
 	parent.empty();
 	parent.append(table.html);
-}
+};
 
-function buildReservationTable(parent) {
+global.buildReservationTable = function(parent) {
 	
 	var pills = $(
-			'<div class="tabbable">'
-		  + '	<ul class="nav nav-pills">'
-		  + '		<li class="active"><a href="#WiseGuiPublicReservationsCurrentFuture">Current and Upcoming</a></li>'
-		  + '		<li               ><a href="#WiseGuiPublicReservationsPast">Past</a></li>'
-		  + '	</ul>'
-		  + '	<div class="tab-content">'
-		  + '		<div class="tab-pane active" id="WiseGuiPublicReservationsCurrentFuture"></div>'
-		  + '		<div class="tab-pane"        id="WiseGuiPublicReservationsPast"></div>'
-		  + '	</div>'
-		  + '</div>'
+			'<div class="tabbable">' +
+			'	<ul class="nav nav-pills">' +
+			'		<li class="active"><a href="#WiseGuiPublicReservationsCurrentFuture">Current and Upcoming</a></li>' +
+			'		<li               ><a href="#WiseGuiPublicReservationsPast">Past</a></li>' +
+			'	</ul>' +
+			'	<div class="tab-content">' +
+			'		<div class="tab-pane active" id="WiseGuiPublicReservationsCurrentFuture"></div>' +
+			'		<div class="tab-pane"        id="WiseGuiPublicReservationsPast"></div>' +
+			'	</div>' +
+			'</div>'
 	);
 
 	var currentAndFutureDiv = pills.find('#WiseGuiPublicReservationsCurrentFuture');
@@ -682,7 +691,7 @@ function buildReservationTable(parent) {
 			WiseGui.showAjaxError,
 			true
 		);
-	}
+	};
 
 	pills.find('a[href="#WiseGuiPublicReservationsCurrentFuture"]').click(function(e) {
 		e.preventDefault();
@@ -700,9 +709,9 @@ function buildReservationTable(parent) {
 	
 	parent.empty();
 	parent.append(pills);
-}
+};
 
-function loadReservationViewContainer(navigationData, parentDiv) {
+global.loadReservationViewContainer = function(navigationData, parentDiv) {
 
 	wisebed.reservations.getByExperimentId(navigationData.experimentId, function(reservation) {
 
@@ -711,50 +720,50 @@ function loadReservationViewContainer(navigationData, parentDiv) {
 		$(window).trigger('hashchange');
 
 	}, WiseGui.showAjaxError);
-}
+};
 
-function getNavigationKey(navigationData) {
-	if (navigationData.nav == 'overview' && navigationData.experimentId == '') {
+global.getNavigationKey = function(navigationData) {
+	if (navigationData.nav == 'overview' && navigationData.experimentId === '') {
 		return 'overview';
-	} else if (navigationData.nav == 'experiment' && navigationData.experimentId != '') {
+	} else if (navigationData.nav == 'experiment' && navigationData.experimentId !== '') {
 		return 'experimentId=' + navigationData.experimentId;
 	}
 	return undefined;
-}
+};
 
-function getCreateContentFunction(navigationData) {
-	if (navigationData.nav == 'overview' && navigationData.experimentId == '')   { return loadTestbedDetailsContainer;  }
-	if (navigationData.nav == 'experiment' && navigationData.experimentId != '') { return loadReservationViewContainer; }
+global.getCreateContentFunction = function(navigationData) {
+	if (navigationData.nav == 'overview' && navigationData.experimentId === '')   { return loadTestbedDetailsContainer;  }
+	if (navigationData.nav == 'experiment' && navigationData.experimentId !== '') { return loadReservationViewContainer; }
 	return undefined;
-}
+};
 
-function showReservationsDialog() {
+global.showReservationsDialog = function() {
 	var existingDialog = $("#WiseGuiReservationDialog");
-	if (existingDialog.length != 0) {existingDialog.modal('show');}
+	if (existingDialog.length !== 0) {existingDialog.modal('show');}
 	else {new WiseGuiReservationDialog();}
-}
+};
 
-function navigateTo(experimentId, tab) {
+global.navigateTo = function(experimentId, tab) {
 	var navigationData = {
 		nav          : (experimentId ? 'experiment' : 'overview'),
 		experimentId : (experimentId || ''),
 		tab          : (tab || '')
 	};
 	$.bbq.pushState(navigationData);
-}
+};
 
-function getNavigationData(fragment) {
+global.getNavigationData = function(fragment) {
 
 	var parsedFragment = $.deparam.fragment(fragment ? fragment : window.location.fragment);
 
 	return {
-		nav          : parsedFragment['nav']          || 'overview',
-		experimentId : parsedFragment['experimentId'] || '',
-		tab          : parsedFragment['tab']          || ''
+		nav          : parsedFragment.nav          || 'overview',
+		experimentId : parsedFragment.experimentId || '',
+		tab          : parsedFragment.tab          || ''
 	};
-}
+};
 
-function createNavigationContainer() {
+global.createNavigationContainer = function() {
 
 	var container = $('<div class="WiseGuiNavigationContainer" id="WiseGuiNavigationContainer"/>');
 	
@@ -763,14 +772,14 @@ function createNavigationContainer() {
 	var navigationViewer = new WiseGuiNavigationView();
 	container.append(navigationViewer.view);
 	return container;
-}
+};
 
-function switchContentContainer(navigationData, navigationKey) {
+global.switchContentContainer = function(navigationData, navigationKey) {
 	$('#WiseGuiContainer .WiseGuiContentContainer').hide();
 	getOrCreateContentContainer(navigationData, navigationKey).show();
-}
+};
 
-function getOrCreateContentContainer(navigationData, navigationKey) {
+global.getOrCreateContentContainer = function(navigationData, navigationKey) {
 	
 	if (contentContainers[navigationKey]) {
 		return contentContainers[navigationKey];
@@ -779,9 +788,9 @@ function getOrCreateContentContainer(navigationData, navigationKey) {
 	var container = createContentContainer(navigationData);
 	contentContainers[navigationKey] = container;
 	return container;
-}
+};
 
-function createContentContainer(navigationData) {
+global.createContentContainer = function(navigationData) {
 	
 	var container = $('<div class="WiseGuiContentContainer"/>');
 	container.hide();
@@ -797,10 +806,9 @@ function createContentContainer(navigationData) {
 	}
 
 	return container;
-}
+};
 
-
-function onHashChange(e) {
+global.onHashChange = function(e) {
 
 	var navigationData = getNavigationData(e.fragment);
 	var navigationKey  = getNavigationKey(navigationData);
@@ -808,9 +816,9 @@ function onHashChange(e) {
 	switchContentContainer(navigationData, navigationKey);
 
 	$(window).trigger('wisegui-navigation-event', navigationData);
-}
+};
 
-function connectEventWebSocket() {
+global.connectEventWebSocket = function() {
 
 	console.log('EventWebSocket: trying to connect');
 
@@ -821,7 +829,7 @@ function connectEventWebSocket() {
 		$(window).trigger(EVENT_EVENTWEBSOCKET_CONNECTED);
 
 		if (eventWebSocketSchedule !== undefined) {
-			console.log('EventWebSocket: cancelling reconnection schedule')
+			console.log('EventWebSocket: cancelling reconnection schedule');
 			window.clearInterval(eventWebSocketSchedule);
 			eventWebSocketSchedule = undefined;
 		}
@@ -852,15 +860,15 @@ function connectEventWebSocket() {
 	$(window).bind(EVENT_EVENTWEBSOCKET_DISCONNECTED, function() {
 
 		var disconnectionModal = $(
-			  '<div class="modal hide" id="WiseGuiDisconnectionModal">'
-			+ '	<div class="modal-header">'
-			+ '		<button type="button" class="close" data-dismiss="modal">×</button>'
-			+ '		<h3>Connection Lost...</h3>'
-			+ '	</div>'
-			+ '	<div class="modal-body">'
-			+ '		<p>WiseGui is currently offline as it lost the connection to the testbeds portal server. Trying to reconnect every 5 seconds...</p>'
-			+ '	</div>'
-			+ '</div>'
+				'<div class="modal hide" id="WiseGuiDisconnectionModal">' +
+				'	<div class="modal-header">' +
+				'		<button type="button" class="close" data-dismiss="modal">×</button>' +
+				'		<h3>Connection Lost...</h3>' +
+				'	</div>' +
+				'	<div class="modal-body">' +
+				'		<p>WiseGui is currently offline as it lost the connection to the testbeds portal server. Trying to reconnect every 5 seconds...</p>' +
+				'	</div>' +
+				'</div>'
 		);
 		
 		$(document.body).append(disconnectionModal);
@@ -869,35 +877,38 @@ function connectEventWebSocket() {
 		$(window).bind(EVENT_EVENTWEBSOCKET_CONNECTED, function() {
 			$('#WiseGuiDisconnectionModal').modal('hide');
 			$('#WiseGuiDisconnectionModal').remove();
-		})
+		});
 	});
 
-}
+};
 
 // some event constants
-var EVENT_EVENTWEBSOCKET_CONNECTED    = 'wisegui-eventwebsocket-connected';
-var EVENT_EVENTWEBSOCKET_DISCONNECTED = 'wisegui-eventwebsocket-disconnected';
-var EVENT_DEVICES_ATTACHED            = 'wisegui-devices-attached-event';
-var EVENT_DEVICES_DETACHED            = 'wisegui-devices-detached-event';
-var EVENT_LOGGED_IN                   = 'wisegui-logged-in';
-var EVENT_LOGGED_OUT                  = 'wisegui-logged-out';
+global.EVENT_EVENTWEBSOCKET_CONNECTED    = 'wisegui-eventwebsocket-connected';
+global.EVENT_EVENTWEBSOCKET_DISCONNECTED = 'wisegui-eventwebsocket-disconnected';
+global.EVENT_DEVICES_ATTACHED            = 'wisegui-devices-attached-event';
+global.EVENT_DEVICES_DETACHED            = 'wisegui-devices-detached-event';
+global.EVENT_LOGGED_IN                   = 'wisegui-logged-in';
+global.EVENT_LOGGED_OUT                  = 'wisegui-logged-out';
 
-var wisebed                = new Wisebed(wisebedBaseUrl, wisebedWebSocketBaseUrl);
+var wjs = require('wisebed.js');
+global.wisebed = new wjs.Wisebed(wisebedBaseUrl, wisebedWebSocketBaseUrl);
+global.WisebedPublicReservationData = wjs.WisebedPublicReservationData;
+global.WisebedConfidentialReservationData = wjs.WisebedConfidentialReservationData;
+global.WisebedReservation = wjs.WisebedReservation;
 
-var navigationContainer    = undefined;
-var contentContainers      = {};
+global.WiseGuiTable = require('./wisegui-table.js');
 
-var loginObserver          = new WiseGuiLoginObserver();
-var reservationObserver    = new WiseGuiReservationObserver();
-var notificationsViewer    = new WiseGuiNotificationsViewer();
-
-var testbedDescription     = null;
-
-var eventWebSocket         = undefined;
-var eventWebSocketSchedule = undefined;
-var eventWebSocketState    = 'disconnected';
-
-var isLoggedIn             = false;
+global._ = require('underscore');
+global.navigationContainer    = null;
+global.contentContainers      = {};
+global.loginObserver = new WiseGuiLoginObserver();
+global.reservationObserver = new WiseGuiReservationObserver();
+global.notificationsViewer = new WiseGuiNotificationsViewer();
+global.testbedDescription  = null;
+global.eventWebSocket = null;
+global.eventWebSocketSchedule = null;
+global.eventWebSocketState = 'disconnected';
+global.isLoggedIn = false;
 
 $(function () {
 
@@ -928,9 +939,10 @@ $(function () {
 			// Test for 3rd party cookies
 			var cookieCallbackError = function(jqXHR, textStatus, errorThrown) {
 				WiseGui.showErrorAlert(
-						'Your browser doesn\'t support 3rd party cookies. '
-						+ 'Please enable them or you will not be able to login. '
-						+ 'Otherwise you can go to <a href="' + wisebedBaseUrl + '">' + wisebedBaseUrl + '</a>');
+						'Your browser doesn\'t support 3rd party cookies. ' +
+						'Please enable them or you will not be able to login. ' +
+						'Otherwise you can go to <a href="' + wisebedBaseUrl + '">' + wisebedBaseUrl + '</a>'
+				);
 			};
 			wisebed.testCookie(function() {}, cookieCallbackError);
 		},

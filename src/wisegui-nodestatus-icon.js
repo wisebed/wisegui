@@ -23,3 +23,5 @@ var WiseGuiNodeStatusIcon = function(nodeUrn) {
 		}
 	});
 };
+
+module.exports = WiseGuiNodeStatusIcon;

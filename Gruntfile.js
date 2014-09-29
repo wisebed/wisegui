@@ -4,15 +4,16 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     browserify: {
-      'build/<%= pkg.name %>.browserify.js': ['src/<%= pkg.name %>.js']
+      'dist/js/<%= pkg.name %>.browserify.js': ['src/<%= pkg.name %>.js']
     },
     uglify: {
       options: {
-        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
+        sourceMap : true
       },
       build: {
-        src: 'build/<%= pkg.name %>.browserify.js',
-        dest: 'dist/<%= pkg.name %>.min.js'
+        src: 'dist/js/<%= pkg.name %>.browserify.js',
+        dest: 'dist/js/<%= pkg.name %>.min.js'
       }
     },
     copy: {
@@ -22,7 +23,7 @@ module.exports = function(grunt) {
         ]
       }
     },
-	clean: ['build/','dist/','docs/'],
+	clean: ['dist/','docs/'],
     jshint: {
       all: ['src/**/*.js']
     },

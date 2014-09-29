@@ -3,6 +3,10 @@
  * WiseGuiNodeTable
  * #################################################################
  */
+
+var WiseGuiNodeStatusIcon = require('./wisegui-nodestatus-icon.js');
+var WiseGuiTable = require('./wisegui-table.js');
+
 var WiseGuiNodeTable = function (wiseML, parent, showCheckboxes, showFilter) {
 	this.table = null;
 	this.wiseML = wiseML;
@@ -208,3 +212,5 @@ WiseGuiNodeTable.prototype.applyFilter = function (fn) {
 WiseGuiNodeTable.prototype.applySelected = function (fn) {
 	this.table.setSelectFun(fn);
 };
+
+module.exports = WiseGuiNodeTable;
