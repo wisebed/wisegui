@@ -4,7 +4,7 @@
 
 ## Building
 
-WiseGui uses the [npm module system](https://www.npmjs.org/) for dependency resolution and modularization of its own classes. It is built using [Grunt](http://gruntjs.com/), invoking [Browserify](http://browserify.org/) to create a single JS file out of the dependency tree and [UglifyJS 2](https://github.com/mishoo/UglifyJS2) for minification.
+WiseGui uses the [npm module system](https://www.npmjs.org/) for dependency resolution and modularization of its own classes. It is built using [Grunt](http://gruntjs.com/), invoking (besides others) [Browserify](http://browserify.org/) to create a single JS file out of the dependency tree and [UglifyJS 2](https://github.com/mishoo/UglifyJS2) for minification.
 
 To build WiseGui simply invoke:
 
