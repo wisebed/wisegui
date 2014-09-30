@@ -443,4 +443,4 @@ WiseGuiTable.prototype.getSelectFun = function () {
 	return this.preSelectFun;
 };
 
-module.exports = WiseGuiTable;	
+module.exports = WiseGuiTable;

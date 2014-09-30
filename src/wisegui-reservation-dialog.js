@@ -1,4 +1,7 @@
 var WiseGuiNodeTable = require('./wisegui-node-table.js');
+var WiseGuiGoogleMapsView = require('./wisegui-google-maps-view.js');
+var WiseGuiNodeSelectionSaveButton = require('./wisegui-nodeselection-save-button.js');
+var WiseGuiNodeSelectionLoadButton = require('./wisegui-nodeselection-load-button.js');
 
 /**
  * #################################################################

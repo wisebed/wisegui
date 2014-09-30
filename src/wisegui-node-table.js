@@ -4,7 +4,7 @@
  * #################################################################
  */
 
-var WiseGuiNodeStatusIcon = require('./wisegui-nodestatus-icon.js');
+var WiseGuiNodeStatusIcon = require('./wisegui-node-status-icon.js');
 var WiseGuiTable = require('./wisegui-table.js');
 
 var WiseGuiNodeTable = function (wiseML, parent, showCheckboxes, showFilter) {

@@ -1,4 +1,15 @@
-var WiseGuiNodeTable = require('./wisegui-node-table.js');
+global._                       = require('underscore');
+var wjs                        = require('wisebed.js');
+var WiseGuiNodeTable           = require('./wisegui-node-table.js');
+var WiseGuiReservationDialog   = require('./wisegui-reservation-dialog.js');
+var WiseGuiReservationObserver = require('./wisegui-reservation-observer.js');
+var WiseGuiReservationView     = require('./wisegui-reservation-view.js');
+var WiseGuiLoginObserver       = require('./wisegui-login-observer.js');
+var WiseGuiTable               = require('./wisegui-table.js');
+var WiseGuiNotificationsViewer = require('./wisegui-notifications-viewer.js');
+var WiseGuiNavigationView      = require('./wisegui-navigation-view.js');
+var WiseGuiGoogleMapsView      = require('./wisegui-google-maps-view.js');
+var WiseGuiModalDialog         = require('./wisegui-modal-dialog.js');
 
 global.WiseGui = {
 
@@ -308,7 +319,7 @@ global.loadTestbedDetailsContainer = function(navigationData, parentDiv) {
 	    e.preventDefault();
 	    var navigationData = getNavigationData();
 	    navigationData.tab = e.target.hash.substring(1);
-	    window.location.hash = $.param(navigationData);
+	    navigateToNavigationData(navigationData);
 	});
 };
 
@@ -551,14 +562,16 @@ global.buildPersonalReservationsTable = function(parent, reservations, past) {
 		if (!reservation.cancelled && !reservation.finalized && !past) {
 			cancelButton = $('<a class="btn btn-danger">Cancel</a>').bind('click', reservation, function(e) {
 	                e.preventDefault();
-	                wisebed.reservations.delete(
-	                	e.data.experimentId,
-	                	function() { 
-	                		cancelButton.popover('hide');
-	                		$(window).trigger('hashchange');
-	                	},
-	                	WiseGui.showAjaxError
-	                	);
+	                new WiseGuiModalDialog(undefined, function() {
+	                	wisebed.reservations.cancel(
+							e.data.experimentId,
+							function() { 
+								cancelButton.popover('hide');
+								$(window).trigger('hashchange');
+							},
+							WiseGui.showAjaxError
+						);
+	                }).show();
 	        });
 			cancelButton.popover({
 				placement : 'top',
@@ -743,23 +756,29 @@ global.showReservationsDialog = function() {
 	else {new WiseGuiReservationDialog();}
 };
 
+global.navigateToNavigationData = function(navigationData) {
+	console.log('navigateToNavigationData(%s)', JSON.stringify(navigationData));
+	if (navigationData) {
+		window.location.hash = '#nav='+encodeURIComponent(navigationData.nav)+'&experimentId='+encodeURIComponent(navigationData.experimentId)+'&tab='+encodeURIComponent(navigationData.tab);
+	} else {
+		window.location.hash = '#nav=overview';
+	}
+};
+
 global.navigateTo = function(experimentId, tab) {
-	var navigationData = {
+	navigateToNavigationData({
 		nav          : (experimentId ? 'experiment' : 'overview'),
 		experimentId : (experimentId || ''),
 		tab          : (tab || '')
-	};
-	$.bbq.pushState(navigationData);
+	});
 };
 
 global.getNavigationData = function(fragment) {
-
-	var parsedFragment = $.deparam.fragment(fragment ? fragment : window.location.fragment);
-
+	var decoded = decodeUrlHash();
 	return {
-		nav          : parsedFragment.nav          || 'overview',
-		experimentId : parsedFragment.experimentId || '',
-		tab          : parsedFragment.tab          || ''
+		nav          : decoded.nav          || 'overview',
+		experimentId : decoded.experimentId || '',
+		tab          : decoded.tab          || ''
 	};
 };
 
@@ -806,16 +825,6 @@ global.createContentContainer = function(navigationData) {
 	}
 
 	return container;
-};
-
-global.onHashChange = function(e) {
-
-	var navigationData = getNavigationData(e.fragment);
-	var navigationKey  = getNavigationKey(navigationData);
-
-	switchContentContainer(navigationData, navigationKey);
-
-	$(window).trigger('wisegui-navigation-event', navigationData);
 };
 
 global.connectEventWebSocket = function() {
@@ -890,25 +899,45 @@ global.EVENT_DEVICES_DETACHED            = 'wisegui-devices-detached-event';
 global.EVENT_LOGGED_IN                   = 'wisegui-logged-in';
 global.EVENT_LOGGED_OUT                  = 'wisegui-logged-out';
 
-var wjs = require('wisebed.js');
-global.wisebed = new wjs.Wisebed(wisebedBaseUrl, wisebedWebSocketBaseUrl);
-global.WisebedPublicReservationData = wjs.WisebedPublicReservationData;
+global.wisebed                            = new wjs.Wisebed(wisebedBaseUrl, wisebedWebSocketBaseUrl);
+global.WisebedPublicReservationData       = wjs.WisebedPublicReservationData;
 global.WisebedConfidentialReservationData = wjs.WisebedConfidentialReservationData;
-global.WisebedReservation = wjs.WisebedReservation;
+global.WisebedReservation                 = wjs.WisebedReservation;
 
-global.WiseGuiTable = require('./wisegui-table.js');
-
-global._ = require('underscore');
 global.navigationContainer    = null;
 global.contentContainers      = {};
-global.loginObserver = new WiseGuiLoginObserver();
-global.reservationObserver = new WiseGuiReservationObserver();
-global.notificationsViewer = new WiseGuiNotificationsViewer();
-global.testbedDescription  = null;
-global.eventWebSocket = null;
+global.loginObserver          = new WiseGuiLoginObserver();
+global.reservationObserver    = new WiseGuiReservationObserver();
+global.notificationsViewer    = new WiseGuiNotificationsViewer();
+global.testbedDescription     = null;
+global.eventWebSocket         = null;
 global.eventWebSocketSchedule = null;
-global.eventWebSocketState = 'disconnected';
-global.isLoggedIn = false;
+global.eventWebSocketState    = 'disconnected';
+global.isLoggedIn             = false;
+global.$                      = $;
+
+global.decodeUrlHash = function () {
+	var urlParams = {};
+    var match,
+        pl     = /\+/g,  // Regex for replacing addition symbol with a space
+        search = /([^&=]+)=?([^&]*)/g,
+        decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
+        query  = window.location.hash.substring(1);
+
+    while ((match = search.exec(query)) !== null) {
+       urlParams[decode(match[1])] = decode(match[2]);
+    }
+
+    return urlParams;
+};
+
+// extend jQuery with the 'exists' function to check if selector returned empty result
+// and only do so if not done yet...
+if (!($.fn.exists)) {
+	$.fn.exists = function () {
+		return this.length !== 0;
+	};
+}
 
 $(function () {
 
@@ -933,7 +962,17 @@ $(function () {
 			reservationObserver.startObserving();
 			loginObserver.startObserving();
 
-			$(window).bind('hashchange', onHashChange);
+			window.onhashchange = function(e) {
+				
+				console.log('onhashchange');
+				e.preventDefault();
+
+				var navigationData = getNavigationData();
+				var navigationKey  = getNavigationKey(navigationData);
+				switchContentContainer(navigationData, navigationKey);
+				$(window).trigger('wisegui-navigation-event', navigationData);
+			};
+			
 			$(window).trigger('hashchange');
 
 			// Test for 3rd party cookies

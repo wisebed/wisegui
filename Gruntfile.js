@@ -23,7 +23,7 @@ module.exports = function(grunt) {
         ]
       }
     },
-	clean: ['dist/','docs/'],
+	clean: ['dist/','doc/'],
     jshint: {
       all: ['src/**/*.js']
     },
@@ -40,17 +40,9 @@ module.exports = function(grunt) {
       }
     },
     watch: {
-      js: {
-        files: ['src/*.js'],
-        tasks: ['jshint','browserify','uglify']
-      },
-      static: {
-        files: ['static/**'],
-        tasks: ['copy']
-      },
-      docs: {
-        files: ['src/*.js'],
-        tasks: ['yuidoc']
+      all: {
+        files: ['src/*.js','static/**'],
+        tasks: ['clean','default']
       }
     }
   });
