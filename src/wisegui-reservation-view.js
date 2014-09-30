@@ -3,6 +3,7 @@ var WiseGuiFlashView     = require('./wisegui-flash-view.js');
 var WiseGuiResetView     = require('./wisegui-reset-view.js');
 var WiseGuiSendView      = require('./wisegui-send-view.js');
 var WiseGuiScriptingView = require('./wisegui-scripting-view.js');
+var WiseGuiEvents        = require('./wisegui-events.js');
 
 /**
  * #################################################################
@@ -104,7 +105,7 @@ WiseGuiReservationView.prototype.buildView = function() {
 		window.location.hash = $.param(navigationData);
 	});
 
-	$(window).bind('wisegui-navigation-event', function(e, navigationData) {
+	$(window).bind(WiseGuiEvents.EVENT_NAVIGATION, function(e, navigationData) {
 		if (navigationData.tab) {
 			tabs.find('a[href="#'+navigationData.tab+'"]').tab('show');
 		}

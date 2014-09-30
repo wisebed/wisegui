@@ -1,3 +1,5 @@
+var WiseGuiEvents = require('./wisegui-events.js');
+
 /**
  * #################################################################
  * WiseGuiLoginObserver
@@ -38,7 +40,7 @@ WiseGuiLoginObserver.prototype.startObserving = function() {
 
 	var self = this;
 
-	$(window).bind('wisegui-logged-in', function(e, data) {
+	$(window).bind(WiseGuiEvents.EVENT_LOGGED_IN, function(e, data) {
 		console.log('WiseGuiLoginObserver starting observation');
 		if (data && data.loginData) {
 			self.loginData = data.loginData;
@@ -46,7 +48,7 @@ WiseGuiLoginObserver.prototype.startObserving = function() {
 		}
 	});
 
-	$(window).bind('wisegui-logged-out', function(e, data) {
+	$(window).bind(WiseGuiEvents.EVENT_LOGGED_OUT, function(e, data) {
 		if (self.schedule !== undefined) {
 			console.log('WiseGuiLoginObserver stopping observation');
 			window.clearInterval(self.schedule);
@@ -55,7 +57,7 @@ WiseGuiLoginObserver.prototype.startObserving = function() {
 	});
 
 	checkLoggedIn(function(isLoggedIn) {
-		$(window).trigger(isLoggedIn ? 'wisegui-logged-in' : 'wisegui-logged-out');
+		$(window).trigger(isLoggedIn ? WiseGuiEvents.EVENT_LOGGED_IN : WiseGuiEvents.EVENT_LOGGED_OUT);
 	});
 };
 

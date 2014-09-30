@@ -10,11 +10,12 @@ var WiseGuiNotificationsViewer = require('./wisegui-notifications-viewer.js');
 var WiseGuiNavigationView      = require('./wisegui-navigation-view.js');
 var WiseGuiGoogleMapsView      = require('./wisegui-google-maps-view.js');
 var WiseGuiModalDialog         = require('./wisegui-modal-dialog.js');
+var WiseGuiEvents              = require('./wisegui-events.js');
 
 global.WiseGui = {
 
 	showAlert : function(message, severity) {
-		$(window).trigger('wisegui-notification',
+		$(window).trigger(WiseGuiEvents.EVENT_NOTIFICATION,
 				{
 					type     : 'alert',
 					severity : severity,
@@ -35,7 +36,7 @@ global.WiseGui = {
 		WiseGui.showAlert(message, 'info');
 	},
 	showBlockAlert : function(message, actions, severity) {
-		$(window).trigger('wisegui-notification',
+		$(window).trigger(WiseGuiEvents.EVENT_NOTIFICATION,
 				{
 					type     : 'block-alert',
 					severity : severity,
@@ -80,7 +81,7 @@ global.WiseGui = {
 
 			elem.attr('disabled', 'disabled');
 
-			$(window).bind('wisegui-reservation-started', function(e, reservation) {
+			$(window).bind(WiseGuiEvents.EVENT_RESERVATION_STARTED, function(e, reservation) {
 				if (experimentId == reservation.experimentId) {
 					
 					if (originalDisabled) {
@@ -91,7 +92,7 @@ global.WiseGui = {
 				}
 			});
 
-			$(window).bind('wisegui-reservation-ended', function(e, reservation) {
+			$(window).bind(WiseGuiEvents.EVENT_RESERVATION_ENDED, function(e, reservation) {
 				if (experimentId == reservation.experimentId) {
 					elem.attr('disabled', 'disabled');
 				}
@@ -111,7 +112,7 @@ global.doLogin = function(loginData) {
 	var self = this;
 
 	var callbackError = function(jqXHR, textStatus, errorThrown) {
-		$(window).trigger('wisegui-login-error', {
+		$(window).trigger(WiseGuiEvents.EVENT_LOGIN_ERROR, {
 			jqXHR       : jqXHR,
 			textStatus  : textStatus,
 			errorThrown : errorThrown
@@ -119,7 +120,7 @@ global.doLogin = function(loginData) {
 	};
 
 	var callbackDone = function() {
-		$(window).trigger('wisegui-logged-in', { loginData : self.loginData });
+		$(window).trigger(WiseGuiEvents.EVENT_LOGGED_IN, { loginData : self.loginData });
 		$(window).trigger('hashchange');
 	};
 
@@ -129,7 +130,7 @@ global.doLogin = function(loginData) {
 global.doLogout = function() {
 
 	var callbackOK = function() {
-		$(window).trigger('wisegui-logged-out');
+		$(window).trigger(WiseGuiEvents.EVENT_LOGGED_OUT);
 		$('#WiseGuiLoginDialog').remove();
 		navigateTo(undefined, 'WiseGuiTestbedDetailsMapView');
 	};
@@ -268,7 +269,7 @@ global.loadTestbedDetailsContainer = function(navigationData, parentDiv) {
 	reloadFunctions[wiseMLJSONTabDivId]              = reloadWiseMLJSONTab;
 
 	var self = this;
-	$(window).bind('wisegui-navigation-event', function(e, navigationData) {
+	$(window).bind(WiseGuiEvents.EVENT_NAVIGATION, function(e, navigationData) {
 		if (navigationData.nav == 'overview' && navigationData.tab) {
 			tabs.find('a[href="#'+navigationData.tab+'"]').tab('show');
 			var reloadFunction = reloadFunctions[navigationData.tab];
@@ -280,35 +281,35 @@ global.loadTestbedDetailsContainer = function(navigationData, parentDiv) {
 		}
 	});
 	
-	$(window).bind('wisegui-reservations-changed', function() {
+	$(window).bind(WiseGuiEvents.EVENT_RESERVATIONS_CHANGED, function() {
 		buildReservationTable(reservationsTabContentDiv);
 		if (isLoggedIn) {
 			buildMyReservationTable(myReservationsTabContentDiv);
 		}
 	});
 	
-	$(window).bind('wisegui-logged-in', function() {
+	$(window).bind(WiseGuiEvents.EVENT_LOGGED_IN, function() {
 		myReservationsTab.show();
 		buildMyReservationTable(myReservationsTabContentDiv);
 	});
 	
-	$(window).bind('wisegui-logged-out', function() {
+	$(window).bind(WiseGuiEvents.EVENT_LOGGED_OUT, function() {
 		myReservationsTab.hide();
 		myReservationsTabContentDiv.empty();
 	});
 	
 	if (testbedDescription.isFederator) {
 		
-		$(window).bind('wisegui-logged-in', function() {
+		$(window).bind(WiseGuiEvents.EVENT_LOGGED_IN, function() {
 			federatableReservationsTab.show();
 			buildFederatableReservationTable(federatableReservationsTabContentDiv);
 		});
 
-		$(window).bind('wisegui-logged-out', function() {
+		$(window).bind(WiseGuiEvents.EVENT_LOGGED_OUT, function() {
 			federatableReservationsTab.hide();
 		});
 
-		$(window).bind('wisegui-reservations-changed', function() {
+		$(window).bind(WiseGuiEvents.EVENT_RESERVATIONS_CHANGED, function() {
 			if (isLoggedIn) {
 				buildFederatableReservationTable(federatableReservationsTabContentDiv);
 			}
@@ -891,14 +892,12 @@ global.connectEventWebSocket = function() {
 
 };
 
-// some event constants
-global.EVENT_EVENTWEBSOCKET_CONNECTED    = 'wisegui-eventwebsocket-connected';
-global.EVENT_EVENTWEBSOCKET_DISCONNECTED = 'wisegui-eventwebsocket-disconnected';
-global.EVENT_DEVICES_ATTACHED            = 'wisegui-devices-attached-event';
-global.EVENT_DEVICES_DETACHED            = 'wisegui-devices-detached-event';
-global.EVENT_LOGGED_IN                   = 'wisegui-logged-in';
-global.EVENT_LOGGED_OUT                  = 'wisegui-logged-out';
+// export event constants into global namespace for backwards compatibility with older code
+for (var eventName in WiseGuiEvents) {
+	global[eventName] = WiseGuiEvents[eventName];
+}
 
+// some more global vars for backwards compatibility
 global.wisebed                            = new wjs.Wisebed(wisebedBaseUrl, wisebedWebSocketBaseUrl);
 global.WisebedPublicReservationData       = wjs.WisebedPublicReservationData;
 global.WisebedConfidentialReservationData = wjs.WisebedConfidentialReservationData;
@@ -970,7 +969,7 @@ $(function () {
 				var navigationData = getNavigationData();
 				var navigationKey  = getNavigationKey(navigationData);
 				switchContentContainer(navigationData, navigationKey);
-				$(window).trigger('wisegui-navigation-event', navigationData);
+				$(window).trigger(WiseGuiEvents.EVENT_NAVIGATION, navigationData);
 			};
 			
 			$(window).trigger('hashchange');

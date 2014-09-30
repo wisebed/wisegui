@@ -1,3 +1,4 @@
+var WiseGuiEvents                = require('./wisegui-events.js');
 var WiseGuiOptionSelectionDialog = require('./wisegui-option-selection-dialog.js');
 
 /**
@@ -38,7 +39,7 @@ var WiseGuiNodeSelectionLoadButton = function(selectionCallback) {
 		this.enable(savedSelection !== null && savedSelection !== undefined);
 	};
 
-	$(window).bind('wisegui-nodeselection-storage-changed', function (e) {
+	$(window).bind(WiseGuiEvents.EVENT_NODESELECTIONS_STORAGE_CHANGED, function (e) {
 		self.updateEnabledState();
 	});
 

@@ -1,3 +1,5 @@
+var WiseGuiEvents = require('./wisegui-events.js');
+
 /**
  * #################################################################
  * WiseGuiReservationObserver
@@ -42,7 +44,7 @@ WiseGuiReservationObserver.prototype.processReservationsFetched = function(reser
 	}
 
 	for (var k=0; k<newReservations.length; k++) {
-		$(window).trigger('wisegui-reservation-added', newReservations[k]);
+		$(window).trigger(WiseGuiEvents.EVENT_RESERVATION_ADDED, newReservations[k]);
 		this.lastKnownReservations.push(newReservations[k]);
 	}
 };
@@ -51,13 +53,13 @@ WiseGuiReservationObserver.prototype.startObserving = function() {
 
 	var self = this;
 
-	$(window).bind('wisegui-logged-in', function(e, data) {
+	$(window).bind(WiseGuiEvents.EVENT_LOGGED_IN, function(e, data) {
 		self.schedule = window.setInterval(function() {self.fetchReservationsAndProcess();}, 60 * 1000);
 		self.fetchReservationsAndProcess();
 		console.log('WiseGuiReservationObserver beginning to observe reservations');
 	});
 
-	$(window).bind('wisegui-logged-out', function(e, data) {
+	$(window).bind(WiseGuiEvents.EVENT_LOGGED_OUT, function(e, data) {
 		self.stopObserving();
 	});
 };

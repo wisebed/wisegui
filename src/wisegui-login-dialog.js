@@ -1,3 +1,5 @@
+var WiseGuiEvents = require('./wisegui-events.js');
+
 /**
  * #################################################################
  * WiseGuiLoginDialog
@@ -17,9 +19,9 @@ var WiseGuiLoginDialog = function() {
 	this.buildView();
 
 	var self = this;
-	$(window).bind('wisegui-login-error', function(e, data) { self.onLoginError(data); });
-	$(window).bind('wisegui-logged-in', function() { self.onLoginSuccess(); });
-	$(window).bind('wisegui-logged-out', function() { self.onLoginSuccess(); });
+	$(window).bind(WiseGuiEvents.EVENT_LOGIN_ERROR, function(e, data) { self.onLoginError(data); });
+	$(window).bind(WiseGuiEvents.EVENT_LOGGED_IN, function() { self.onLoginSuccess(); });
+	$(window).bind(WiseGuiEvents.EVENT_LOGGED_OUT, function() { self.onLoginSuccess(); });
 };
 
 WiseGuiLoginDialog.prototype.onLoginError = function(data) {

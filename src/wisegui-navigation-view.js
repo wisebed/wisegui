@@ -1,3 +1,4 @@
+var WiseGuiEvents      = require('./wisegui-events.js');
 var WiseGuiLoginDialog = require('./wisegui-login-dialog.js');
 
 /**
@@ -135,19 +136,19 @@ WiseGuiNavigationView.prototype.buildView = function() {
 	});
 
 	// bind to login and logout events
-	$(window).bind('wisegui-logged-in', function() {
+	$(window).bind(WiseGuiEvents.EVENT_LOGGED_IN, function() {
 		self.loginButtonLi.hide();
 		self.logoutButtonLi.show();
 		self.reservationsButtonLi.show();
 	});
 
-	$(window).bind('wisegui-logged-out', function() {
+	$(window).bind(WiseGuiEvents.EVENT_LOGGED_OUT, function() {
 		self.loginButtonLi.show();
 		self.logoutButtonLi.hide();
 		self.reservationsButtonLi.hide();
 	});
 	
-	$(window).bind('wisegui-navigation-event', function(e, navigationData) {
+	$(window).bind(WiseGuiEvents.EVENT_NAVIGATION, function(e, navigationData) {
 		if (navigationData.nav == 'experiment') {
 			self.overviewButtonLi.removeClass('active');
 		} else {

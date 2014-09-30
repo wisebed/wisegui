@@ -1,5 +1,6 @@
+var WiseGuiEvents              = require('./wisegui-events.js');
 var WiseGuiNodeSelectionDialog = require('./wisegui-nodeselection-dialog.js');
-var StringUtils = require('./string-utils.js');
+var StringUtils                = require('./string-utils.js');
 
 /**
  * #################################################################
@@ -244,7 +245,7 @@ WiseGuiConsoleView.prototype.buildView = function() {
 	updateStatusBadge();
 	statusBadgeInterval = window.setInterval(updateStatusBadge, 5000);
 	
-	$(window).bind('wisegui-reservation-started', function(e, reservation) {
+	$(window).bind(WiseGuiEvents.EVENT_RESERVATION_STARTED, function(e, reservation) {
 		if (self.experimentId == reservation.experimentId) {
 			
 			// start progress bar as soon as reservation starts
@@ -263,7 +264,7 @@ WiseGuiConsoleView.prototype.buildView = function() {
 		}
 	});
 
-	$(window).bind('wisegui-reservation-ended', function(e, reservation) {
+	$(window).bind(WiseGuiEvents.EVENT_RESERVATION_ENDED, function(e, reservation) {
 		if (self.experimentId == reservation.experimentId) {
 
 			// stop progress bar as soon as reservation ends
@@ -278,7 +279,7 @@ WiseGuiConsoleView.prototype.buildView = function() {
 		}
 	});
 
-	$(window).bind('wisegui-devices-attached-event', function(e, devicesAttachedEvent) {
+	$(window).bind(WiseGuiEvents.EVENT_DEVICES_ATTACHED, function(e, devicesAttachedEvent) {
 
 		devicesAttachedEvent.nodeUrns.forEach(function(nodeUrn) {
 			if (self.reservation.nodeUrns.indexOf(nodeUrn) > -1) {
@@ -292,7 +293,7 @@ WiseGuiConsoleView.prototype.buildView = function() {
 		updateStatusBadge();
 	});
 
-	$(window).bind('wisegui-devices-detached-event', function(e, devicesDetachedEvent) {
+	$(window).bind(WiseGuiEvents.EVENT_DEVICES_DETACHED, function(e, devicesDetachedEvent) {
 
 		devicesDetachedEvent.nodeUrns.forEach(function(nodeUrn) {
 			if (self.reservation.nodeUrns.indexOf(nodeUrn) > -1) {
@@ -517,7 +518,7 @@ WiseGuiConsoleView.prototype.onWebSocketMessageEvent = function(event) {
 	} else if (message.type == 'reservationStarted') {
 		
 		var reservation = new WisebedReservation(message.reservationData);
-		$(window).trigger('wisegui-reservation-started', reservation);
+		$(window).trigger(WiseGuiEvents.EVENT_RESERVATION_STARTED, reservation);
 
 		if (reservation.experimentId != getNavigationData().experimentId) {
 			var button = $('<input class="btn" type="button" value="Take me there">');
@@ -528,7 +529,7 @@ WiseGuiConsoleView.prototype.onWebSocketMessageEvent = function(event) {
 		}
 
 	} else if (message.type == 'reservationEnded') {
-		$(window).trigger('wisegui-reservation-ended', new WisebedReservation(message.reservationData));
+		$(window).trigger(WiseGuiEvents.EVENT_RESERVATION_ENDED, new WisebedReservation(message.reservationData));
 		WiseGui.showInfoBlockAlert('Reservation ended at ' + message.timestamp);
 	}
 };

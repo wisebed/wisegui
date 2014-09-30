@@ -1,4 +1,5 @@
 var WiseGuiOptionSelectionDialog = require('./wisegui-option-selection-dialog.js');
+var WiseGuiEvents = require('./wisegui-events.js');
 
 /**
  * #################################################################
@@ -14,7 +15,7 @@ var WiseGuiNodeSelectionSaveButton = function(getSelectionCallback) {
 		var callback = function(name) {
 			storedNodeSelections[name] = selection;
 			window.localStorage.setItem("wisegui.nodeselections", JSON.stringify(storedNodeSelections));
-			$(window).trigger('wisegui-nodeselection-storage-changed');
+			$(window).trigger(WiseGuiEvents.EVENT_NODESELECTIONS_STORAGE_CHANGED);
 		};
 		var dialogOptions = {
 			'title' : 'Pick a name',

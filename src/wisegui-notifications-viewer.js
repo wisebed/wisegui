@@ -1,3 +1,5 @@
+var WiseGuiEvents = require('./wisegui-events.js');
+
 /**
  * #################################################################
  * WiseGuiNotificationsViewer
@@ -37,7 +39,7 @@ var WiseGuiNotificationsViewer = function() {
 	};
 	this.buildView();
 
-	$(window).bind('wisegui-notification', function(e, data) {
+	$(window).bind(WiseGuiEvents.EVENT_NOTIFICATION, function(e, data) {
 		self.showNotification(data);
 	});
 };

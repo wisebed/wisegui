@@ -6,6 +6,7 @@
 
 var WiseGuiNodeStatusIcon = require('./wisegui-node-status-icon.js');
 var WiseGuiTable = require('./wisegui-table.js');
+var WiseGuiEvents = require('./wisegui-events.js');
 
 var WiseGuiNodeTable = function (wiseML, parent, showCheckboxes, showFilter) {
 	this.table = null;
@@ -50,14 +51,14 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 		}
 
 		// emulate devicesAttachedEvent
-		$(window).trigger('wisegui-devices-attached-event', {
+		$(window).trigger(WiseGuiEvents.EVENT_DEVICES_ATTACHED, {
 			type : 'devicesAttached',
 			timestamp : new Date().toISOString(),
 			nodeUrns : attached
 		});
 
 		// emulate devicesDetachedEvent
-		$(window).trigger('wisegui-devices-detached-event', {
+		$(window).trigger(WiseGuiEvents.EVENT_DEVICES_DETACHED, {
 			type : 'devicesDetached',
 			timestamp : new Date().toISOString(),
 			nodeUrns : detached

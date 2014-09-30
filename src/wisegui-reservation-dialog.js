@@ -1,7 +1,8 @@
-var WiseGuiNodeTable = require('./wisegui-node-table.js');
-var WiseGuiGoogleMapsView = require('./wisegui-google-maps-view.js');
+var WiseGuiNodeTable               = require('./wisegui-node-table.js');
+var WiseGuiGoogleMapsView          = require('./wisegui-google-maps-view.js');
 var WiseGuiNodeSelectionSaveButton = require('./wisegui-nodeselection-save-button.js');
 var WiseGuiNodeSelectionLoadButton = require('./wisegui-nodeselection-load-button.js');
+var WiseGuiEvents                  = require('./wisegui-events.js');
 
 /**
  * #################################################################
@@ -333,10 +334,10 @@ WiseGuiReservationDialog.prototype.buildView = function() {
 			that.hide();
 
 			// Refresh the reservation table
-			$(window).trigger('wisegui-reservations-changed');
+			$(window).trigger(WiseGuiEvents.EVENT_RESERVATIONS_CHANGED);
 
 			// Refresh the experiments tab in the menu
-			$(window).trigger('wisegui-navigation-event', getNavigationData());
+			$(window).trigger(WiseGuiEvents.EVENT_NAVIGATION, getNavigationData());
 		};
 
 		// TODO support key-value pairs in "options" field

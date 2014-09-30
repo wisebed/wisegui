@@ -1,3 +1,5 @@
+var WiseGuiEvents = require('./wisegui-events.js');
+
 /**
  * #################################################################
  * WiseGuiNodeStatusIcon
@@ -11,13 +13,13 @@ var WiseGuiNodeStatusIcon = function(nodeUrn) {
 	
 	var self = this;
 
-	$(window).bind('wisegui-devices-attached-event', function(e, devicesAttachedEvent) {
+	$(window).bind(WiseGuiEvents.EVENT_DEVICES_ATTACHED, function(e, devicesAttachedEvent) {
 		if (devicesAttachedEvent.nodeUrns.indexOf(nodeUrn) >= 0) {
 			self.view.attr('src', 'img/famfamfam/tick.png');
 		}
 	});
 
-	$(window).bind('wisegui-devices-detached-event', function(e, devicesDetachedEvent) {
+	$(window).bind(WiseGuiEvents.EVENT_DEVICES_DETACHED, function(e, devicesDetachedEvent) {
 		if (devicesDetachedEvent.nodeUrns.indexOf(nodeUrn) >= 0) {
 			self.view.attr('src', 'img/famfamfam/cross.png');
 		}
