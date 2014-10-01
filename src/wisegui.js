@@ -569,7 +569,6 @@ global.buildPersonalReservationsTable = function(parent, reservations, past) {
 							e.data.experimentId,
 							function() { 
 								cancelButton.popover('hide');
-								$(window).trigger(WiseGuiEvents.EVENT_RESERVATION_CANCELLED, reservation);
 								$(window).trigger('hashchange');
 							},
 							WiseGui.showAjaxError
@@ -903,7 +902,7 @@ for (var eventName in WiseGuiEvents) {
 for (var eventName in WiseGuiEvents) {
 	/*jshint loopfunc:true */
 	$(window).bind(WiseGuiEvents[eventName], function(e, data) {
-		console.log('+++ %s => %s', eventName, JSON.stringify(data));
+		console.log('+++ %s', eventName);
 	});
 }
 

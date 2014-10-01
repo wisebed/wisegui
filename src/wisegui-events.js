@@ -14,6 +14,7 @@ var WiseGuiEvents = {
 	EVENT_RESERVATION_STARTED            : 'wisegui-reservation-started',
 	EVENT_RESERVATION_CANCELLED          : 'wisegui-reservation-cancelled',
 	EVENT_RESERVATION_ENDED              : 'wisegui-reservation-ended',
+	EVENT_RESERVATION_FINALIZED          : 'wisegui-reservation-finalized',
 	EVENT_RESERVATIONS_CHANGED           : 'wisegui-reservations-changed'
 };
 

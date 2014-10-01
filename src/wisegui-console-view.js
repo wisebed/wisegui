@@ -210,12 +210,12 @@ WiseGuiConsoleView.prototype.buildView = function() {
 		if (status == 'pending') {
 
 			self.statusBadge.addClass('badge-info');
-			self.statusBadge.append('Reservation starting in ' + now.from(self.reservation.from, true));
+			self.statusBadge.append('Reservation starting in ' + self.reservation.from.fromNow());
 
 		} else if (status == 'running') {
 			
 			self.statusBadge.removeClass('badge-info').addClass('badge-success');
-			self.statusBadge.append('Reservation running since ' + moment.duration(self.reservation.from.diff(moment())).humanize());
+			self.statusBadge.append('Reservation running since ' + self.reservation.from.fromNow());
 
 			if (devicesDetached.length > 0) {
 				
@@ -238,12 +238,12 @@ WiseGuiConsoleView.prototype.buildView = function() {
 		} else if (status == 'cancelled') {
 
 			self.statusBadge.removeClass('badge-info badge-success').addClass('badge-warning');
-			self.statusBadge.append('Reservation cancelled ' + self.reservation.cancelled.from(moment()));
+			self.statusBadge.append('Reservation cancelled ' + self.reservation.cancelled.fromNow());
 
 		} else if (status == 'ended') {
 
 			self.statusBadge.removeClass('badge-info badge-success').addClass('badge-warning');
-			self.statusBadge.append('Reservation ended ' + self.reservation.to.from(moment()));
+			self.statusBadge.append('Reservation ended ' + self.reservation.to.fromNow());
 		}
 	};
 
@@ -495,12 +495,15 @@ WiseGuiConsoleView.prototype.onWebSocketMessageEvent = function(event) {
 	var self = this;
 	var message = JSON.parse(event.data);
 
+	console.log('onWebSocketMessageEvent => %s', event.data);
+
 	if (!message.type) {
 		console.log('Received message with unknown content: ' + event.data);
 		return;
 	}
 
 	var paused = this.view.find('#pause-output').is('.active');
+	var reservation;
 	
 	if (message.type == 'upstream'  && !paused) {
 
@@ -537,7 +540,7 @@ WiseGuiConsoleView.prototype.onWebSocketMessageEvent = function(event) {
 		WiseGui.showInfoBlockAlert('Devices [' + message.nodeUrns.join(', ') + '] were detached at ' + message.timestamp);
 	} else if (message.type == 'reservationStarted') {
 		
-		var reservation = new WisebedReservation(message.reservationData);
+		reservation = new WisebedReservation(message.reservationData);
 		$(window).trigger(WiseGuiEvents.EVENT_RESERVATION_STARTED, reservation);
 
 		if (reservation.experimentId != getNavigationData().experimentId) {
@@ -548,9 +551,23 @@ WiseGuiConsoleView.prototype.onWebSocketMessageEvent = function(event) {
 			WiseGui.showInfoBlockAlert('Reservation started at ' + message.timestamp, [button]);
 		}
 
+	} else if (message.type == 'reservationCancelled') {
+
+		reservation = new WisebedReservation(message.reservationData);
+		$(window).trigger(WiseGuiEvents.EVENT_RESERVATION_CANCELLED, reservation);
+		WiseGui.showInfoBlockAlert('Reservation cancelled at ' + message.timestamp);
+
 	} else if (message.type == 'reservationEnded') {
-		$(window).trigger(WiseGuiEvents.EVENT_RESERVATION_ENDED, new WisebedReservation(message.reservationData));
+
+		reservation = new WisebedReservation(message.reservationData);
+		$(window).trigger(WiseGuiEvents.EVENT_RESERVATION_ENDED, reservation);
 		WiseGui.showInfoBlockAlert('Reservation ended at ' + message.timestamp);
+
+	} else if (message.type == 'reservationFinalized') {
+
+		reservation = new WisebedReservation(message.reservationData);
+		$(window).trigger(WiseGuiEvents.EVENT_RESERVATION_FINALIZED, reservation);
+		WiseGui.showInfoBlockAlert('Reservation finalized at ' + message.timestamp);
 	}
 };
 
