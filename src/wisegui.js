@@ -462,7 +462,7 @@ global.buildMyReservationTable = function(parent) {
 	var currentAndFutureDiv = pills.find('#WiseGuiMyReservationsCurrentFuture');
 	var pastDiv = pills.find('#WiseGuiMyReservationsPast');
 
-	var loadPersonalReservations = function(past) {
+	var loadPersonalReservations = function(past, showCancelled) {
 		wisebed.reservations.getPersonal(
 			!past ? moment() : null,
 			 past ? moment() : null,
@@ -470,23 +470,24 @@ global.buildMyReservationTable = function(parent) {
 				buildPersonalReservationsTable(!past ? currentAndFutureDiv : pastDiv, reservations, past);
 			},
 			WiseGui.showAjaxError,
-			true
+			false,
+			showCancelled
 		);
 	};
 
 	pills.find('a[href="#WiseGuiMyReservationsCurrentFuture"]').click(function(e) {
 		e.preventDefault();
-		loadPersonalReservations(false);
+		loadPersonalReservations(false, false);
 		$(this).tab('show');
 	});
 
 	pills.find('a[href="#WiseGuiMyReservationsPast"]').click(function(e) {
 		e.preventDefault();
-		loadPersonalReservations(true);
+		loadPersonalReservations(true, true);
 		$(this).tab('show');
 	});
 
-	loadPersonalReservations(false);
+	loadPersonalReservations(false, false);
 
 	parent.empty();
 	parent.append(pills);
@@ -696,7 +697,7 @@ global.buildReservationTable = function(parent) {
 	var currentAndFutureDiv = pills.find('#WiseGuiPublicReservationsCurrentFuture');
 	var pastDiv = pills.find('#WiseGuiPublicReservationsPast');
 
-	var loadPublicReservations = function(past) {
+	var loadPublicReservations = function(past, showCancelled) {
 		wisebed.reservations.getPublic(
 			!past ? moment() : null,
 			 past ? moment() : null,
@@ -704,23 +705,23 @@ global.buildReservationTable = function(parent) {
 				buildReservationTableInternal(!past ? currentAndFutureDiv : pastDiv, reservations);
 			},
 			WiseGui.showAjaxError,
-			true
+			showCancelled
 		);
 	};
 
 	pills.find('a[href="#WiseGuiPublicReservationsCurrentFuture"]').click(function(e) {
 		e.preventDefault();
-		loadPublicReservations(true);
+		loadPublicReservations(false, false);
 		$(this).tab('show');
 	});
 
 	pills.find('a[href="#WiseGuiPublicReservationsPast"]').click(function(e) {
 		e.preventDefault();
-		loadPublicReservations(true);
+		loadPublicReservations(true, true);
 		$(this).tab('show');
 	});
 
-	loadPublicReservations(false);
+	loadPublicReservations(false, false);
 	
 	parent.empty();
 	parent.append(pills);

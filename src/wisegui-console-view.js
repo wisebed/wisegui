@@ -235,6 +235,11 @@ WiseGuiConsoleView.prototype.buildView = function() {
 				self.statusBadgeDetached.toggle(false);
 			}
 
+		} else if (status == 'cancelled') {
+
+			self.statusBadge.removeClass('badge-info badge-success').addClass('badge-warning');
+			self.statusBadge.append('Reservation cancelled ' + self.reservation.cancelled.from(moment()));
+
 		} else if (status == 'ended') {
 
 			self.statusBadge.removeClass('badge-info badge-success').addClass('badge-warning');
@@ -260,6 +265,21 @@ WiseGuiConsoleView.prototype.buildView = function() {
 
 			// update status badge to show device connectivity
 			status = 'running';
+			updateStatusBadge();
+		}
+	});
+
+	$(window).bind(WiseGuiEvents.EVENT_RESERVATION_CANCELLED, function(e, reservation) {
+		if (self.experimentId == reservation.experimentId) {
+
+			// stop progress bar as soon as reservation has just been cancelled
+			window.clearInterval(self.progressBarSchedule);
+			self.progressBar.toggleClass('progress-success', false);
+			self.progressBar.toggleClass('progress-warning', true);
+			self.progressBar.find('div.bar').css('width', '100%');
+
+			// update status badge
+			status = 'cancelled';
 			updateStatusBadge();
 		}
 	});
