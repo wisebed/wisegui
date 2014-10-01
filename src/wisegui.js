@@ -568,6 +568,7 @@ global.buildPersonalReservationsTable = function(parent, reservations, past) {
 							e.data.experimentId,
 							function() { 
 								cancelButton.popover('hide');
+								$(window).trigger(WiseGuiEvents.EVENT_RESERVATION_CANCELLED, reservation);
 								$(window).trigger('hashchange');
 							},
 							WiseGui.showAjaxError
@@ -895,6 +896,14 @@ global.connectEventWebSocket = function() {
 // export event constants into global namespace for backwards compatibility with older code
 for (var eventName in WiseGuiEvents) {
 	global[eventName] = WiseGuiEvents[eventName];
+}
+
+// print all events to console for debugging as soon as they occur
+for (var eventName in WiseGuiEvents) {
+	/*jshint loopfunc:true */
+	$(window).bind(WiseGuiEvents[eventName], function(e, data) {
+		console.log('+++ %s => %s', eventName, JSON.stringify(data));
+	});
 }
 
 // some more global vars for backwards compatibility
