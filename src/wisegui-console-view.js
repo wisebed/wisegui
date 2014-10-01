@@ -240,10 +240,20 @@ WiseGuiConsoleView.prototype.buildView = function() {
 			self.statusBadge.removeClass('badge-info badge-success').addClass('badge-warning');
 			self.statusBadge.append('Reservation cancelled ' + self.reservation.cancelled.fromNow());
 
+			self.statusBadgeDetached.empty();
+			self.statusBadgeDetached.tooltip('hide');
+			self.statusBadgeDetached.data('tooltip', false);
+			self.statusBadgeDetached.toggle(false);
+
 		} else if (status == 'ended') {
 
 			self.statusBadge.removeClass('badge-info badge-success').addClass('badge-warning');
 			self.statusBadge.append('Reservation ended ' + self.reservation.to.fromNow());
+			
+			self.statusBadgeDetached.empty();
+			self.statusBadgeDetached.tooltip('hide');
+			self.statusBadgeDetached.data('tooltip', false);
+			self.statusBadgeDetached.toggle(false);
 		}
 	};
 
@@ -253,6 +263,8 @@ WiseGuiConsoleView.prototype.buildView = function() {
 	$(window).bind(WiseGuiEvents.EVENT_RESERVATION_STARTED, function(e, reservation) {
 		if (self.experimentId == reservation.experimentId) {
 			
+			self.reservation = reservation;
+
 			// start progress bar as soon as reservation starts
 			self.progressBar.toggleClass('progress-success', true);
 			self.progressBar.find('div.bar').css('width', '1%');
@@ -272,6 +284,8 @@ WiseGuiConsoleView.prototype.buildView = function() {
 	$(window).bind(WiseGuiEvents.EVENT_RESERVATION_CANCELLED, function(e, reservation) {
 		if (self.experimentId == reservation.experimentId) {
 
+			self.reservation = reservation;
+
 			// stop progress bar as soon as reservation has just been cancelled
 			window.clearInterval(self.progressBarSchedule);
 			self.progressBar.toggleClass('progress-success', false);
@@ -286,6 +300,25 @@ WiseGuiConsoleView.prototype.buildView = function() {
 
 	$(window).bind(WiseGuiEvents.EVENT_RESERVATION_ENDED, function(e, reservation) {
 		if (self.experimentId == reservation.experimentId) {
+
+			self.reservation = reservation;
+
+			// stop progress bar as soon as reservation ends
+			window.clearInterval(self.progressBarSchedule);
+			self.progressBar.toggleClass('progress-success', false);
+			self.progressBar.toggleClass('progress-warning', true);
+			self.progressBar.find('div.bar').css('width', '100%');
+
+			// update status badge
+			status = 'ended';
+			updateStatusBadge();
+		}
+	});
+
+	$(window).bind(WiseGuiEvents.EVENT_RESERVATION_FINALIZED, function(e, reservation) {
+		if (self.experimentId == reservation.experimentId) {
+
+			self.reservation = reservation;
 
 			// stop progress bar as soon as reservation ends
 			window.clearInterval(self.progressBarSchedule);
