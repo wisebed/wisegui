@@ -51,18 +51,22 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 		}
 
 		// emulate devicesAttachedEvent
-		$(window).trigger(WiseGuiEvents.EVENT_DEVICES_ATTACHED, {
-			type : 'devicesAttached',
-			timestamp : new Date().toISOString(),
-			nodeUrns : attached
-		});
+		if (attached.length > 0) {
+			$(window).trigger(WiseGuiEvents.EVENT_DEVICES_ATTACHED, {
+				type : 'devicesAttached',
+				timestamp : new Date().toISOString(),
+				nodeUrns : attached
+			});
+		}
 
 		// emulate devicesDetachedEvent
-		$(window).trigger(WiseGuiEvents.EVENT_DEVICES_DETACHED, {
-			type : 'devicesDetached',
-			timestamp : new Date().toISOString(),
-			nodeUrns : detached
-		});
+		if (detached.length > 0) {
+			$(window).trigger(WiseGuiEvents.EVENT_DEVICES_DETACHED, {
+				type : 'devicesDetached',
+				timestamp : new Date().toISOString(),
+				nodeUrns : detached
+			});
+		}
 
 	}, function(jqXHR, textStatus, errorThrown) {
 		WiseGui.showAjaxError(jqXHR, textStatus, errorThrown);
