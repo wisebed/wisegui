@@ -528,8 +528,6 @@ WiseGuiConsoleView.prototype.onWebSocketMessageEvent = function(event) {
 	var self = this;
 	var message = JSON.parse(event.data);
 
-	console.log('onWebSocketMessageEvent => %s', event.data);
-
 	if (!message.type) {
 		console.log('Received message with unknown content: ' + event.data);
 		return;
