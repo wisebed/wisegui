@@ -90,6 +90,12 @@ WiseGuiNotificationsViewer.prototype.showAlert = function(alert) {
 			'</div>'
 	);
 	alertDiv.append(alert.message);
+	
+	// http://stackoverflow.com/questions/783818/how-do-i-create-a-custom-error-in-javascript
+	if (alert.message instanceof Error && alert.message.stack) {
+		alertDiv.append(alert.message.stack);
+	}
+	
 	this.history.append(alertDiv);
 	this.flash(alertDiv.clone());
 };

@@ -23,6 +23,16 @@ global.WiseGui = {
 				}
 		);
 	},
+	showBlockAlert : function(message, actions, severity) {
+		$(window).trigger(WiseGuiEvents.EVENT_NOTIFICATION,
+				{
+					type     : 'block-alert',
+					severity : severity,
+					message  : message,
+					actions  : actions
+				}
+		);
+	},
 	showWarningAlert : function(message) {
 		WiseGui.showAlert(message, 'warning');
 	},
@@ -34,16 +44,6 @@ global.WiseGui = {
 	},
 	showInfoAlert : function(message) {
 		WiseGui.showAlert(message, 'info');
-	},
-	showBlockAlert : function(message, actions, severity) {
-		$(window).trigger(WiseGuiEvents.EVENT_NOTIFICATION,
-				{
-					type     : 'block-alert',
-					severity : severity,
-					message  : message,
-					actions  : actions
-				}
-		);
 	},
 	showWarningBlockAlert : function(message, actions) {
 		WiseGui.showBlockAlert(message, actions, 'warning');
@@ -62,13 +62,13 @@ global.WiseGui = {
 		var message = $(
 			'<h2>Error while loading data!</h2>' +
 			'<h3>jqXHR</h3>' +
-			(jqXHR.readyState ? ('readyState = ' + jqXHR.readyState + '<br/>') : '') +
-			(jqXHR.status ? ('status = ' + jqXHR.status + '<br/>') : '') +
-			(jqXHR.responseText ? ('responseText = <pre>' + jqXHR.responseText + '</pre><br/>') : '') +
+			(jqXHR.readyState   !== undefined ? ('readyState = ' + jqXHR.readyState + '<br/>') : '') +
+			(jqXHR.status       !== undefined ? ('status = ' + jqXHR.status + '<br/>') : '') +
+			(jqXHR.responseText !== undefined ? ('responseText = <pre>' + jqXHR.responseText + '</pre><br/>') : '') +
 			'<h3>textStatus</h3>' +
-			'<pre>'+textStatus+'</pre>' +
+			'<pre>' + textStatus + '</pre>' +
 			'<h3>errorThrown</h3>' +
-			'<pre>'+errorThrown+'</pre>'
+			'<pre>' + errorThrown + '</pre>'
 		);
 		WiseGui.showErrorBlockAlert(message);
 	},
@@ -310,8 +310,20 @@ global.loadTestbedDetailsContainer = function(navigationData, parentDiv) {
 		});
 
 		$(window).bind(WiseGuiEvents.EVENT_RESERVATIONS_CHANGED, function() {
+			
 			if (isLoggedIn) {
 				buildFederatableReservationTable(federatableReservationsTabContentDiv);
+			}
+
+			// detect if any of the reservations tabs is visible and reload it if so
+			var nav = getNavigationData();
+
+			if (nav.tab == 'WiseGuiTestbedDetailsReservations') {
+				reloadReservationsTab();
+			}
+
+			if (nav.tab == 'WiseGuiTestbedDetailsMyReservations') {
+				reloadMyReservationsTab();
 			}
 		});
 	}
@@ -902,7 +914,7 @@ for (var eventName in WiseGuiEvents) {
 for (var eventName in WiseGuiEvents) {
 	/*jshint loopfunc:true */
 	$(window).bind(WiseGuiEvents[eventName], function(e, data) {
-		console.log('+++ %s', eventName);
+		console.log('+++ %s', e.type);
 	});
 }
 
