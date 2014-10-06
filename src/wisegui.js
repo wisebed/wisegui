@@ -1,4 +1,5 @@
 global._                       = require('underscore');
+var toastr                     = require('toastr');
 var wjs                        = require('wisebed.js');
 var WiseGuiNodeTable           = require('./wisegui-node-table.js');
 var WiseGuiReservationDialog   = require('./wisegui-reservation-dialog.js');
@@ -6,18 +7,94 @@ var WiseGuiReservationObserver = require('./wisegui-reservation-observer.js');
 var WiseGuiReservationView     = require('./wisegui-reservation-view.js');
 var WiseGuiLoginObserver       = require('./wisegui-login-observer.js');
 var WiseGuiTable               = require('./wisegui-table.js');
-var WiseGuiNotificationsViewer = require('./wisegui-notifications-viewer.js');
 var WiseGuiNavigationView      = require('./wisegui-navigation-view.js');
 var WiseGuiGoogleMapsView      = require('./wisegui-google-maps-view.js');
 var WiseGuiModalDialog         = require('./wisegui-modal-dialog.js');
 var WiseGuiEvents              = require('./wisegui-events.js');
+
+$(window).bind(WiseGuiEvents.EVENT_NOTIFICATION, function (event, alert) {
+	
+	var div = $('<div/>');
+
+	var formatMessage = function(message) {
+		// http://stackoverflow.com/questions/783818/how-do-i-create-a-custom-error-in-javascript
+		if (message instanceof Error && message.stack) {
+			return alert.message.stack;
+		}
+		return message;
+	};
+
+	if (alert.message instanceof Array) {
+		alert.message.map(formatMessage).forEach(div.append);
+	} else {
+		div.append(formatMessage(alert.message));
+	}
+	var autoHide = (alert.severity == 'success');
+	
+	if (alert.severity == 'warning') {
+		toastr.options = {
+			"closeButton": true,
+			"debug": false,
+			"positionClass": "toast-bottom-right",
+			"onclick": null,
+			"showDuration": 300,
+			"hideDuration": 10,
+			"timeOut": 10000,
+			"extendedTimeOut": 10000,
+			"showMethod": "fadeIn",
+			"hideMethod": "fadeOut"
+		};
+		toastr.warning(div);
+	} else if (alert.severity == 'error') {
+		toastr.options = {
+			"closeButton": true,
+			"debug": false,
+			"positionClass": "toast-bottom-right",
+			"onclick": null,
+			"showDuration": 300,
+			"hideDuration": 10,
+			"timeOut": 0,
+			"extendedTimeOut": 0,
+			"showMethod": "fadeIn",
+			"hideMethod": "fadeOut"
+		};
+		toastr.error(div);
+	} else if (alert.severity == 'success') {
+		toastr.options = {
+			"closeButton": true,
+			"debug": false,
+			"positionClass": "toast-bottom-right",
+			"onclick": null,
+			"showDuration": 300,
+			"hideDuration": 10,
+			"timeOut": 5000,
+			"extendedTimeOut": 5000,
+			"showMethod": "fadeIn",
+			"hideMethod": "fadeOut"
+		};
+		toastr.success(div);
+	} else {
+		toastr.options = {
+			"closeButton": true,
+			"debug": false,
+			"positionClass": "toast-bottom-right",
+			"onclick": null,
+			"showDuration": 300,
+			"hideDuration": 100,
+			"timeOut": 120000,
+			"extendedTimeOut": 120000,
+			"showMethod": "fadeIn",
+			"hideMethod": "fadeOut"
+		};
+		toastr.info(div);
+	}
+});
 
 global.WiseGui = {
 
 	showAlert : function(message, severity) {
 		$(window).trigger(WiseGuiEvents.EVENT_NOTIFICATION,
 				{
-					type     : 'alert',
 					severity : severity,
 					message  : message
 				}
@@ -26,7 +103,6 @@ global.WiseGui = {
 	showBlockAlert : function(message, actions, severity) {
 		$(window).trigger(WiseGuiEvents.EVENT_NOTIFICATION,
 				{
-					type     : 'block-alert',
 					severity : severity,
 					message  : message,
 					actions  : actions
@@ -59,6 +135,12 @@ global.WiseGui = {
 	},
 	showAjaxError : function(jqXHR, textStatus, errorThrown) {
 		console.log(jqXHR);
+		var message = '= Error while loading data!\n';
+		message    += '== jqXHR';
+		message    += (jqXHR.readyState   !== undefined ? ('readyState = ' + jqXHR.readyState + '\n') : '');
+		message    += (jqXHR.status       !== undefined ? ('status = ' + jqXHR.status + '\n') : '');
+		message    += (jqXHR.responseText !== undefined ? ('responseText = ' + jqXHR.responseText + '\n') : '');
+		/*
 		var message = $(
 			'<h2>Error while loading data!</h2>' +
 			'<h3>jqXHR</h3>' +
@@ -69,7 +151,7 @@ global.WiseGui = {
 			'<pre>' + textStatus + '</pre>' +
 			'<h3>errorThrown</h3>' +
 			'<pre>' + errorThrown + '</pre>'
-		);
+		);*/
 		WiseGui.showErrorBlockAlert(message);
 	},
 	bindToReservationState : function(elems, experimentId) {
@@ -800,7 +882,7 @@ global.createNavigationContainer = function() {
 
 	var container = $('<div class="WiseGuiNavigationContainer" id="WiseGuiNavigationContainer"/>');
 	
-	$('#WiseGuiContainer .WiseGuiNotificationsContainer').before(container);
+	$('#WiseGuiContainer').prepend(container);
 
 	var navigationViewer = new WiseGuiNavigationView();
 	container.append(navigationViewer.view);
@@ -828,7 +910,7 @@ global.createContentContainer = function(navigationData) {
 	var container = $('<div class="WiseGuiContentContainer"/>');
 	container.hide();
 
-	$('#WiseGuiContainer .WiseGuiNotificationsContainer').after(container);
+	$('#WiseGuiContainer').append(container);
 
 	var createContentFunction = getCreateContentFunction(navigationData);
 	if (createContentFunction === undefined) {
@@ -928,7 +1010,6 @@ global.navigationContainer    = null;
 global.contentContainers      = {};
 global.loginObserver          = new WiseGuiLoginObserver();
 global.reservationObserver    = new WiseGuiReservationObserver();
-global.notificationsViewer    = new WiseGuiNotificationsViewer();
 global.testbedDescription     = null;
 global.eventWebSocket         = null;
 global.eventWebSocketSchedule = null;
@@ -961,7 +1042,6 @@ if (!($.fn.exists)) {
 
 $(function () {
 
-	$('#WiseGuiContainer').append(notificationsViewer.view);
 	$('.modal').modal({ keyboard: true });
 
 	$(window).bind(EVENT_LOGGED_IN,  function() { isLoggedIn = true;  });
