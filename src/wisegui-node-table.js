@@ -89,7 +89,7 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 		data.push(node.id);
 		data.push(node.nodeType);
 
-		if (node.position !== null && node.position.outdoorCoordinates) {
+		if (node.position && node.position.outdoorCoordinates) {
 
 			var c = node.position.outdoorCoordinates;
 
@@ -105,7 +105,7 @@ WiseGuiNodeTable.prototype.generateTable = function () {
 				data.push('');
 			}
 
-		} else if (node.position !== null && node.position.indoorCoordinates) {
+		} else if (node.position && node.position.indoorCoordinates) {
 			data.push(JSON.stringify(node.position.indoorCoordinates));
 		} else {
 			data.push('');
