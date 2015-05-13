@@ -1,7 +1,7 @@
 {
 	"name": "wisegui",
 	"main": "src/wisegui.js",
-	"version": "0.2.4",
+	"version": "0.2.5",
 	"devDependencies": {
 		"grunt": "~0.4.5",
 		"grunt-contrib-jshint": "^0.10.0",
