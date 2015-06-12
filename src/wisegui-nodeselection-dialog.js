@@ -144,7 +144,7 @@ WiseGuiNodeSelectionDialog.prototype.constructDialogInternal = function(wiseML) 
 			}
 	);
 
-	if (!document.body.contains(this.dialogDiv)) {
+	if (!document.body.contains(this.dialogDiv.get(0))) {
 		$(document.body).append(this.dialogDiv);
 	}
 };

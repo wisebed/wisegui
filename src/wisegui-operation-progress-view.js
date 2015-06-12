@@ -9,6 +9,7 @@ var WiseGuiOperationProgressView = function(nodeUrns, operationMaxValue, success
 	this.view = $('<div class="WiseGuiOperationProgressView"/>');
 	this.successMessage = successMessage;
 	this.visible = false;
+	this.operationMaxValue = operationMaxValue;
 
 	this.contents = {};
 
@@ -47,6 +48,11 @@ WiseGuiOperationProgressView.prototype.update = function(operationStatus) {
 			if (nodeStatus.status == 'SUCCESS') {
 				content.row.remove();
 				delete self.contents[nodeUrn];
+			} else if (nodeStatus.status == 'FAILED') {
+				content.progressBar[0].value = self.operationMaxValue;
+				content.statusTd.html(nodeStatus.status);
+				content.messageTd.html(nodeStatus.message);
+				allSuccessful = false;
 			} else {
 				content.progressBar[0].value = nodeStatus.statusCode;
 				content.statusTd.html(nodeStatus.status);

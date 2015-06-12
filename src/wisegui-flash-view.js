@@ -209,13 +209,13 @@ WiseGuiFlashView.prototype.addConfiguration = function(conf) {
 
 	if(typeof(conf) == "object") {
 		// Set the image
-		if(conf.image !== null) {
+		if(conf.image !== null && conf.image !== undefined) {
 			configuration.config.image = conf.image;
 			var blob = this.dataURItoBlob(configuration.config.image);
 			imageFileInfoLabel.append('<strong>' + blob.name + '</strong> (' + (blob.type || 'n/a') + ')<br/>' + blob.size + ' bytes');
 		}
 		// Set the node URNs
-		if(conf.nodeUrns !== null) {
+		if(conf.nodeUrns !== null && conf.nodeUrns !== undefined) {
 
 			var checkNodes = function(data) {
 
